@@ -1,0 +1,349 @@
+{
+  "type": "object",
+  "required": [
+    "symbol",
+    "price_source",
+    "name",
+    "base_currency",
+    "quote_currency",
+    "sell_price",
+    "buy_price",
+    "is_tradable",
+    "created_at",
+    "is_up_to_date"
+  ],
+  "properties": {
+    "symbol": {
+      "type": "string",
+      "description": "Trading pair symbol (e.g., USD-IRT, USDT-IRT)",
+      "example": "USD-IRT"
+    },
+    "price_source": {
+      "type": "object",
+      "description": "Source of the price data",
+      "properties": {
+        "symbol": {
+          "type": "string",
+          "description": "Price data source identifier",
+          "enum": ["GHEYMAT"],
+          "x-readme-ref-name": "PriceSourceSymbol"
+        },
+        "fa": {
+          "type": "string",
+          "description": "Persian name",
+          "example": "قیمت"
+        },
+        "en": {
+          "type": "string",
+          "description": "English name",
+          "example": "Gheymat"
+        },
+        "link": { "type": "string", "nullable": true },
+        "image": { "type": "string", "nullable": true }
+      },
+      "x-readme-ref-name": "PriceSource"
+    },
+    "name": {
+      "type": "object",
+      "required": ["symbol", "category", "fa", "en"],
+      "properties": {
+        "symbol": {
+          "type": "string",
+          "description": "Currency/asset symbol",
+          "example": "USD"
+        },
+        "category": {
+          "type": "object",
+          "description": "Asset category (Currency, Cryptocurrency, Gold, Coin, Funds, Bourse, etc.)",
+          "properties": {
+            "symbol": {
+              "type": "string",
+              "description": "Asset category identifier",
+              "enum": [
+                "BORS",
+                "COIN",
+                "COMMODITY_SAFFRON_FUNDS",
+                "CRYPTOCURRENCY",
+                "CURRENCY",
+                "FIXED_INCOME_FUNDS",
+                "GOLD",
+                "GOLD_FUNDS",
+                "LEVERAGED_FUNDS",
+                "MIXED_ASSET_FUNDS",
+                "PROPERTY_FUNDS",
+                "SECTOR_FUNDS",
+                "SILVER",
+                "STOCK_FUNDS"
+              ],
+              "x-readme-ref-name": "CategorySymbol"
+            },
+            "fa": {
+              "type": "string",
+              "description": "Persian category name",
+              "example": "ارز"
+            },
+            "en": {
+              "type": "string",
+              "description": "English category name",
+              "example": "Currency"
+            },
+            "image": { "type": "string", "nullable": true }
+          },
+          "x-readme-ref-name": "Category"
+        },
+        "fa": {
+          "type": "string",
+          "description": "Persian name",
+          "example": "دلار آمریکا"
+        },
+        "prefix": { "type": "string", "nullable": true },
+        "postfix": {
+          "type": "string",
+          "nullable": true,
+          "description": "Display suffix (e.g., $, تومان)",
+          "example": "$"
+        },
+        "suffix": { "type": "string", "nullable": true, "example": "$" },
+        "en": {
+          "type": "string",
+          "description": "English name",
+          "example": "US Dollar"
+        },
+        "png": {
+          "type": "string",
+          "format": "uri",
+          "nullable": true,
+          "description": "URL to currency icon"
+        }
+      },
+      "x-readme-ref-name": "CurrencyInfo"
+    },
+    "base_currency": {
+      "type": "object",
+      "required": ["symbol", "category", "fa", "en"],
+      "properties": {
+        "symbol": {
+          "type": "string",
+          "description": "Currency/asset symbol",
+          "example": "USD"
+        },
+        "category": {
+          "type": "object",
+          "description": "Asset category (Currency, Cryptocurrency, Gold, Coin, Funds, Bourse, etc.)",
+          "properties": {
+            "symbol": {
+              "type": "string",
+              "description": "Asset category identifier",
+              "enum": [
+                "BORS",
+                "COIN",
+                "COMMODITY_SAFFRON_FUNDS",
+                "CRYPTOCURRENCY",
+                "CURRENCY",
+                "FIXED_INCOME_FUNDS",
+                "GOLD",
+                "GOLD_FUNDS",
+                "LEVERAGED_FUNDS",
+                "MIXED_ASSET_FUNDS",
+                "PROPERTY_FUNDS",
+                "SECTOR_FUNDS",
+                "SILVER",
+                "STOCK_FUNDS"
+              ],
+              "x-readme-ref-name": "CategorySymbol"
+            },
+            "fa": {
+              "type": "string",
+              "description": "Persian category name",
+              "example": "ارز"
+            },
+            "en": {
+              "type": "string",
+              "description": "English category name",
+              "example": "Currency"
+            },
+            "image": { "type": "string", "nullable": true }
+          },
+          "x-readme-ref-name": "Category"
+        },
+        "fa": {
+          "type": "string",
+          "description": "Persian name",
+          "example": "دلار آمریکا"
+        },
+        "prefix": { "type": "string", "nullable": true },
+        "postfix": {
+          "type": "string",
+          "nullable": true,
+          "description": "Display suffix (e.g., $, تومان)",
+          "example": "$"
+        },
+        "suffix": { "type": "string", "nullable": true, "example": "$" },
+        "en": {
+          "type": "string",
+          "description": "English name",
+          "example": "US Dollar"
+        },
+        "png": {
+          "type": "string",
+          "format": "uri",
+          "nullable": true,
+          "description": "URL to currency icon"
+        }
+      },
+      "x-readme-ref-name": "CurrencyInfo"
+    },
+    "quote_currency": {
+      "type": "object",
+      "required": ["symbol", "category", "fa", "en"],
+      "properties": {
+        "symbol": {
+          "type": "string",
+          "description": "Currency/asset symbol",
+          "example": "USD"
+        },
+        "category": {
+          "type": "object",
+          "description": "Asset category (Currency, Cryptocurrency, Gold, Coin, Funds, Bourse, etc.)",
+          "properties": {
+            "symbol": {
+              "type": "string",
+              "description": "Asset category identifier",
+              "enum": [
+                "BORS",
+                "COIN",
+                "COMMODITY_SAFFRON_FUNDS",
+                "CRYPTOCURRENCY",
+                "CURRENCY",
+                "FIXED_INCOME_FUNDS",
+                "GOLD",
+                "GOLD_FUNDS",
+                "LEVERAGED_FUNDS",
+                "MIXED_ASSET_FUNDS",
+                "PROPERTY_FUNDS",
+                "SECTOR_FUNDS",
+                "SILVER",
+                "STOCK_FUNDS"
+              ],
+              "x-readme-ref-name": "CategorySymbol"
+            },
+            "fa": {
+              "type": "string",
+              "description": "Persian category name",
+              "example": "ارز"
+            },
+            "en": {
+              "type": "string",
+              "description": "English category name",
+              "example": "Currency"
+            },
+            "image": { "type": "string", "nullable": true }
+          },
+          "x-readme-ref-name": "Category"
+        },
+        "fa": {
+          "type": "string",
+          "description": "Persian name",
+          "example": "دلار آمریکا"
+        },
+        "prefix": { "type": "string", "nullable": true },
+        "postfix": {
+          "type": "string",
+          "nullable": true,
+          "description": "Display suffix (e.g., $, تومان)",
+          "example": "$"
+        },
+        "suffix": { "type": "string", "nullable": true, "example": "$" },
+        "en": {
+          "type": "string",
+          "description": "English name",
+          "example": "US Dollar"
+        },
+        "png": {
+          "type": "string",
+          "format": "uri",
+          "nullable": true,
+          "description": "URL to currency icon"
+        }
+      },
+      "x-readme-ref-name": "CurrencyInfo"
+    },
+    "png": {
+      "type": "string",
+      "format": "uri",
+      "nullable": true,
+      "description": "URL to asset icon/logo",
+      "example": "https://backend.price.ecotrust.ir/assets/currencies/USD.png"
+    },
+    "sell_price": {
+      "type": "string",
+      "description": "Sell price in quote currency (decimal string)",
+      "example": "169083.00000000"
+    },
+    "buy_price": {
+      "type": "string",
+      "description": "Buy price in quote currency (decimal string)",
+      "example": "169250.00000000"
+    },
+    "is_tradable": {
+      "type": "boolean",
+      "description": "Whether the asset is tradable"
+    },
+    "support": {
+      "type": "string",
+      "nullable": true,
+      "description": "Support price level",
+      "example": "161297.0000"
+    },
+    "resistance": {
+      "type": "string",
+      "nullable": true,
+      "description": "Resistance price level",
+      "example": "163446.0000"
+    },
+    "buy_fee": {
+      "type": "string",
+      "description": "Buy fee percentage",
+      "example": "0.0000"
+    },
+    "sell_fee": {
+      "type": "string",
+      "description": "Sell fee percentage",
+      "example": "0.0000"
+    },
+    "change": {
+      "type": "string",
+      "description": "Price change percentage",
+      "example": "1.87"
+    },
+    "bubble": {
+      "type": "string",
+      "nullable": true,
+      "description": "Bubble value (difference from real value)",
+      "example": "-23819.00000000"
+    },
+    "real_value": {
+      "type": "string",
+      "nullable": true,
+      "description": "Real/underlying value",
+      "example": "169250.00000000"
+    },
+    "bubble_percentage": {
+      "type": "string",
+      "nullable": true,
+      "description": "Bubble as percentage",
+      "example": "-14.07"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update timestamp (ISO 8601)",
+      "example": "2026-03-15T00:14:23.817686Z"
+    },
+    "is_up_to_date": {
+      "type": "boolean",
+      "description": "Whether the price is considered up-to-date"
+    }
+  },
+  "x-readme-ref-name": "PriceItem"
+}

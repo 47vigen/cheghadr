@@ -20,7 +20,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./src/*"],
+      "@Swagger/*": ["./src/modules/API/Swagger/*"]
     }
   },
   "include": [

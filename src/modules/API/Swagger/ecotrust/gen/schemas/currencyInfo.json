@@ -1,0 +1,75 @@
+{
+  "type": "object",
+  "required": ["symbol", "category", "fa", "en"],
+  "properties": {
+    "symbol": {
+      "type": "string",
+      "description": "Currency/asset symbol",
+      "example": "USD"
+    },
+    "category": {
+      "type": "object",
+      "description": "Asset category (Currency, Cryptocurrency, Gold, Coin, Funds, Bourse, etc.)",
+      "properties": {
+        "symbol": {
+          "type": "string",
+          "description": "Asset category identifier",
+          "enum": [
+            "BORS",
+            "COIN",
+            "COMMODITY_SAFFRON_FUNDS",
+            "CRYPTOCURRENCY",
+            "CURRENCY",
+            "FIXED_INCOME_FUNDS",
+            "GOLD",
+            "GOLD_FUNDS",
+            "LEVERAGED_FUNDS",
+            "MIXED_ASSET_FUNDS",
+            "PROPERTY_FUNDS",
+            "SECTOR_FUNDS",
+            "SILVER",
+            "STOCK_FUNDS"
+          ],
+          "x-readme-ref-name": "CategorySymbol"
+        },
+        "fa": {
+          "type": "string",
+          "description": "Persian category name",
+          "example": "ارز"
+        },
+        "en": {
+          "type": "string",
+          "description": "English category name",
+          "example": "Currency"
+        },
+        "image": { "type": "string", "nullable": true }
+      },
+      "x-readme-ref-name": "Category"
+    },
+    "fa": {
+      "type": "string",
+      "description": "Persian name",
+      "example": "دلار آمریکا"
+    },
+    "prefix": { "type": "string", "nullable": true },
+    "postfix": {
+      "type": "string",
+      "nullable": true,
+      "description": "Display suffix (e.g., $, تومان)",
+      "example": "$"
+    },
+    "suffix": { "type": "string", "nullable": true, "example": "$" },
+    "en": {
+      "type": "string",
+      "description": "English name",
+      "example": "US Dollar"
+    },
+    "png": {
+      "type": "string",
+      "format": "uri",
+      "nullable": true,
+      "description": "URL to currency icon"
+    }
+  },
+  "x-readme-ref-name": "CurrencyInfo"
+}

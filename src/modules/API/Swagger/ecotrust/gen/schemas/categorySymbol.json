@@ -1,0 +1,21 @@
+{
+  "type": "string",
+  "description": "Asset category identifier",
+  "enum": [
+    "BORS",
+    "COIN",
+    "COMMODITY_SAFFRON_FUNDS",
+    "CRYPTOCURRENCY",
+    "CURRENCY",
+    "FIXED_INCOME_FUNDS",
+    "GOLD",
+    "GOLD_FUNDS",
+    "LEVERAGED_FUNDS",
+    "MIXED_ASSET_FUNDS",
+    "PROPERTY_FUNDS",
+    "SECTOR_FUNDS",
+    "SILVER",
+    "STOCK_FUNDS"
+  ],
+  "x-readme-ref-name": "CategorySymbol"
+}

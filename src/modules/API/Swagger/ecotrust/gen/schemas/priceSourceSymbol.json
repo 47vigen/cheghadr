@@ -1,0 +1,6 @@
+{
+  "type": "string",
+  "description": "Price data source identifier",
+  "enum": ["GHEYMAT"],
+  "x-readme-ref-name": "PriceSourceSymbol"
+}

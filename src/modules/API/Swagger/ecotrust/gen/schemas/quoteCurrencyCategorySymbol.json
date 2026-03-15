@@ -1,0 +1,6 @@
+{
+  "type": "string",
+  "description": "Quote currency category (all prices quoted in IRT)",
+  "enum": ["CURRENCY"],
+  "x-readme-ref-name": "QuoteCurrencyCategorySymbol"
+}

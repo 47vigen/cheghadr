@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "description": "Source of the price data",
+  "properties": {
+    "symbol": {
+      "type": "string",
+      "description": "Price data source identifier",
+      "enum": ["GHEYMAT"],
+      "x-readme-ref-name": "PriceSourceSymbol"
+    },
+    "fa": {
+      "type": "string",
+      "description": "Persian name",
+      "example": "قیمت"
+    },
+    "en": {
+      "type": "string",
+      "description": "English name",
+      "example": "Gheymat"
+    },
+    "link": { "type": "string", "nullable": true },
+    "image": { "type": "string", "nullable": true }
+  },
+  "x-readme-ref-name": "PriceSource"
+}

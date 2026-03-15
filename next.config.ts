@@ -22,6 +22,7 @@ const nextConfig: NextConfig = {
       '@base-ui/react',
       'date-fns-jalali',
       '@tabler/icons-react',
+      '@telegram-apps/telegram-ui',
     ],
   },
 }

@@ -4,7 +4,7 @@ import './globals.css'
 
 import { ThemeProvider } from '@/components/theme-provider'
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils/style'
 
 const fontSans = Geist({
   subsets: ['latin'],
