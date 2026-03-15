@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack --inspect",
-    "build": "next build --turbopack",
+    "build": "prisma generate && next build --turbopack",
     "check": "pnpm typecheck && pnpm lint",
     "format": "biome format .",
     "format:write": "biome format --write --max-diagnostics 0 .",

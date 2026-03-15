@@ -1,6 +1,7 @@
 onlyBuiltDependencies:
-  - msw
-  - sharp
-  - es5-ext
-  - prisma
   - '@prisma/engines'
+  - es5-ext
+  - esbuild
+  - msw
+  - prisma
+  - sharp
