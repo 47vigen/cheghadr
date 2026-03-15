@@ -1,12 +1,9 @@
 import { NextResponse } from 'next/server'
 
-import NextAuth from 'next-auth'
+import { auth } from '@/server/auth/config'
 
-import { edgeAuthConfig } from '@/server/auth/edge-config'
-
-// Use the edge-safe config so the middleware bundle never pulls in node:crypto
-const { auth } = NextAuth(edgeAuthConfig)
-
+// proxy.ts runs on Node.js runtime (unlike the old middleware.ts which ran on
+// Edge). This means node:crypto and other Node.js modules are fully supported.
 export default auth((req) => {
   const { pathname } = req.nextUrl
 
@@ -19,7 +16,7 @@ export default auth((req) => {
 
   // Redirect unauthenticated page requests to login.
   // Note: initData (mini app mode) is validated server-side via tRPC context;
-  // middleware only checks the NextAuth session cookie.
+  // proxy only checks the NextAuth session cookie.
   if (!req.auth) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
