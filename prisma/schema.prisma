@@ -1,0 +1,50 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id             String              @id @default(cuid())
+  telegramUserId BigInt              @unique
+  createdAt      DateTime            @default(now())
+  assets         UserAsset[]
+  portfolioSnaps PortfolioSnapshot[]
+}
+
+model UserAsset {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  symbol    String
+  quantity  Decimal  @db.Decimal(24, 8)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, symbol])
+  @@index([userId])
+}
+
+model PriceSnapshot {
+  id         String   @id @default(cuid())
+  snapshotAt DateTime @default(now())
+  data       Json
+
+  @@index([snapshotAt(sort: Desc)])
+}
+
+model PortfolioSnapshot {
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  snapshotAt DateTime @default(now())
+  totalIRT   Decimal  @db.Decimal(24, 2)
+  breakdown  Json
+
+  @@index([userId, snapshotAt(sort: Desc)])
+}

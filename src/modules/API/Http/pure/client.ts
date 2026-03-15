@@ -9,11 +9,8 @@ import type { CustomAxiosInstance } from '@/modules/API/Http/types'
 
 const client: CustomAxiosInstance = axios.create({
   adapter: fetchAdapter,
-  baseURL: env.NEXT_PUBLIC_API_URL,
+  baseURL: env.NEXT_PUBLIC_ECOTRUST_API_URL,
   validateStatus: (status) => status >= 200 && status < 500,
-  headers: {
-    'x-api-key': env.NEXT_PRIVATE_API_KEY,
-  },
   paramsSerializer: {
     serialize: (params) =>
       qs.stringify(params, { arrayFormat: 'comma', encode: false }),
