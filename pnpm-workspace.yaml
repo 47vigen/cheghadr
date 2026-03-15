@@ -1,2 +1,4 @@
 onlyBuiltDependencies:
+  - msw
+  - sharp
   - es5-ext
