@@ -1,9 +1,13 @@
+import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import type { ReactNode } from 'react'
 
 import './globals.css'
 
+import { TelegramProvider } from '@/components/telegram-provider'
 import { ThemeProvider } from '@/components/theme-provider'
 
+import { TRPCReactProvider } from '@/trpc/react'
 import { cn } from '@/utils/style'
 
 const fontSans = Geist({
@@ -16,14 +20,20 @@ const fontMono = Geist_Mono({
   variable: '--font-mono',
 })
 
+export const metadata: Metadata = {
+  title: 'چه‌قدر؟',
+  description: 'ردیاب ارزش خالص دارایی',
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: ReactNode
 }>) {
   return (
     <html
-      lang="en"
+      lang="fa"
+      dir="rtl"
       suppressHydrationWarning
       className={cn(
         'antialiased',
@@ -33,7 +43,11 @@ export default function RootLayout({
       )}
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <TRPCReactProvider>
+            <TelegramProvider>{children}</TelegramProvider>
+          </TRPCReactProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

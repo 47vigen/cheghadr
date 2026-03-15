@@ -16,7 +16,7 @@ import type { CustomAxiosInstance } from './types'
 
 const client: CustomAxiosInstance = axios.create({
   timeout: 30 * 1_000, // 30 s
-  baseURL: env.NEXT_PUBLIC_API_URL,
+  baseURL: env.NEXT_PUBLIC_ECOTRUST_API_URL,
   paramsSerializer: {
     serialize: (params) =>
       qs.stringify(params, { arrayFormat: 'indices', encode: false }),
