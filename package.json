@@ -17,6 +17,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "swagger:gen": "KUBB_DISABLE_TELEMETRY=1 kubb generate",
     "swagger": "pnpm swagger:gen && pnpm biome:fix",
+    "postinstall": "prisma generate",
     "prepare": "husky || true",
     "test": "vitest run",
     "test:watch": "vitest",

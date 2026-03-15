@@ -1,24 +1,25 @@
 import { NextResponse } from 'next/server'
 
-import { auth } from '@/server/auth/config'
+import NextAuth from 'next-auth'
+
+import { edgeAuthConfig } from '@/server/auth/edge-config'
+
+// Use the edge-safe config so the middleware bundle never pulls in node:crypto
+const { auth } = NextAuth(edgeAuthConfig)
 
 export default auth((req) => {
   const { pathname } = req.nextUrl
 
   const isLoginPage = pathname === '/login'
   const isApiRoute = pathname.startsWith('/api/')
-  const isTrpcRoute = pathname.startsWith('/api/trpc')
   const isCronRoute = pathname.startsWith('/api/cron')
 
-  // Always allow public routes
-  if (isLoginPage || isCronRoute) return NextResponse.next()
+  // Always allow public and API routes
+  if (isLoginPage || isCronRoute || isApiRoute) return NextResponse.next()
 
-  // tRPC and auth routes handle their own authentication
-  if (isTrpcRoute || isApiRoute) return NextResponse.next()
-
-  // Redirect unauthenticated page requests to login
-  // Note: initData (mini app mode) is validated client-side;
-  // middleware only checks the NextAuth session cookie
+  // Redirect unauthenticated page requests to login.
+  // Note: initData (mini app mode) is validated server-side via tRPC context;
+  // middleware only checks the NextAuth session cookie.
   if (!req.auth) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
