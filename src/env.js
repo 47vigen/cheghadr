@@ -42,7 +42,9 @@ export const env = createEnv({
     DIRECT_URL: process.env.DIRECT_URL,
 
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+    NEXTAUTH_URL: process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : process.env.NEXTAUTH_URL,
     TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
 
     CRON_SECRET: process.env.CRON_SECRET,
