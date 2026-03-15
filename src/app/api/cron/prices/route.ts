@@ -6,10 +6,25 @@ import { db } from '@/server/db'
 const ECOTRUST_API_URL = process.env.NEXT_PUBLIC_ECOTRUST_API_URL
 
 export async function GET(request: NextRequest) {
+  // Explicit guard: prevents "Bearer undefined" bypass when secret is unset
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret) {
+    console.error('[CRON] CRON_SECRET is not configured')
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   // Verify cron secret — Vercel sends this as a Bearer token
   const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  if (!ECOTRUST_API_URL) {
+    console.error('[CRON] NEXT_PUBLIC_ECOTRUST_API_URL is not configured')
+    return NextResponse.json(
+      { error: 'API URL not configured' },
+      { status: 500 },
+    )
   }
 
   try {

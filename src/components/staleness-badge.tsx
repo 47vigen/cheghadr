@@ -1,6 +1,6 @@
-'use client'
-
 import { IconAlertTriangle, IconClock } from '@tabler/icons-react'
+
+const STALE_AFTER_MINUTES = 60
 
 interface StalenessBadgeProps {
   snapshotAt: Date | null
@@ -18,6 +18,13 @@ export function StalenessBadge({ snapshotAt, stale }: StalenessBadgeProps) {
   }
 
   if (stale) {
+    const minutesOld = Math.floor(
+      (Date.now() - snapshotAt.getTime()) / 1000 / 60,
+    )
+    const isOverThreshold = minutesOld > STALE_AFTER_MINUTES
+
+    if (!isOverThreshold) return null
+
     return (
       <div className="flex items-center gap-1.5 text-sm text-warning">
         <IconClock size={16} />

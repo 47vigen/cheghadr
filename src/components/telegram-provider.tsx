@@ -1,11 +1,12 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 
 import { AppRoot } from '@telegram-apps/telegram-ui'
 import { useTheme } from 'next-themes'
 
-export function TelegramProvider({ children }: { children: React.ReactNode }) {
+export function TelegramProvider({ children }: { children: ReactNode }) {
   const { resolvedTheme } = useTheme()
   const [appearance, setAppearance] = useState<'light' | 'dark'>('light')
 

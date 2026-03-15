@@ -11,18 +11,27 @@ export async function createTRPCContext(opts: { headers: Headers }) {
   // Path 1: Telegram Mini App — validate initData header
   const initData = opts.headers.get('x-telegram-init-data')
   if (initData && process.env.TELEGRAM_BOT_TOKEN) {
-    const result = validateInitData(initData, process.env.TELEGRAM_BOT_TOKEN)
-    if (result.valid && result.user) {
-      telegramUserId = BigInt(result.user.id)
+    try {
+      const result = validateInitData(initData, process.env.TELEGRAM_BOT_TOKEN)
+      if (result.valid && result.user) {
+        telegramUserId = BigInt(result.user.id)
+      }
+    } catch {
+      // Invalid initData — treat as unauthenticated
     }
   }
 
   // Path 2: Standalone browser — read NextAuth session
   if (!telegramUserId) {
-    const session = await auth()
-    const sessionAny = session as Record<string, unknown> | null
-    if (sessionAny?.telegramUserId) {
-      telegramUserId = BigInt(sessionAny.telegramUserId as string)
+    try {
+      const session = await auth()
+      const sessionAny = session as Record<string, unknown> | null
+      const rawId = sessionAny?.telegramUserId
+      if (rawId && typeof rawId === 'string' && /^\d+$/.test(rawId)) {
+        telegramUserId = BigInt(rawId)
+      }
+    } catch {
+      // Invalid session — treat as unauthenticated
     }
   }
 
