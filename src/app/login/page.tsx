@@ -4,7 +4,13 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
 import { retrieveRawInitData } from '@telegram-apps/sdk'
-import { Spinner } from '@telegram-apps/telegram-ui'
+import {
+  Caption,
+  LargeTitle,
+  Placeholder,
+  Spinner,
+  Text,
+} from '@telegram-apps/telegram-ui'
 import { signIn } from 'next-auth/react'
 
 import { env } from '@/env'
@@ -31,7 +37,6 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const attemptedRef = useRef(false)
 
-  // Detect context and auto-login for Mini App
   useEffect(() => {
     if (attemptedRef.current) return
     attemptedRef.current = true
@@ -60,7 +65,6 @@ export default function LoginPage() {
       })
   }, [router])
 
-  // Inject the Telegram Login Widget script for standalone browsers
   useEffect(() => {
     if (mode !== 'standalone') return
 
@@ -98,24 +102,26 @@ export default function LoginPage() {
   }, [mode, router])
 
   if (mode === 'loading' || mode === 'miniapp') {
-    return (
-      <div className="flex min-h-svh flex-col items-center justify-center gap-4 p-6">
-        <Spinner size="l" />
-        <p className="text-muted-foreground text-sm">در حال ورود…</p>
-      </div>
-    )
+    return <Placeholder header="در حال ورود…" action={<Spinner size="l" />} />
   }
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-8 p-6">
       <div className="flex flex-col items-center gap-3 text-center">
-        <h1 className="font-semibold text-2xl">چه‌قدر؟</h1>
-        <p className="text-muted-foreground text-sm">
+        <LargeTitle weight="1">چه‌قدر؟</LargeTitle>
+        <Text weight="3" style={{ color: 'var(--tgui--hint_color)' }}>
           برای ادامه با تلگرام وارد شوید
-        </p>
+        </Text>
       </div>
 
-      {error && <p className="text-destructive text-sm">{error}</p>}
+      {error && (
+        <Caption
+          level="1"
+          style={{ color: 'var(--tgui--destructive_text_color)' }}
+        >
+          {error}
+        </Caption>
+      )}
 
       <div ref={widgetContainerRef} />
     </div>

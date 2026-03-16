@@ -3,9 +3,7 @@
 import { useRouter } from 'next/navigation'
 
 import { IconWallet } from '@tabler/icons-react'
-import { Placeholder } from '@telegram-apps/telegram-ui'
-
-import { Button } from '@/components/ui/button'
+import { Button, Placeholder } from '@telegram-apps/telegram-ui'
 
 export function EmptyState() {
   const router = useRouter()
@@ -15,12 +13,12 @@ export function EmptyState() {
       header="هنوز دارایی اضافه نکرده‌اید"
       description="دارایی‌های خود را اضافه کنید تا ارزش کل سبد خود را ببینید"
       action={
-        <Button onClick={() => router.push('/assets/add')}>
+        <Button mode="filled" onClick={() => router.push('/assets/add')}>
           افزودن دارایی
         </Button>
       }
     >
-      <IconWallet size={64} className="text-muted-foreground" />
+      <IconWallet size={64} style={{ color: 'var(--tgui--hint_color)' }} />
     </Placeholder>
   )
 }
