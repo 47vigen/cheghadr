@@ -2,6 +2,7 @@
 
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { Button, Placeholder } from '@telegram-apps/telegram-ui'
+import { useTranslations } from 'next-intl'
 
 export default function AppError({
   error,
@@ -10,13 +11,15 @@ export default function AppError({
   error: Error
   reset: () => void
 }) {
+  const t = useTranslations('common')
+
   return (
     <Placeholder
-      header="خطایی رخ داد"
-      description={error.message || 'لطفاً دوباره تلاش کنید'}
+      header={t('error')}
+      description={error.message || t('tryAgain')}
       action={
         <Button mode="filled" onClick={reset}>
-          تلاش مجدد
+          {t('retry')}
         </Button>
       }
     >

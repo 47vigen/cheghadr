@@ -1,0 +1,90 @@
+{
+  "nav": {
+    "assets": "My Assets",
+    "prices": "Prices",
+    "calculator": "Calculator"
+  },
+  "login": {
+    "title": "Cheghadr?",
+    "subtitle": "Sign in with Telegram to continue",
+    "loading": "Signing in…",
+    "errorTelegram": "Error signing in via Telegram",
+    "error": "Sign in error"
+  },
+  "assets": {
+    "totalValue": "Total Portfolio Value",
+    "myAssets": "My Assets",
+    "addAsset": "Add Asset",
+    "loadError": "Failed to load",
+    "retryButton": "Retry",
+    "emptyTitle": "No assets yet",
+    "emptyDescription": "Add your assets to see your total portfolio value",
+    "toman": "Toman",
+    "tomanAbbr": "T",
+    "units": "units",
+    "editTitle": "Edit Quantity — {name}",
+    "editQuantityHeader": "Quantity",
+    "editQuantityPlaceholder": "New quantity",
+    "save": "Save",
+    "cancel": "Cancel",
+    "deleteTitle": "Delete Asset",
+    "deleteConfirm": "Are you sure you want to delete {name}?",
+    "delete": "Delete",
+    "toastUpdated": "Asset updated",
+    "toastUpdateError": "Error updating",
+    "toastDeleted": "Asset deleted",
+    "toastDeleteError": "Error deleting",
+    "toastAdded": "Asset added",
+    "toastAddError": "Error adding",
+    "toastInvalidQuantity": "Quantity must be a positive number"
+  },
+  "prices": {
+    "unavailable": "Prices unavailable",
+    "checkLater": "Please check back later"
+  },
+  "calculator": {
+    "title": "Calculator",
+    "from": "From",
+    "to": "To",
+    "amount": "Amount",
+    "amountPlaceholder": "Enter amount",
+    "resultTitle": "Result",
+    "resultPlaceholder": "Result will appear here"
+  },
+  "addAsset": {
+    "title": "Add Asset",
+    "subtitle": "Search and select the desired asset"
+  },
+  "picker": {
+    "search": "Search...",
+    "selectedHeader": "{name} selected",
+    "enterQuantity": "Enter quantity",
+    "save": "Save",
+    "checkmark": "✓ Selected",
+    "noResults": "No results found",
+    "selectAsset": "Select Asset",
+    "iranianToman": "Iranian Toman",
+    "toman": "Toman"
+  },
+  "common": {
+    "error": "An error occurred",
+    "tryAgain": "Please try again",
+    "retry": "Retry"
+  },
+  "categories": {
+    "CURRENCY": "Currency",
+    "CRYPTOCURRENCY": "Cryptocurrency",
+    "GOLD": "Gold",
+    "COIN": "Coin",
+    "SILVER": "Silver",
+    "BORS": "Stock Market",
+    "GOLD_FUNDS": "Gold Funds",
+    "STOCK_FUNDS": "Stock Funds",
+    "FIXED_INCOME_FUNDS": "Fixed Income Funds",
+    "MIXED_ASSET_FUNDS": "Mixed Asset Funds",
+    "LEVERAGED_FUNDS": "Leveraged Funds",
+    "SECTOR_FUNDS": "Sector Funds",
+    "PROPERTY_FUNDS": "Property Funds",
+    "COMMODITY_SAFFRON_FUNDS": "Saffron Funds"
+  }
+}

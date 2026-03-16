@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 
 import { List, Section, Spinner, Subheadline } from '@telegram-apps/telegram-ui'
+import { useTranslations } from 'next-intl'
 
 import { AssetPicker } from '@/components/asset-picker'
 
@@ -11,6 +12,7 @@ import { api } from '@/trpc/react'
 
 export default function AddAssetPage() {
   const router = useRouter()
+  const t = useTranslations('addAsset')
   useTelegramBackButton(true)
 
   const { data, isLoading } = api.prices.latest.useQuery()
@@ -25,9 +27,9 @@ export default function AddAssetPage() {
 
   return (
     <List>
-      <Section header="افزودن دارایی">
+      <Section header={t('title')}>
         <Subheadline level="2" weight="3" className="text-tgui-hint">
-          دارایی مورد نظر را جستجو و انتخاب کنید
+          {t('subtitle')}
         </Subheadline>
       </Section>
       <AssetPicker priceData={data?.data} onSaved={() => router.push('/')} />

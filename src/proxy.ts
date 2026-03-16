@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import { routing } from '@/i18n/routing'
 import { auth } from '@/server/auth/config'
 
 // proxy.ts runs on Node.js runtime (unlike the old middleware.ts which ran on
@@ -7,9 +8,15 @@ import { auth } from '@/server/auth/config'
 export default auth((req) => {
   const { pathname } = req.nextUrl
 
-  const isLoginPage = pathname === '/login'
-  const isApiRoute = pathname.startsWith('/api/')
-  const isCronRoute = pathname.startsWith('/api/cron')
+  // Strip locale prefix for path matching (e.g. /fa/login → /login)
+  const localePattern = new RegExp(
+    `^/(${routing.locales.join('|')})(/|$)`,
+  )
+  const normalizedPath = pathname.replace(localePattern, '/')
+
+  const isLoginPage = normalizedPath === '/login'
+  const isApiRoute = normalizedPath.startsWith('/api/')
+  const isCronRoute = normalizedPath.startsWith('/api/cron')
 
   // Always allow public and API routes
   if (isLoginPage || isCronRoute || isApiRoute) return NextResponse.next()

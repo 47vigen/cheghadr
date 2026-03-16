@@ -1,10 +1,14 @@
 import type { NextConfig } from 'next'
 
+import createNextIntlPlugin from 'next-intl/plugin'
+
 /**
  * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially useful
  * for Docker builds.
  */
 import './src/env.js'
+
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
 const nextConfig: NextConfig = {
   typedRoutes: true,
@@ -32,4 +36,4 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default nextConfig
+export default withNextIntl(nextConfig)

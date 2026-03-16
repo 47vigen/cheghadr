@@ -1,8 +1,11 @@
+'use client'
+
 import { Avatar, Cell, Text } from '@telegram-apps/telegram-ui'
+import { useLocale, useTranslations } from 'next-intl'
 
 import { ChangeLabel } from '@/components/change-label'
 
-import { formatIRT } from '@/lib/prices'
+import { formatIRT, getLocalizedItemName } from '@/lib/prices'
 import type { PriceItem } from '@/modules/API/Swagger/ecotrust/gen/models'
 
 interface PriceRowProps {
@@ -10,8 +13,10 @@ interface PriceRowProps {
 }
 
 export function PriceRow({ item }: PriceRowProps) {
+  const locale = useLocale()
+  const t = useTranslations('assets')
   const icon = item.png ?? item.base_currency.png
-  const name = item.name.fa || item.base_currency.fa
+  const name = getLocalizedItemName(item, locale)
   const sellPrice = Number.parseFloat(item.sell_price)
 
   return (
@@ -26,7 +31,9 @@ export function PriceRow({ item }: PriceRowProps) {
       after={
         <div className="flex flex-col items-end gap-0.5">
           <Text weight="2" className="tabular-nums" dir="ltr">
-            {Number.isNaN(sellPrice) ? '—' : `${formatIRT(sellPrice)} ت`}
+            {Number.isNaN(sellPrice)
+              ? '—'
+              : `${formatIRT(sellPrice, locale)} ${t('tomanAbbr')}`}
           </Text>
           <ChangeLabel change={item.change} />
         </div>

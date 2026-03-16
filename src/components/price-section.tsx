@@ -1,8 +1,10 @@
+'use client'
+
 import { Section } from '@telegram-apps/telegram-ui'
+import { useTranslations } from 'next-intl'
 
 import { PriceRow } from '@/components/price-row'
 
-import { categoryLabels } from '@/lib/prices'
 import type { PriceItem } from '@/modules/API/Swagger/ecotrust/gen/models'
 
 interface PriceSectionProps {
@@ -11,7 +13,15 @@ interface PriceSectionProps {
 }
 
 export function PriceSection({ category, items }: PriceSectionProps) {
-  const label = categoryLabels[category] ?? category
+  const tCat = useTranslations('categories')
+
+  // Cast to known key type; unknown categories fall back to the raw symbol
+  let label: string
+  try {
+    label = tCat(category as Parameters<typeof tCat>[0])
+  } catch {
+    label = category
+  }
 
   return (
     <Section header={label}>
