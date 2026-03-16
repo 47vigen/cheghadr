@@ -24,8 +24,9 @@ design for the Telegram UX paradigm, not traditional web.
 1. **No shadcn** — Remove all shadcn/ui, Radix UI primitives used for shadcn, and `cn()` utilities. Use only `@telegram-apps/telegram-ui`.
 2. **Design like a Telegram product designer** — Think native Telegram: Settings, Wallet, Channels. Match spacing, hierarchy, and interaction patterns.
 3. **Puzzle-piece composition** — Stick Telegram UI components together. No custom styles. No `className` overrides for layout/colors. If TGUI doesn't have it, compose existing components.
-4. **globals.css from TGUI variables** — Regenerate via Telegram theme variables. No shadcn/Radix CSS variables. See "globals.css structure" below.
-5. **Vazirmatn font** — Add from Google Fonts and use as first priority in `font-family` for RTL/Persian.
+4. **Tailwind tokens over `style` prop** — Prefer Tailwind utility classes using `@theme inline` tokens (e.g. `bg-tgui-bg`, `text-tgui-text`). Avoid the `style` prop when a Tailwind class or token exists. Use `style` only for truly dynamic values (e.g. `width: ${percent}%`).
+5. **globals.css from TGUI variables** — Regenerate via Telegram theme variables. No shadcn/Radix CSS variables. See "globals.css structure" below.
+6. **Vazirmatn font** — Add from Google Fonts and use as first priority in `font-family` for RTL/Persian.
 
 ### globals.css Structure
 
@@ -194,6 +195,8 @@ For non-Next.js: add Vazirmatn via `<link href="https://fonts.googleapis.com/css
   --color-tgui-hint: var(--tgui--hint_color);
   /* ... */
 }
+
+/* Use tokens in components: className="bg-tgui-bg text-tgui-text" — avoid style prop */
 ```
 
 ### TON Connect Integration
@@ -335,6 +338,12 @@ function ReferralShare() {
 **Why bad**: Breaks theme sync. Hard to maintain. Doesn't adapt to Telegram light/dark.
 
 **Instead**: Stick to TGUI components like puzzle pieces. Use TGUI props and composition. Avoid `className` for colors/spacing.
+
+### ❌ Using `style` Prop When Tailwind Tokens Exist
+
+**Why bad**: Bypasses design tokens. Inconsistent theming. Harder to maintain. Doesn't benefit from Tailwind's token system.
+
+**Instead**: Use Tailwind utility classes with `@theme inline` tokens (e.g. `className="bg-tgui-bg text-tgui-text"`). Reserve `style` for truly dynamic values only (e.g. `style={{ width: `${progress}%` }}`).
 
 ### ❌ Ignoring Telegram Theme
 
