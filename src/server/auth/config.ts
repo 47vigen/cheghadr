@@ -1,9 +1,19 @@
 import NextAuth from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 
-import { validateTelegramWidget } from './telegram'
+import { validateInitData, validateTelegramWidget } from './telegram'
 
 export type { Session } from 'next-auth'
+
+const TELEGRAM_WIDGET_FIELDS = [
+  'id',
+  'first_name',
+  'last_name',
+  'username',
+  'photo_url',
+  'auth_date',
+  'hash',
+] as const
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: process.env.NEXTAUTH_SECRET,
@@ -23,17 +33,43 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       authorize(credentials) {
         if (!credentials || !process.env.TELEGRAM_BOT_TOKEN) return null
 
+        // NextAuth injects extra fields (csrfToken, etc.) into credentials.
+        // Extract only Telegram-specific fields to prevent HMAC mismatch.
+        const raw = credentials as Record<string, unknown>
+        const telegramData: Record<string, unknown> = {}
+        for (const key of TELEGRAM_WIDGET_FIELDS) {
+          if (raw[key] != null) telegramData[key] = raw[key]
+        }
+
         const valid = validateTelegramWidget(
-          credentials as Record<string, unknown>,
+          telegramData,
           process.env.TELEGRAM_BOT_TOKEN,
         )
 
         if (!valid) return null
 
-        // Store only telegramUserId — no PII
-        return {
-          id: String(credentials.id),
-        }
+        return { id: String(credentials.id) }
+      },
+    }),
+
+    Credentials({
+      id: 'telegram-miniapp',
+      name: 'Telegram Mini App',
+      credentials: {
+        initData: { label: 'Init Data' },
+      },
+      authorize(credentials) {
+        if (!credentials?.initData || !process.env.TELEGRAM_BOT_TOKEN)
+          return null
+
+        const result = validateInitData(
+          String(credentials.initData),
+          process.env.TELEGRAM_BOT_TOKEN,
+        )
+
+        if (!result.valid || !result.user) return null
+
+        return { id: String(result.user.id) }
       },
     }),
   ],
