@@ -1,3 +1,5 @@
+'use client'
+
 import { Spinner } from '@telegram-apps/telegram-ui'
 
 export default function AppLoading() {
