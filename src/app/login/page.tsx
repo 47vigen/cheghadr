@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
-import { retrieveRawInitData } from '@telegram-apps/sdk'
 import {
   Caption,
   LargeTitle,
@@ -14,19 +13,7 @@ import {
 import { signIn } from 'next-auth/react'
 
 import { env } from '@/env'
-
-function getRawInitData(): string | undefined {
-  if (typeof window === 'undefined') return undefined
-
-  try {
-    const raw = retrieveRawInitData()
-    if (raw) return raw
-  } catch {
-    // SDK throws when no Telegram context is found — fall through
-  }
-
-  return window.Telegram?.WebApp?.initData || undefined
-}
+import { getRawInitData } from '@/utils/telegram'
 
 export default function LoginPage() {
   const router = useRouter()

@@ -3,6 +3,8 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 
+import WebApp from '@twa-dev/sdk'
+
 export function useTelegramBackButton(show: boolean) {
   const router = useRouter()
   // Keep a stable ref so the effect only re-runs on `show` changes
@@ -12,22 +14,21 @@ export function useTelegramBackButton(show: boolean) {
   }, [router])
 
   useEffect(() => {
-    const tg = window.Telegram?.WebApp
-    if (!tg?.BackButton) return
+    if (!WebApp.BackButton) return
 
     if (show) {
-      tg.BackButton.show()
+      WebApp.BackButton.show()
       const handler = () => routerRef.current.back()
-      tg.BackButton.onClick(handler)
+      WebApp.BackButton.onClick(handler)
       return () => {
-        tg.BackButton?.offClick(handler)
-        tg.BackButton?.hide()
+        WebApp.BackButton?.offClick(handler)
+        WebApp.BackButton?.hide()
       }
     }
 
-    tg.BackButton.hide()
+    WebApp.BackButton.hide()
     return () => {
-      tg.BackButton?.hide()
+      WebApp.BackButton?.hide()
     }
   }, [show])
 }

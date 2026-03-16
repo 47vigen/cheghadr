@@ -1,22 +1,29 @@
 'use client'
 
-import type { ReactNode } from 'react'
+import type { PropsWithChildren } from 'react'
 import { useEffect } from 'react'
 
 import { AppRoot } from '@telegram-apps/telegram-ui'
+import WebApp from '@twa-dev/sdk'
 
-export function TelegramProvider({ children }: { children: ReactNode }) {
+import { usePlatform } from '@/hooks/use-platform'
+
+export default function TelegramProvider(props: PropsWithChildren) {
+  const platform = usePlatform()
+
   useEffect(() => {
-    try {
-      const tg = window.Telegram?.WebApp
-      if (tg?.initData) {
-        tg.expand()
-        tg.ready()
-      }
-    } catch {
-      // Not in Telegram context
+    if (['ios', 'android'].includes(platform)) {
+      WebApp.requestFullscreen()
     }
-  }, [])
+  }, [platform])
 
-  return <AppRoot dir="rtl">{children}</AppRoot>
+  return (
+    <AppRoot
+      className="h-full w-full"
+      appearance={WebApp.colorScheme}
+      platform={['macos', 'ios'].includes(platform) ? 'ios' : 'base'}
+    >
+      {props.children}
+    </AppRoot>
+  )
 }
