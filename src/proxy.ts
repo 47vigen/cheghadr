@@ -14,6 +14,14 @@ export default auth((req) => {
   // Always allow public and API routes
   if (isLoginPage || isCronRoute || isApiRoute) return NextResponse.next()
 
+  // Dev bypass: allow through when DEV_TELEGRAM_USER_ID is set
+  if (
+    process.env.NODE_ENV === 'development' &&
+    process.env.DEV_TELEGRAM_USER_ID
+  ) {
+    return NextResponse.next()
+  }
+
   // Redirect unauthenticated page requests to login.
   // Note: initData (mini app mode) is validated server-side via tRPC context;
   // proxy only checks the NextAuth session cookie.

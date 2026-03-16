@@ -1,20 +1,12 @@
 import { LargeTitle, Text } from '@telegram-apps/telegram-ui'
 
-import { StalenessBadge } from '@/components/staleness-badge'
-
 import { formatIRT } from '@/lib/prices'
 
 interface PortfolioTotalProps {
   totalIRT: number
-  stale: boolean
-  snapshotAt: Date | null
 }
 
-export function PortfolioTotal({
-  totalIRT,
-  stale,
-  snapshotAt,
-}: PortfolioTotalProps) {
+export function PortfolioTotal({ totalIRT }: PortfolioTotalProps) {
   return (
     <div className="flex flex-col items-center gap-2 py-4">
       <div className="flex items-baseline gap-1.5">
@@ -25,7 +17,6 @@ export function PortfolioTotal({
           تومان
         </Text>
       </div>
-      <StalenessBadge snapshotAt={snapshotAt} stale={stale} />
     </div>
   )
 }

@@ -17,11 +17,11 @@ export function PriceRow({ item }: PriceRowProps) {
   return (
     <Cell
       before={
-        icon ? (
-          <Avatar src={icon} size={40} />
-        ) : (
-          <Avatar size={40} acronym={item.base_currency.symbol.slice(0, 2)} />
-        )
+        <Avatar
+          size={40}
+          src={icon ?? undefined}
+          acronym={item.base_currency.symbol.slice(0, 2)}
+        />
       }
       after={
         <div className="flex flex-col items-end gap-0.5">

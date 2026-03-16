@@ -3,7 +3,6 @@
 import { List, Placeholder, Spinner } from '@telegram-apps/telegram-ui'
 
 import { PriceSection } from '@/components/price-section'
-import { StalenessBadge } from '@/components/staleness-badge'
 
 import {
   groupByCategory,
@@ -41,10 +40,6 @@ export default function PricesPage() {
 
   return (
     <List>
-      <StalenessBadge
-        snapshotAt={data?.snapshotAt ?? null}
-        stale={data?.stale ?? true}
-      />
       {entries.map(([category, items]) => (
         <PriceSection key={category} category={category} items={items} />
       ))}

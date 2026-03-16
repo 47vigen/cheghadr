@@ -18,6 +18,7 @@ export const env = createEnv({
     NEXTAUTH_SECRET: z.string().min(32),
     NEXTAUTH_URL: z.url().optional(),
     TELEGRAM_BOT_TOKEN: z.string().min(1),
+    DEV_TELEGRAM_USER_ID: z.string().regex(/^\d+$/).optional(),
 
     // Cron
     CRON_SECRET: z.string().min(1),
@@ -46,6 +47,7 @@ export const env = createEnv({
       ? `https://${process.env.VERCEL_URL}`
       : process.env.NEXTAUTH_URL,
     TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
+    DEV_TELEGRAM_USER_ID: process.env.DEV_TELEGRAM_USER_ID,
 
     CRON_SECRET: process.env.CRON_SECRET,
 

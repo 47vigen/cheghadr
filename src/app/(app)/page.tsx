@@ -57,11 +57,7 @@ export default function AssetsPage() {
     <>
       <List>
         <Section header="ارزش کل دارایی‌ها">
-          <PortfolioTotal
-            totalIRT={data.totalIRT}
-            stale={data.stale}
-            snapshotAt={data.snapshotAt}
-          />
+          <PortfolioTotal totalIRT={data.totalIRT} />
         </Section>
 
         {data.assets.length === 0 ? (

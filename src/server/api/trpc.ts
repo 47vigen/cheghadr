@@ -35,6 +35,15 @@ export async function createTRPCContext(opts: { headers: Headers }) {
     }
   }
 
+  // Path 3: Dev bypass — use env user when no session/initData
+  if (
+    !telegramUserId &&
+    process.env.NODE_ENV === 'development' &&
+    process.env.DEV_TELEGRAM_USER_ID
+  ) {
+    telegramUserId = BigInt(process.env.DEV_TELEGRAM_USER_ID)
+  }
+
   return { db, telegramUserId }
 }
 
