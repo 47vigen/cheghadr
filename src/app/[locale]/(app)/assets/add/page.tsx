@@ -1,9 +1,9 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-
 import { List, Section, Spinner, Subheadline } from '@telegram-apps/telegram-ui'
 import { useTranslations } from 'next-intl'
+
+import { useRouter } from '@/i18n/navigation'
 
 import { AssetPicker } from '@/components/asset-picker'
 

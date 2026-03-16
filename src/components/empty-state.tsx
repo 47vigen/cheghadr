@@ -1,10 +1,10 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-
 import { IconWallet } from '@tabler/icons-react'
 import { Button, Placeholder } from '@telegram-apps/telegram-ui'
 import { useTranslations } from 'next-intl'
+
+import { useRouter } from '@/i18n/navigation'
 
 export function EmptyState() {
   const router = useRouter()

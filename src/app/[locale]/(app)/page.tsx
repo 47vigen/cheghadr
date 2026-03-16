@@ -1,7 +1,5 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-
 import { IconPlus } from '@tabler/icons-react'
 import {
   Button,
@@ -13,6 +11,7 @@ import {
 } from '@telegram-apps/telegram-ui'
 import { useTranslations } from 'next-intl'
 
+import { useRouter } from '@/i18n/navigation'
 import { AssetListItem } from '@/components/asset-list-item'
 import { EmptyState } from '@/components/empty-state'
 import { PortfolioTotal } from '@/components/portfolio-total'
