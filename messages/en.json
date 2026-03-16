@@ -87,7 +87,12 @@
   "common": {
     "error": "An error occurred",
     "tryAgain": "Please try again",
-    "retry": "Retry"
+    "retry": "Retry",
+    "sessionExpired": "Your session has expired",
+    "sessionExpiredDescription": "Please sign in again",
+    "reLogin": "Re-login",
+    "connectionError": "Unable to connect to the server",
+    "connectionErrorDescription": "Please try again in a moment"
   },
   "categories": {
     "CURRENCY": "Currency",

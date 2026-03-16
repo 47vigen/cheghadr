@@ -45,17 +45,20 @@ export function useTelegramMainButton({
       WebApp.MainButton?.offClick(handler)
       WebApp.MainButton?.hide()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // biome-ignore lint/correctness/useExhaustiveDependencies: stable-ref pattern — onClick intentionally omitted
   }, [isVisible, text])
 
   useEffect(() => {
-    if (!WebApp.MainButton) return
-    if (!isVisible) return
+    if (!WebApp.MainButton || !isVisible) return
 
     if (isLoading) {
       WebApp.MainButton.showProgress()
     } else {
       WebApp.MainButton.hideProgress()
+    }
+
+    return () => {
+      WebApp.MainButton?.hideProgress()
     }
   }, [isLoading, isVisible])
 }

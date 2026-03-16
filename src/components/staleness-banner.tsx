@@ -5,59 +5,54 @@ import { useLocale, useTranslations } from 'next-intl'
 
 interface StalenessBannerProps {
   snapshotAt: Date | null
+  /** 'prices' shows a timestamped warning; 'assets' shows a brief static note */
   namespace?: 'assets' | 'prices'
 }
 
 function formatRelativeTime(date: Date, locale: string): string {
-  const diffMs = Date.now() - date.getTime()
-  const diffMin = Math.floor(diffMs / 60000)
+  const diffMin = Math.floor((Date.now() - date.getTime()) / 60000)
 
   if (diffMin < 60) {
-    if (locale === 'fa') {
-      return `${new Intl.NumberFormat('fa-IR').format(diffMin)} دقیقه پیش`
-    }
-    return `${diffMin} minutes ago`
+    return locale === 'fa'
+      ? `${new Intl.NumberFormat('fa-IR').format(diffMin)} دقیقه پیش`
+      : `${diffMin} min ago`
   }
 
   const diffHours = Math.floor(diffMin / 60)
   if (diffHours < 24) {
-    if (locale === 'fa') {
-      return `${new Intl.NumberFormat('fa-IR').format(diffHours)} ساعت پیش`
-    }
-    return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`
+    return locale === 'fa'
+      ? `${new Intl.NumberFormat('fa-IR').format(diffHours)} ساعت پیش`
+      : `${diffHours}h ago`
   }
 
   const diffDays = Math.floor(diffHours / 24)
-  if (locale === 'fa') {
-    return `${new Intl.NumberFormat('fa-IR').format(diffDays)} روز پیش`
-  }
-  return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`
+  return locale === 'fa'
+    ? `${new Intl.NumberFormat('fa-IR').format(diffDays)} روز پیش`
+    : `${diffDays}d ago`
 }
 
 export function StalenessBanner({
   snapshotAt,
   namespace = 'prices',
 }: StalenessBannerProps) {
-  const t = useTranslations(namespace)
   const locale = useLocale()
 
-  const timeStr = snapshotAt
-    ? formatRelativeTime(
-        snapshotAt instanceof Date ? snapshotAt : new Date(snapshotAt),
-        locale,
-      )
-    : null
+  const tPrices = useTranslations('prices')
+  const tAssets = useTranslations('assets')
+
+  const resolvedDate = snapshotAt ? new Date(snapshotAt) : null
+
+  const label =
+    namespace === 'prices'
+      ? resolvedDate
+        ? tPrices('staleWarning', { time: formatRelativeTime(resolvedDate, locale) })
+        : tPrices('checkLater')
+      : tAssets('staleWarning')
 
   return (
-    <div className="flex items-center gap-1.5 px-4 py-2">
+    <div className="flex items-center gap-1.5 px-4 py-1.5">
       <Caption level="2" className="text-tgui-hint">
-        ⚠️{' '}
-        {timeStr
-          ? t('staleWarning', { time: timeStr })
-          : (t as (k: string) => string)('staleWarning').replace(
-              / \{time\}/,
-              '',
-            )}
+        ⚠️ {label}
       </Caption>
     </div>
   )

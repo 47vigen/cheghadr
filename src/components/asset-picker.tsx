@@ -68,7 +68,7 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
   const entries = sortedGroupEntries(grouped)
 
   const handleSave = () => {
-    if (!selected) return
+    if (!selected || addMutation.isPending) return
     const qty = Number(quantity)
     if (!quantity || Number.isNaN(qty) || qty <= 0) {
       toast.error(t('toastInvalidQuantity'))
@@ -77,11 +77,9 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
     addMutation.mutate({ symbol: selected.base_currency.symbol, quantity })
   }
 
+  const qty = Number(quantity)
   const canSave =
-    !!selected &&
-    !!quantity &&
-    !Number.isNaN(Number(quantity)) &&
-    Number(quantity) > 0
+    !!selected && !!quantity && !Number.isNaN(qty) && qty > 0
 
   useTelegramMainButton({
     text: tPicker('save'),

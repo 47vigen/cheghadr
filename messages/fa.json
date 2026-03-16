@@ -87,7 +87,12 @@
   "common": {
     "error": "خطایی رخ داد",
     "tryAgain": "لطفاً دوباره تلاش کنید",
-    "retry": "تلاش مجدد"
+    "retry": "تلاش مجدد",
+    "sessionExpired": "نشست شما منقضی شده است",
+    "sessionExpiredDescription": "لطفاً دوباره وارد شوید",
+    "reLogin": "ورود مجدد",
+    "connectionError": "مشکلی در اتصال به سرور رخ داد",
+    "connectionErrorDescription": "لطفاً چند لحظه دیگر تلاش کنید"
   },
   "categories": {
     "CURRENCY": "ارز",

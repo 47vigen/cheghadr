@@ -2,27 +2,31 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-const PULL_THRESHOLD = 72 // px before triggering refresh
+const PULL_THRESHOLD = 72
 
-/**
- * Adds pull-to-refresh behavior to the page. Returns `isRefreshing` so the
- * caller can show a loading indicator. The `onRefresh` callback is called
- * when the pull gesture crosses the threshold.
- */
 export function usePullToRefresh(onRefresh: () => Promise<void>) {
   const [isRefreshing, setIsRefreshing] = useState(false)
+  // Stable ref so the effect doesn't re-register listeners on every render
+  const onRefreshRef = useRef(onRefresh)
+  useEffect(() => {
+    onRefreshRef.current = onRefresh
+  }, [onRefresh])
+
+  const isRefreshingRef = useRef(false)
   const startYRef = useRef<number | null>(null)
   const isTouching = useRef(false)
 
   const handleRefresh = useCallback(async () => {
-    if (isRefreshing) return
+    if (isRefreshingRef.current) return
+    isRefreshingRef.current = true
     setIsRefreshing(true)
     try {
-      await onRefresh()
+      await onRefreshRef.current()
     } finally {
+      isRefreshingRef.current = false
       setIsRefreshing(false)
     }
-  }, [isRefreshing, onRefresh])
+  }, [])
 
   useEffect(() => {
     const onTouchStart = (e: TouchEvent) => {

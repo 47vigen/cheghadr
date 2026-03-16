@@ -29,6 +29,7 @@ export function useViewportHeight(): void {
 
     return () => {
       WebApp.offEvent('viewportChanged', update)
+      document.documentElement.style.removeProperty('--tg-viewport-height')
     }
   }, [])
 }

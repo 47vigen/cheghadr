@@ -20,13 +20,7 @@ interface PortfolioChartProps {
 }
 
 function formatChartDate(date: Date, locale: string): string {
-  if (locale === 'fa') {
-    return new Intl.DateTimeFormat('fa-IR', {
-      month: 'short',
-      day: 'numeric',
-    }).format(date)
-  }
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat(locale === 'fa' ? 'fa-IR' : 'en-US', {
     month: 'short',
     day: 'numeric',
   }).format(date)
@@ -87,14 +81,10 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
     )
   }
 
-  const chartData = data.map((d) => ({
-    date: d.date instanceof Date ? d.date : new Date(d.date),
-    totalIRT: d.totalIRT,
-    label: formatChartDate(
-      d.date instanceof Date ? d.date : new Date(d.date),
-      locale,
-    ),
-  }))
+  const chartData = data.map((d) => {
+    const date = d.date instanceof Date ? d.date : new Date(d.date)
+    return { date, totalIRT: d.totalIRT, label: formatChartDate(date, locale) }
+  })
 
   return (
     <div dir="ltr" className="px-2 py-4">

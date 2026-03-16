@@ -2,7 +2,14 @@
 
 import { useState } from 'react'
 
-import { Input, List, Placeholder, Spinner } from '@telegram-apps/telegram-ui'
+import {
+  Button,
+  Input,
+  List,
+  Placeholder,
+  Spinner,
+  Text,
+} from '@telegram-apps/telegram-ui'
 import { useTranslations } from 'next-intl'
 
 import { PriceSection } from '@/components/price-section'
@@ -20,12 +27,16 @@ import { api } from '@/trpc/react'
 
 export default function PricesPage() {
   const t = useTranslations('prices')
+  const tCommon = useTranslations('common')
   const [search, setSearch] = useState('')
 
-  const { data, isLoading, refetch } = api.prices.latest.useQuery(undefined, {
-    refetchInterval: 30 * 60 * 1000,
-    refetchOnWindowFocus: true,
-  })
+  const { data, isLoading, isError, refetch } = api.prices.latest.useQuery(
+    undefined,
+    {
+      refetchInterval: 30 * 60 * 1000,
+      refetchOnWindowFocus: true,
+    },
+  )
 
   const { isRefreshing } = usePullToRefresh(async () => {
     await refetch()
@@ -33,6 +44,22 @@ export default function PricesPage() {
 
   if (isLoading) {
     return <PricesSkeleton />
+  }
+
+  if (isError) {
+    return (
+      <Placeholder
+        header={t('unavailable')}
+        description={t('checkLater')}
+        action={
+          <Button mode="filled" onClick={() => void refetch()}>
+            {tCommon('retry')}
+          </Button>
+        }
+      >
+        <Text className="text-tgui-hint">⚠️</Text>
+      </Placeholder>
+    )
   }
 
   const prices = parsePriceSnapshot(data?.data)

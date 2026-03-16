@@ -35,17 +35,16 @@ export default function AppError({
   reset: () => void
 }) {
   const t = useTranslations('common')
-  const tAssets = useTranslations('assets')
   const router = useRouter()
 
   if (isUnauthorized(error)) {
     return (
       <Placeholder
-        header={tAssets('sessionExpired')}
-        description={tAssets('sessionExpiredDescription')}
+        header={t('sessionExpired')}
+        description={t('sessionExpiredDescription')}
         action={
           <Button mode="filled" onClick={() => router.push('/login')}>
-            {tAssets('reLogin')}
+            {t('reLogin')}
           </Button>
         }
       >
@@ -57,8 +56,8 @@ export default function AppError({
   if (isConnectionError(error)) {
     return (
       <Placeholder
-        header={tAssets('connectionError')}
-        description={tAssets('retryLater')}
+        header={t('connectionError')}
+        description={t('connectionErrorDescription')}
         action={
           <Button mode="filled" onClick={reset}>
             {t('retry')}
