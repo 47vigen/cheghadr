@@ -1,5 +1,6 @@
-import createIntlMiddleware from 'next-intl/middleware'
 import { NextResponse } from 'next/server'
+
+import createIntlMiddleware from 'next-intl/middleware'
 
 import { routing } from '@/i18n/routing'
 import { auth } from '@/server/auth/config'
@@ -50,5 +51,7 @@ export default auth((req) => {
 })
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  // Exclude api, trpc, _next, _vercel, and paths with dots (static files).
+  // API routes must bypass the proxy so next-intl doesn't rewrite them.
+  matcher: ['/((?!api|trpc|_next|_vercel|.*\\..*).*)'],
 }

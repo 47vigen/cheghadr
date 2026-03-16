@@ -1,5 +1,7 @@
 onlyBuiltDependencies:
+  - '@parcel/watcher'
   - '@prisma/engines'
+  - '@swc/core'
   - es5-ext
   - esbuild
   - msw
