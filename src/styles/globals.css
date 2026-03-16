@@ -106,6 +106,8 @@
     --tabbar-height: 64px;
     --bottom-above-tabbar: var(--tabbar-height, 72px);
     --bottom-safe: max(16px, env(safe-area-inset-bottom));
+    /* Fallback — overwritten by useViewportHeight when inside Telegram */
+    --tg-viewport-height: 100svh;
   }
 
   body {

@@ -15,6 +15,8 @@ import {
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
+import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
+import { useTelegramMainButton } from '@/hooks/use-telegram-main-button'
 import {
   filterPriceItems,
   formatIRT,
@@ -25,6 +27,7 @@ import {
   sortedGroupEntries,
 } from '@/lib/prices'
 import type { PriceItem } from '@/modules/API/Swagger/ecotrust/gen/models'
+import { isTelegramWebApp } from '@/utils/telegram'
 import { api } from '@/trpc/react'
 
 interface AssetPickerProps {
@@ -43,14 +46,20 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
   const [quantity, setQuantity] = useState('')
 
   const utils = api.useUtils()
+  const { notificationOccurred } = useTelegramHaptics()
+  const inTelegram = isTelegramWebApp()
 
   const addMutation = api.assets.add.useMutation({
     onSuccess: () => {
+      notificationOccurred('success')
       void utils.assets.list.invalidate()
       toast.success(t('toastAdded'))
       onSaved()
     },
-    onError: (err) => toast.error(err.message || t('toastAddError')),
+    onError: (err) => {
+      notificationOccurred('error')
+      toast.error(err.message || t('toastAddError'))
+    },
   })
 
   const items = parsePriceSnapshot(priceData)
@@ -59,7 +68,7 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
   const entries = sortedGroupEntries(grouped)
 
   const handleSave = () => {
-    if (!selected) return
+    if (!selected || addMutation.isPending) return
     const qty = Number(quantity)
     if (!quantity || Number.isNaN(qty) || qty <= 0) {
       toast.error(t('toastInvalidQuantity'))
@@ -67,6 +76,17 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
     }
     addMutation.mutate({ symbol: selected.base_currency.symbol, quantity })
   }
+
+  const qty = Number(quantity)
+  const canSave =
+    !!selected && !!quantity && !Number.isNaN(qty) && qty > 0
+
+  useTelegramMainButton({
+    text: tPicker('save'),
+    onClick: handleSave,
+    isVisible: canSave,
+    isLoading: addMutation.isPending,
+  })
 
   return (
     <>
@@ -95,14 +115,16 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
             onChange={(e) => setQuantity(e.target.value)}
             placeholder={tPicker('enterQuantity')}
           />
-          <Button
-            mode="filled"
-            stretched
-            onClick={handleSave}
-            disabled={addMutation.isPending}
-          >
-            {addMutation.isPending ? <Spinner size="s" /> : tPicker('save')}
-          </Button>
+          {!inTelegram && (
+            <Button
+              mode="filled"
+              stretched
+              onClick={handleSave}
+              disabled={addMutation.isPending}
+            >
+              {addMutation.isPending ? <Spinner size="s" /> : tPicker('save')}
+            </Button>
+          )}
         </Section>
       )}
 

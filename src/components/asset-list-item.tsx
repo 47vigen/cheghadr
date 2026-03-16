@@ -20,6 +20,7 @@ import { toast } from 'sonner'
 
 import { ChangeLabel } from '@/components/change-label'
 
+import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 import { formatIRT } from '@/lib/prices'
 import { api } from '@/trpc/react'
 
@@ -50,23 +51,32 @@ export function AssetListItem({
   const [newQuantity, setNewQuantity] = useState(String(quantity))
 
   const utils = api.useUtils()
+  const { notificationOccurred, impactOccurred } = useTelegramHaptics()
 
   const updateMutation = api.assets.update.useMutation({
     onSuccess: () => {
+      notificationOccurred('success')
       void utils.assets.list.invalidate()
       setEditOpen(false)
       toast.success(t('toastUpdated'))
     },
-    onError: (err) => toast.error(err.message || t('toastUpdateError')),
+    onError: (err) => {
+      notificationOccurred('error')
+      toast.error(err.message || t('toastUpdateError'))
+    },
   })
 
   const deleteMutation = api.assets.delete.useMutation({
     onSuccess: () => {
+      impactOccurred('medium')
       void utils.assets.list.invalidate()
       setDeleteOpen(false)
       toast.success(t('toastDeleted'))
     },
-    onError: (err) => toast.error(err.message || t('toastDeleteError')),
+    onError: (err) => {
+      notificationOccurred('error')
+      toast.error(err.message || t('toastDeleteError'))
+    },
   })
 
   const handleUpdate = () => {

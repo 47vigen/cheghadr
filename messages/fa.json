@@ -36,11 +36,29 @@
     "toastDeleteError": "خطا در حذف",
     "toastAdded": "دارایی اضافه شد",
     "toastAddError": "خطا در افزودن",
-    "toastInvalidQuantity": "مقدار باید عددی مثبت باشد"
+    "toastInvalidQuantity": "مقدار باید عددی مثبت باشد",
+    "portfolioChart": "روند ارزش دارایی‌ها",
+    "chartEmpty": "نمودار شما پس از دو روز نمایش داده می‌شود",
+    "chartPeriod7": "۷ روز",
+    "chartPeriod30": "۳۰ روز",
+    "chartPeriod90": "۹۰ روز",
+    "chartPeriod365": "۱ سال",
+    "staleWarning": "قیمت‌ها ممکن است به‌روز نباشد",
+    "lastUpdated": "آخرین به‌روزرسانی: {time}",
+    "sessionExpired": "نشست شما منقضی شده است",
+    "sessionExpiredDescription": "لطفاً دوباره وارد شوید",
+    "reLogin": "ورود مجدد",
+    "connectionError": "مشکلی در اتصال به سرور رخ داد",
+    "retryLater": "لطفاً چند لحظه دیگر تلاش کنید",
+    "mainButtonSave": "ذخیره",
+    "mainButtonConvert": "تبدیل"
   },
   "prices": {
     "unavailable": "قیمت‌ها در دسترس نیست",
-    "checkLater": "لطفاً بعداً دوباره بررسی کنید"
+    "checkLater": "لطفاً بعداً دوباره بررسی کنید",
+    "search": "جستجو...",
+    "noResults": "نتیجه‌ای یافت نشد",
+    "staleWarning": "آخرین به‌روزرسانی: {time}"
   },
   "calculator": {
     "title": "ماشین حساب",
@@ -69,7 +87,12 @@
   "common": {
     "error": "خطایی رخ داد",
     "tryAgain": "لطفاً دوباره تلاش کنید",
-    "retry": "تلاش مجدد"
+    "retry": "تلاش مجدد",
+    "sessionExpired": "نشست شما منقضی شده است",
+    "sessionExpiredDescription": "لطفاً دوباره وارد شوید",
+    "reLogin": "ورود مجدد",
+    "connectionError": "مشکلی در اتصال به سرور رخ داد",
+    "connectionErrorDescription": "لطفاً چند لحظه دیگر تلاش کنید"
   },
   "categories": {
     "CURRENCY": "ارز",

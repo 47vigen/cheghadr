@@ -14,21 +14,37 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import { AssetListItem } from '@/components/asset-list-item'
 import { EmptyState } from '@/components/empty-state'
+import { PortfolioChart } from '@/components/portfolio-chart'
 import { PortfolioTotal } from '@/components/portfolio-total'
+import { AssetsSkeleton } from '@/components/skeletons/assets-skeleton'
+import { StalenessBanner } from '@/components/staleness-banner'
 
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
 import { api } from '@/trpc/react'
 
 export default function AssetsPage() {
   const router = useRouter()
   const t = useTranslations('assets')
 
-  const { data, isLoading, isError, error, refetch } = api.assets.list.useQuery(
-    undefined,
-    {
-      refetchInterval: 30 * 60 * 1000,
-      refetchOnWindowFocus: true,
-    },
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = api.assets.list.useQuery(undefined, {
+    refetchInterval: 30 * 60 * 1000,
+    refetchOnWindowFocus: true,
+  })
+
+  const historyQuery = api.portfolio.history.useQuery(
+    { days: 30 },
+    { refetchInterval: 30 * 60 * 1000 },
   )
+
+  const { isRefreshing } = usePullToRefresh(async () => {
+    await Promise.all([refetch(), historyQuery.refetch()])
+  })
 
   if (isError) {
     return (
@@ -47,19 +63,33 @@ export default function AssetsPage() {
   }
 
   if (isLoading || !data) {
-    return (
-      <div className="flex min-h-svh items-center justify-center">
-        <Spinner size="l" />
-      </div>
-    )
+    return <AssetsSkeleton />
   }
 
   return (
     <>
+      {isRefreshing && (
+        <div className="flex justify-center py-2">
+          <Spinner size="s" />
+        </div>
+      )}
+
       <List>
         <Section header={t('totalValue')}>
           <PortfolioTotal totalIRT={data.totalIRT} />
+          {data.stale && (
+            <StalenessBanner
+              snapshotAt={data.snapshotAt}
+              namespace="assets"
+            />
+          )}
         </Section>
+
+        {historyQuery.data && (
+          <Section header={t('portfolioChart')}>
+            <PortfolioChart data={historyQuery.data} />
+          </Section>
+        )}
 
         {data.assets.length === 0 ? (
           <EmptyState />

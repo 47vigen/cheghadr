@@ -36,11 +36,29 @@
     "toastDeleteError": "Error deleting",
     "toastAdded": "Asset added",
     "toastAddError": "Error adding",
-    "toastInvalidQuantity": "Quantity must be a positive number"
+    "toastInvalidQuantity": "Quantity must be a positive number",
+    "portfolioChart": "Portfolio Trend",
+    "chartEmpty": "Your chart will appear after two days",
+    "chartPeriod7": "7D",
+    "chartPeriod30": "30D",
+    "chartPeriod90": "90D",
+    "chartPeriod365": "1Y",
+    "staleWarning": "Prices may not be up to date",
+    "lastUpdated": "Last updated: {time}",
+    "sessionExpired": "Your session has expired",
+    "sessionExpiredDescription": "Please sign in again",
+    "reLogin": "Re-login",
+    "connectionError": "Unable to connect to the server",
+    "retryLater": "Please try again in a moment",
+    "mainButtonSave": "Save",
+    "mainButtonConvert": "Convert"
   },
   "prices": {
     "unavailable": "Prices unavailable",
-    "checkLater": "Please check back later"
+    "checkLater": "Please check back later",
+    "search": "Search...",
+    "noResults": "No results found",
+    "staleWarning": "Last updated: {time}"
   },
   "calculator": {
     "title": "Calculator",
@@ -69,7 +87,12 @@
   "common": {
     "error": "An error occurred",
     "tryAgain": "Please try again",
-    "retry": "Retry"
+    "retry": "Retry",
+    "sessionExpired": "Your session has expired",
+    "sessionExpiredDescription": "Please sign in again",
+    "reLogin": "Re-login",
+    "connectionError": "Unable to connect to the server",
+    "connectionErrorDescription": "Please try again in a moment"
   },
   "categories": {
     "CURRENCY": "Currency",

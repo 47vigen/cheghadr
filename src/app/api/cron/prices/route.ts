@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
+import { createPortfolioSnapshot } from '@/lib/portfolio'
 import { db } from '@/server/db'
 
 const ECOTRUST_API_URL = process.env.NEXT_PUBLIC_ECOTRUST_API_URL
@@ -48,18 +49,38 @@ export async function GET(request: NextRequest) {
       data: { data: data as object },
     })
 
-    // Prune snapshots older than 90 days
+    // Prune price snapshots older than 90 days
     const ninetyDaysAgo = new Date()
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
 
-    const { count } = await db.priceSnapshot.deleteMany({
+    const { count: prunedPrices } = await db.priceSnapshot.deleteMany({
       where: { snapshotAt: { lt: ninetyDaysAgo } },
+    })
+
+    // Create daily portfolio snapshots for all active users
+    const activeUsers = await db.user.findMany({
+      where: { assets: { some: {} } },
+      select: { id: true },
+    })
+
+    let portfolioSnapshotCount = 0
+    for (const user of activeUsers) {
+      const snap = await createPortfolioSnapshot(db, user.id)
+      if (snap) portfolioSnapshotCount++
+    }
+
+    // Prune portfolio snapshots older than 365 days
+    const yearAgo = new Date()
+    yearAgo.setDate(yearAgo.getDate() - 365)
+    await db.portfolioSnapshot.deleteMany({
+      where: { snapshotAt: { lt: yearAgo } },
     })
 
     return NextResponse.json({
       success: true,
       assetsCount: data.data.length,
-      prunedCount: count,
+      prunedCount: prunedPrices,
+      portfolioSnapshotCount,
     })
   } catch (error) {
     console.error('[CRON] Price snapshot failed:', error)

@@ -7,6 +7,7 @@ import {
   parsePriceSnapshot,
   STALE_AFTER_MINUTES,
 } from '@/lib/prices'
+import { createPortfolioSnapshot } from '@/lib/portfolio'
 import { protectedProcedure, router } from '@/server/api/trpc'
 
 async function requireOwnedAsset(
@@ -80,8 +81,8 @@ export const assetsRouter = router({
         quantity: quantitySchema,
       }),
     )
-    .mutation(({ ctx, input }) => {
-      return ctx.db.userAsset.upsert({
+    .mutation(async ({ ctx, input }) => {
+      const asset = await ctx.db.userAsset.upsert({
         where: {
           userId_symbol: { userId: ctx.user.id, symbol: input.symbol },
         },
@@ -92,6 +93,8 @@ export const assetsRouter = router({
           quantity: input.quantity,
         },
       })
+      void createPortfolioSnapshot(ctx.db, ctx.user.id)
+      return asset
     }),
 
   update: protectedProcedure
@@ -103,10 +106,12 @@ export const assetsRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       await requireOwnedAsset(ctx.db, input.id, ctx.user.id)
-      return ctx.db.userAsset.update({
+      const asset = await ctx.db.userAsset.update({
         where: { id: input.id, userId: ctx.user.id },
         data: { quantity: input.quantity },
       })
+      void createPortfolioSnapshot(ctx.db, ctx.user.id)
+      return asset
     }),
 
   delete: protectedProcedure
@@ -116,5 +121,6 @@ export const assetsRouter = router({
       await ctx.db.userAsset.delete({
         where: { id: input.id, userId: ctx.user.id },
       })
+      void createPortfolioSnapshot(ctx.db, ctx.user.id)
     }),
 })
