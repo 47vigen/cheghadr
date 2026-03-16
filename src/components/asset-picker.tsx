@@ -20,6 +20,7 @@ import {
   formatIRT,
   getLocalizedItemName,
   groupByCategory,
+  knownCategories,
   parsePriceSnapshot,
   sortedGroupEntries,
 } from '@/lib/prices'
@@ -106,12 +107,9 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
       )}
 
       {entries.map(([category, categoryItems]) => {
-        let catLabel: string
-        try {
-          catLabel = tCat(category as Parameters<typeof tCat>[0])
-        } catch {
-          catLabel = category
-        }
+        const catLabel = knownCategories.has(category)
+          ? tCat(category as Parameters<typeof tCat>[0])
+          : category
         return (
         <Section
           key={category}

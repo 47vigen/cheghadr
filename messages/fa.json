@@ -85,6 +85,7 @@
     "LEVERAGED_FUNDS": "صندوق اهرمی",
     "SECTOR_FUNDS": "صندوق بخشی",
     "PROPERTY_FUNDS": "صندوق املاک",
-    "COMMODITY_SAFFRON_FUNDS": "صندوق زعفران"
+    "COMMODITY_SAFFRON_FUNDS": "صندوق زعفران",
+    "OTHER": "سایر"
   }
 }

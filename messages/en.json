@@ -85,6 +85,7 @@
     "LEVERAGED_FUNDS": "Leveraged Funds",
     "SECTOR_FUNDS": "Sector Funds",
     "PROPERTY_FUNDS": "Property Funds",
-    "COMMODITY_SAFFRON_FUNDS": "Saffron Funds"
+    "COMMODITY_SAFFRON_FUNDS": "Saffron Funds",
+    "OTHER": "Other"
   }
 }

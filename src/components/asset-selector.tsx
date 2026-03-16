@@ -20,6 +20,7 @@ import {
   getLocalizedIrtName,
   groupByCategory,
   IRT_ENTRY,
+  knownCategories,
   sortedGroupEntries,
 } from '@/lib/prices'
 import type { PriceItem } from '@/modules/API/Swagger/ecotrust/gen/models'
@@ -117,7 +118,16 @@ export function AssetSelector({
           {!isSearching && (
             <Section header={tCat('CURRENCY')}>
               <Cell
-                before={<Avatar size={40} acronym={IRT_ENTRY.fa.charAt(0)} />}
+                before={
+                  <Avatar
+                    size={40}
+                    acronym={
+                      locale === 'fa'
+                        ? IRT_ENTRY.fa.charAt(0)
+                        : IRT_ENTRY.en.slice(0, 2)
+                    }
+                  />
+                }
                 subtitle={tPicker('iranianToman')}
                 after={
                   value === 'IRT' ? (
@@ -137,12 +147,9 @@ export function AssetSelector({
           )}
 
           {entries.map(([category, categoryItems]) => {
-            let catLabel: string
-            try {
-              catLabel = tCat(category as Parameters<typeof tCat>[0])
-            } catch {
-              catLabel = category
-            }
+            const catLabel = knownCategories.has(category)
+              ? tCat(category as Parameters<typeof tCat>[0])
+              : category
             return (
             <Section
               key={category}
