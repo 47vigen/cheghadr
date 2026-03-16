@@ -105,4 +105,10 @@ describe('validateTelegramWidget', () => {
   it('rejects data without hash', () => {
     expect(validateTelegramWidget({ id: 1 }, BOT_TOKEN)).toBe(false)
   })
+
+  it('fails when extra fields (e.g. csrfToken) are present', () => {
+    const data = buildWidgetData(99)
+    const polluted = { ...data, csrfToken: 'abc123', callbackUrl: '/foo' }
+    expect(validateTelegramWidget(polluted, BOT_TOKEN)).toBe(false)
+  })
 })

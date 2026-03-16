@@ -5,6 +5,7 @@ import { useState } from 'react'
 
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { retrieveRawInitData } from '@telegram-apps/sdk'
 import { httpBatchStreamLink } from '@trpc/client'
 import { createTRPCReact } from '@trpc/react-query'
 import SuperJSON from 'superjson'
@@ -25,11 +26,14 @@ export function TRPCReactProvider({ children }: { children: ReactNode }) {
           url: '/api/trpc',
           transformer: SuperJSON,
           headers() {
-            // Forward Telegram initData for mini app auth
-            const initData =
-              typeof window !== 'undefined'
-                ? (window.Telegram?.WebApp?.initData ?? '')
-                : ''
+            if (typeof window === 'undefined') return {}
+
+            let initData = ''
+            try {
+              initData = retrieveRawInitData() ?? ''
+            } catch {
+              initData = window.Telegram?.WebApp?.initData ?? ''
+            }
 
             return initData ? { 'x-telegram-init-data': initData } : {}
           },
