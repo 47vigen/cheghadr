@@ -31,6 +31,7 @@ const nextConfig: NextConfig = {
       'date-fns-jalali',
       '@tabler/icons-react',
       '@telegram-apps/telegram-ui',
+      'recharts',
     ],
   },
 }

@@ -9,13 +9,14 @@ import {
   Input,
   List,
   Section,
-  Spinner,
 } from '@telegram-apps/telegram-ui'
 import { useTranslations } from 'next-intl'
 
 import { AssetSelector } from '@/components/asset-selector'
 import { CalculatorResult } from '@/components/calculator-result'
+import { CalculatorSkeleton } from '@/components/skeletons/calculator-skeleton'
 
+import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 import { computeConversion, parsePriceSnapshot } from '@/lib/prices'
 import { api } from '@/trpc/react'
 
@@ -31,22 +32,20 @@ export default function CalculatorPage() {
   const [amount, setAmount] = useState('')
 
   const prices = parsePriceSnapshot(data?.data)
+  const { selectionChanged } = useTelegramHaptics()
 
   const result = amount
     ? computeConversion(amount, fromSymbol, toSymbol, prices)
     : null
 
   const handleSwap = () => {
+    selectionChanged()
     setFromSymbol(toSymbol)
     setToSymbol(fromSymbol)
   }
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-svh items-center justify-center">
-        <Spinner size="l" />
-      </div>
-    )
+    return <CalculatorSkeleton />
   }
 
   return (

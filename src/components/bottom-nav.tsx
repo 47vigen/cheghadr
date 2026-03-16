@@ -7,6 +7,7 @@ import { Tabbar } from '@telegram-apps/telegram-ui'
 import { useTranslations } from 'next-intl'
 
 import { usePathname, useRouter } from '@/i18n/navigation'
+import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 
 type AppRoute = '/' | '/prices' | '/calculator'
 
@@ -14,6 +15,7 @@ export function BottomNav() {
   const pathname = usePathname()
   const router = useRouter()
   const t = useTranslations('nav')
+  const { selectionChanged } = useTelegramHaptics()
 
   const tabs: Array<{
     id: string
@@ -38,7 +40,10 @@ export function BottomNav() {
           key={id}
           selected={pathname === path}
           text={label}
-          onClick={() => router.push(path)}
+          onClick={() => {
+            selectionChanged()
+            router.push(path)
+          }}
         >
           <Icon size={28} />
         </Tabbar.Item>

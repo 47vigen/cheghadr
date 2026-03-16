@@ -18,3 +18,13 @@ export function getRawInitData(): string | undefined {
 
   return WebApp.initData || undefined
 }
+
+/**
+ * Returns true when running inside a Telegram Mini App with a MainButton
+ * available. Used to decide whether to show the native MainButton or fall
+ * back to an inline button.
+ */
+export function isTelegramWebApp(): boolean {
+  if (typeof window === 'undefined') return false
+  return !!WebApp.MainButton
+}
