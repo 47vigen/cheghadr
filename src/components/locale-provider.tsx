@@ -4,7 +4,6 @@ import type { ReactNode } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 
 import { NextIntlClientProvider } from 'next-intl'
-import { Spinner } from '@telegram-apps/telegram-ui'
 import WebApp from '@twa-dev/sdk'
 
 import type { Locale } from '@/i18n/routing'
@@ -46,7 +45,10 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   if (!messages) {
     return (
       <div className="flex min-h-svh items-center justify-center">
-        <Spinner size="l" />
+        <div
+          className="size-10 animate-spin rounded-full border-2 border-neutral-400 border-t-transparent"
+          aria-hidden
+        />
       </div>
     )
   }
