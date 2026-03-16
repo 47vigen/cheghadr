@@ -19,7 +19,6 @@ const nextConfig: NextConfig = {
   // Build optimizations
   compress: true,
   generateEtags: false,
-  cacheComponents: true,
   poweredByHeader: false,
 
   experimental: {

@@ -15,6 +15,10 @@ import { routing } from '@/i18n/routing'
 import { Vazirmatn } from '@/styles/fonts'
 import { TRPCReactProvider } from '@/trpc/react'
 
+// All pages under [locale] are auth-protected and use dynamic data (session,
+// tRPC queries, URL params). Disable static generation for this segment.
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Cheghadr?',
   description: 'Personal net worth tracker',
