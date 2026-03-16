@@ -76,10 +76,7 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
       </div>
 
       {selected && (
-        <div
-          className="mx-4 rounded-xl p-4"
-          style={{ background: 'var(--tgui--secondary_bg_color)' }}
-        >
+        <div className="mx-4 rounded-xl bg-tgui-secondary-bg p-4">
           <Text weight="2" style={{ display: 'block', marginBottom: '8px' }}>
             {selected.name.fa} انتخاب شد
           </Text>
@@ -126,12 +123,7 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
                   subtitle={`${formatIRT(Number(item.sell_price))} ت`}
                   after={
                     isSelected ? (
-                      <span
-                        style={{
-                          color: 'var(--tgui--accent_text_color)',
-                          fontSize: '12px',
-                        }}
-                      >
+                      <span className="text-tgui-accent-text text-xs">
                         ✓ انتخاب شد
                       </span>
                     ) : undefined
@@ -150,9 +142,7 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
         {entries.length === 0 && (
           <Section>
             <div className="py-10 text-center">
-              <Text style={{ color: 'var(--tgui--hint_color)' }}>
-                نتیجه‌ای یافت نشد
-              </Text>
+              <Text className="text-tgui-hint">نتیجه‌ای یافت نشد</Text>
             </div>
           </Section>
         )}

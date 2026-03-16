@@ -40,7 +40,7 @@ export default function AssetsPage() {
           </Button>
         }
       >
-        <Text style={{ color: 'var(--tgui--hint_color)' }}>⚠️</Text>
+        <Text className="text-tgui-hint">⚠️</Text>
       </Placeholder>
     )
   }

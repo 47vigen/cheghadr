@@ -10,12 +10,13 @@ export function ChangeLabel({ change }: ChangeLabelProps) {
   const formatted = formatChange(change)
   if (!formatted) return null
 
-  const color = formatted.positive
-    ? 'var(--tgui--green)'
-    : 'var(--tgui--destructive_text_color)'
-
   return (
-    <Caption level="2" style={{ color }}>
+    <Caption
+      level="2"
+      className={
+        formatted.positive ? 'text-tgui-green' : 'text-tgui-destructive-text'
+      }
+    >
       {formatted.text}
     </Caption>
   )

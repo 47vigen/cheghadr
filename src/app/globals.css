@@ -7,63 +7,102 @@
  * dir="rtl". This rule appears AFTER the TGUI import so it wins the cascade.
  */
 [dir="rtl"] {
-    --tgui--font-family: var(--font-vazirmatn), system-ui, -apple-system, BlinkMacSystemFont,
-        "Roboto", "Apple Color Emoji", "Helvetica Neue", sans-serif;
+  --tgui--font-family:
+    var(--font-vazirmatn), system-ui, -apple-system, BlinkMacSystemFont,
+    "Roboto", "Apple Color Emoji", "Helvetica Neue", sans-serif;
 }
 
 /*
- * Define TGUI variable defaults at :root so body/html can reference them
- * before AppRoot renders. TGUI's class-level vars override these inside AppRoot.
- */
-:root {
-    --tgui--bg_color: var(--tg-theme-bg-color, #ffffff);
-    --tgui--text_color: var(--tg-theme-text-color, #000000);
-    --tgui--hint_color: var(--tg-theme-hint-color, #707579);
-    --tgui--link_color: var(--tg-theme-link-color, #007aff);
-    --tgui--button_color: var(--tg-theme-button-color, #007aff);
-    --tgui--button_text_color: var(--tg-theme-button-text-color, #ffffff);
-    --tgui--secondary_bg_color: var(--tg-theme-secondary-bg-color, #efeff4);
-    --tgui--header_bg_color: var(--tg-theme-header-bg-color, #ffffff);
-    --tgui--accent_text_color: var(--tg-theme-accent-text-color, #007aff);
-    --tgui--section_bg_color: var(--tg-theme-section-bg-color, #ffffff);
-    --tgui--section_header_text_color: var(--tg-theme-section-header-text-color, #707579);
-    --tgui--subtitle_text_color: var(--tg-theme-subtitle-text-color, #707579);
-    --tgui--destructive_text_color: var(--tg-theme-destructive-text-color, #e53935);
-    --tgui--card_bg_color: #ffffff;
-    --tgui--outline: #0000001a;
-    --tgui--divider: #00000026;
-    --tgui--green: #31d158;
-    --tgui--font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto",
-        "Apple Color Emoji", "Helvetica Neue", sans-serif;
-}
-
-/*
- * Map TGUI variables to Tailwind v4 tokens so layout utility classes
- * (bg-background, text-foreground, border-border, etc.) reference TGUI colors.
+ * Map TGUI variables to Tailwind v4 tokens. Use TGUI naming:
+ * bg-tgui-bg, text-tgui-text, text-tgui-destructive-text, etc.
  */
 @theme inline {
-    --font-sans: var(--font-vazirmatn), var(--tgui--font-family);
-    --color-background: var(--tgui--bg_color);
-    --color-foreground: var(--tgui--text_color);
-    --color-card: var(--tgui--card_bg_color);
-    --color-card-foreground: var(--tgui--text_color);
-    --color-border: var(--tgui--outline);
-    --color-input: var(--tgui--outline);
-    --color-ring: var(--tgui--link_color);
-    --color-muted: var(--tgui--secondary_bg_color);
-    --color-muted-foreground: var(--tgui--hint_color);
-    --color-primary: var(--tgui--button_color);
-    --color-primary-foreground: var(--tgui--button_text_color);
-    --color-destructive: var(--tgui--destructive_text_color);
-    --color-accent: var(--tgui--accent_text_color);
-    --color-green: var(--tgui--green);
+  /* Font */
+  --font-tgui: var(--tgui--font-family);
+
+  /* Font weights */
+  --font-weight-accent1: var(--tgui--font_weight--accent1);
+  --font-weight-accent2: var(--tgui--font_weight--accent2);
+  --font-weight-accent3: var(--tgui--font_weight--accent3);
+
+  /* Typography scale */
+  --text-large-title: var(--tgui--large_title--font_size);
+  --text-large-title--line-height: var(--tgui--large_title--line_height);
+  --text-title1: var(--tgui--title1--font_size);
+  --text-title1--line-height: var(--tgui--title1--line_height);
+  --text-title2: var(--tgui--title2--font_size);
+  --text-title2--line-height: var(--tgui--title2--line_height);
+  --text-title3: var(--tgui--title3--font_size);
+  --text-title3--line-height: var(--tgui--title3--line_height);
+  --text-headline: var(--tgui--headline--font_size);
+  --text-headline--line-height: var(--tgui--headline--line_height);
+  --text-tgui: var(--tgui--text--font_size);
+  --text-tgui--line-height: var(--tgui--text--line_height);
+  --text-subheadline1: var(--tgui--subheadline1--font_size);
+  --text-subheadline1--line-height: var(--tgui--subheadline1--line_height);
+  --text-subheadline2: var(--tgui--subheadline2--font_size);
+  --text-subheadline2--line-height: var(--tgui--subheadline2--line_height);
+  --text-caption1: var(--tgui--caption1--font_size);
+  --text-caption1--line-height: var(--tgui--caption1--line_height);
+  --text-caption2: var(--tgui--caption2--font_size);
+  --text-caption2--line-height: var(--tgui--caption2--line_height);
+
+  /* Border */
+  --border-width: var(--tgui--border--width);
+
+  /* Shadow */
+  --shadow-section: var(--tgui--base--section--box_shadow);
+
+  /* TGUI colors */
+  --color-tgui-bg: var(--tgui--bg_color);
+  --color-tgui-text: var(--tgui--text_color);
+  --color-tgui-hint: var(--tgui--hint_color);
+  --color-tgui-link: var(--tgui--link_color);
+  --color-tgui-button: var(--tgui--button_color);
+  --color-tgui-button-text: var(--tgui--button_text_color);
+  --color-tgui-secondary-bg: var(--tgui--secondary_bg_color);
+  --color-tgui-accent-text: var(--tgui--accent_text_color);
+  --color-tgui-section-bg: var(--tgui--section_bg_color);
+  --color-tgui-destructive-text: var(--tgui--destructive_text_color);
+  --color-tgui-header: var(--tgui--header_bg_color);
+  --color-tgui-section-header: var(--tgui--section_header_text_color);
+  --color-tgui-subtitle: var(--tgui--subtitle_text_color);
+  --color-tgui-skeleton: var(--tgui--skeleton);
+  --color-tgui-divider: var(--tgui--divider);
+  --color-tgui-outline: var(--tgui--outline);
+  --color-tgui-surface: var(--tgui--surface_primary);
+  --color-tgui-tertiary: var(--tgui--tertiary_bg_color);
+  --color-tgui-quaternary: var(--tgui--quartenary_bg_color);
+  --color-tgui-segmented-active: var(--tgui--segmented_control_active_bg);
+  --color-tgui-card: var(--tgui--card_bg_color);
+  --color-tgui-hint-secondary: var(--tgui--secondary_hint_color);
+  --color-tgui-fill-secondary: var(--tgui--secondary_fill);
+  --color-tgui-green: var(--tgui--green);
+  --color-tgui-destructive-bg: var(--tgui--destructive_background);
+  --color-tgui-code-primary: var(--tgui--primary_code_highlight);
+  --color-tgui-code-secondary: var(--tgui--secondary_code_highlight);
+  --color-tgui-code-tertiary: var(--tgui--tertiary_code_highlight);
+  --color-tgui-plain-bg: var(--tgui--plain_background);
+  --color-tgui-plain-fg: var(--tgui--plain_foreground);
+  --color-tgui-toast-accent: var(--tgui--toast_accent_color);
+  --color-tgui-surface-dark: var(--tgui--surface_dark);
+  --color-tgui-tooltip-dark: var(--tooltip_background_dark);
+  --color-tgui-white: var(--tgui--white);
+  --color-tgui-black: var(--tgui--black);
+
+  /* Z-index */
+  --z-index-simple: var(--tgui--z-index--simple);
+  --z-index-skeleton: var(--tgui--z-index--skeleton);
+  --z-index-overlay: var(--tgui--z-index--overlay);
 }
 
 @layer base {
-    body {
-        background-color: var(--tgui--bg_color);
-        color: var(--tgui--text_color);
-        font-family: var(--font-vazirmatn), var(--tgui--font-family);
-        min-height: 100dvh;
-    }
+  :root {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: var(--font-vazirmatn), var(--tgui--font-family);
+  }
 }

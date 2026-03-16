@@ -109,16 +109,13 @@ export default function LoginPage() {
     <div className="flex min-h-svh flex-col items-center justify-center gap-8 p-6">
       <div className="flex flex-col items-center gap-3 text-center">
         <LargeTitle weight="1">چه‌قدر؟</LargeTitle>
-        <Text weight="3" style={{ color: 'var(--tgui--hint_color)' }}>
+        <Text weight="3" className="text-tgui-hint">
           برای ادامه با تلگرام وارد شوید
         </Text>
       </div>
 
       {error && (
-        <Caption
-          level="1"
-          style={{ color: 'var(--tgui--destructive_text_color)' }}
-        >
+        <Caption level="1" className="text-tgui-destructive-text">
           {error}
         </Caption>
       )}

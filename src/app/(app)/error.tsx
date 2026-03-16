@@ -20,10 +20,7 @@ export default function AppError({
         </Button>
       }
     >
-      <IconAlertTriangle
-        size={64}
-        style={{ color: 'var(--tgui--destructive_text_color)' }}
-      />
+      <IconAlertTriangle size={64} className="text-tgui-destructive-text" />
     </Placeholder>
   )
 }

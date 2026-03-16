@@ -33,5 +33,5 @@
   "[json5]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
-  "cSpell.words": ["Cheghadr"]
+  "cSpell.words": ["Cheghadr", "tgui"]
 }

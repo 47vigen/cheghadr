@@ -18,7 +18,7 @@ export function CalculatorResult({
     return (
       <Section>
         <div className="flex min-h-[80px] items-center justify-center p-4">
-          <Caption level="1" style={{ color: 'var(--tgui--hint_color)' }}>
+          <Caption level="1" className="text-tgui-hint">
             نتیجه اینجا نمایش داده می‌شود
           </Caption>
         </div>
@@ -57,7 +57,7 @@ export function CalculatorResult({
           <LargeTitle weight="2" style={{ fontVariantNumeric: 'tabular-nums' }}>
             {formattedResult}
           </LargeTitle>
-          <Text weight="3" style={{ color: 'var(--tgui--hint_color)' }}>
+          <Text weight="3" className="text-tgui-hint">
             {toItem?.fa ?? toSymbol}
           </Text>
         </div>

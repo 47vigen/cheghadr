@@ -17,14 +17,14 @@ export function PortfolioTotal({
 }: PortfolioTotalProps) {
   return (
     <div className="flex flex-col items-center gap-2 px-4 py-8">
-      <Caption level="1" style={{ color: 'var(--tgui--hint_color)' }}>
+      <Caption level="1" className="text-tgui-hint">
         ارزش کل دارایی‌ها
       </Caption>
       <div className="flex items-baseline gap-1.5">
         <LargeTitle weight="2" style={{ fontVariantNumeric: 'tabular-nums' }}>
           {formatIRT(totalIRT)}
         </LargeTitle>
-        <Text weight="3" style={{ color: 'var(--tgui--hint_color)' }}>
+        <Text weight="3" className="text-tgui-hint">
           تومان
         </Text>
       </div>

@@ -117,10 +117,7 @@ export function AssetListItem({
                 mode="plain"
                 onClick={() => setDeleteOpen(true)}
               >
-                <IconTrash
-                  size={16}
-                  style={{ color: 'var(--tgui--destructive_text_color)' }}
-                />
+                <IconTrash size={16} className="text-tgui-destructive-text" />
               </IconButton>
             </div>
           </div>
@@ -160,13 +157,7 @@ export function AssetListItem({
         header={<Modal.Header>حذف دارایی</Modal.Header>}
       >
         <div className="flex flex-col gap-3 p-4 pb-8">
-          <p
-            style={{
-              textAlign: 'center',
-              fontSize: '15px',
-              color: 'var(--tgui--text_color)',
-            }}
-          >
+          <p className="text-center text-subheadline2 text-tgui-text">
             آیا مطمئن هستید که می‌خواهید <strong>{assetName}</strong> را حذف
             کنید؟
           </p>
@@ -183,7 +174,7 @@ export function AssetListItem({
               stretched
               onClick={handleDelete}
               disabled={deleteMutation.isPending}
-              style={{ color: 'var(--tgui--destructive_text_color)' }}
+              className="text-tgui-destructive-text"
             >
               {deleteMutation.isPending ? <Spinner size="s" /> : 'حذف'}
             </Button>

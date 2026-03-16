@@ -107,10 +107,7 @@ export function AssetSelector({
                   subtitle="تومان ایران"
                   after={
                     value === 'IRT' ? (
-                      <Caption
-                        level="2"
-                        style={{ color: 'var(--tgui--accent_text_color)' }}
-                      >
+                      <Caption level="2" className="text-tgui-accent-text">
                         ✓
                       </Caption>
                     ) : undefined
@@ -149,12 +146,7 @@ export function AssetSelector({
                       subtitle={item.base_currency.en}
                       after={
                         isSelected ? (
-                          <Caption
-                            level="2"
-                            style={{
-                              color: 'var(--tgui--accent_text_color)',
-                            }}
-                          >
+                          <Caption level="2" className="text-tgui-accent-text">
                             ✓
                           </Caption>
                         ) : undefined
@@ -174,9 +166,7 @@ export function AssetSelector({
             {entries.length === 0 && (
               <Section>
                 <div className="py-10 text-center">
-                  <Text style={{ color: 'var(--tgui--hint_color)' }}>
-                    نتیجه‌ای یافت نشد
-                  </Text>
+                  <Text className="text-tgui-hint">نتیجه‌ای یافت نشد</Text>
                 </div>
               </Section>
             )}

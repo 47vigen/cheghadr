@@ -35,11 +35,7 @@ export default function AddAssetPage() {
         <Section>
           <div className="flex flex-col gap-1 px-4 py-3">
             <Headline weight="2">افزودن دارایی</Headline>
-            <Subheadline
-              level="2"
-              weight="3"
-              style={{ color: 'var(--tgui--hint_color)' }}
-            >
+            <Subheadline level="2" weight="3" className="text-tgui-hint">
               دارایی مورد نظر را جستجو و انتخاب کنید
             </Subheadline>
           </div>

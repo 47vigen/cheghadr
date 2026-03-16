@@ -18,7 +18,7 @@ export function EmptyState() {
         </Button>
       }
     >
-      <IconWallet size={64} style={{ color: 'var(--tgui--hint_color)' }} />
+      <IconWallet size={64} className="text-tgui-hint" />
     </Placeholder>
   )
 }

@@ -12,14 +12,8 @@ export function StalenessBadge({ snapshotAt, stale }: StalenessBadgeProps) {
   if (!snapshotAt) {
     return (
       <div className="flex items-center gap-1.5">
-        <IconAlertTriangle
-          size={14}
-          style={{ color: 'var(--tgui--destructive_text_color)' }}
-        />
-        <Caption
-          level="1"
-          style={{ color: 'var(--tgui--destructive_text_color)' }}
-        >
+        <IconAlertTriangle size={14} className="text-tgui-destructive-text" />
+        <Caption level="1" className="text-tgui-destructive-text">
           قیمت‌ها در دسترس نیست
         </Caption>
       </div>
@@ -36,8 +30,8 @@ export function StalenessBadge({ snapshotAt, stale }: StalenessBadgeProps) {
 
     return (
       <div className="flex items-center gap-1.5">
-        <IconClock size={14} style={{ color: 'var(--tgui--hint_color)' }} />
-        <Caption level="1" style={{ color: 'var(--tgui--hint_color)' }}>
+        <IconClock size={14} className="text-tgui-hint" />
+        <Caption level="1" className="text-tgui-hint">
           قیمت‌ها ممکن است قدیمی باشند
         </Caption>
       </div>
