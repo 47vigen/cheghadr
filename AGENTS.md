@@ -22,5 +22,6 @@ See `package.json` scripts. Most-used:
 - **Proxy (not middleware)**: Auth runs in `src/proxy.ts` (Next.js 16 proxy, Node.js runtime), not Edge middleware. It allows all `/api/*` routes through without auth.
 - **Cron endpoint**: `/api/cron/prices` requires `Authorization: Bearer $CRON_SECRET` header. The Ecotrust external API (`NEXT_PUBLIC_ECOTRUST_API_URL`) may be unreachable from cloud VMs — the cron 500 on fetch failure is expected in dev.
 - **Telegram Login Widget**: The login page shows "Bot domain invalid" in local dev because the Telegram Widget requires a domain registered with BotFather. This is expected behavior.
+- **Skip login in development**: Set `DEV_TELEGRAM_USER_ID="123456789"` (your Telegram user ID) in `.env.local` to bypass login entirely. The proxy and tRPC context will treat you as authenticated. **Development only** — production ignores this env var.
 - **`--inspect` flag**: `pnpm dev` includes `--inspect` for Node.js debugger. If port 9229 is already in use, the "Starting inspector failed" warning is harmless.
 - **Git hooks**: Husky hooks run `lint-staged` (pre-commit), `commitlint` (commit-msg), and `pnpm typecheck` (pre-push). Use conventional commit messages.
