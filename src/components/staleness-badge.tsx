@@ -1,5 +1,5 @@
 import { IconAlertTriangle, IconClock } from '@tabler/icons-react'
-import { Caption } from '@telegram-apps/telegram-ui'
+import { Banner } from '@telegram-apps/telegram-ui'
 
 const STALE_AFTER_MINUTES = 60
 
@@ -11,12 +11,14 @@ interface StalenessBadgeProps {
 export function StalenessBadge({ snapshotAt, stale }: StalenessBadgeProps) {
   if (!snapshotAt) {
     return (
-      <div className="flex items-center gap-1.5">
-        <IconAlertTriangle size={14} className="text-tgui-destructive-text" />
-        <Caption level="1" className="text-tgui-destructive-text">
-          قیمت‌ها در دسترس نیست
-        </Caption>
-      </div>
+      <Banner
+        type="section"
+        before={
+          <IconAlertTriangle size={20} className="text-tgui-destructive-text" />
+        }
+        header="قیمت‌ها در دسترس نیست"
+        className="text-tgui-destructive-text"
+      />
     )
   }
 
@@ -29,12 +31,12 @@ export function StalenessBadge({ snapshotAt, stale }: StalenessBadgeProps) {
     if (!isOverThreshold) return null
 
     return (
-      <div className="flex items-center gap-1.5">
-        <IconClock size={14} className="text-tgui-hint" />
-        <Caption level="1" className="text-tgui-hint">
-          قیمت‌ها ممکن است قدیمی باشند
-        </Caption>
-      </div>
+      <Banner
+        type="inline"
+        before={<IconClock size={20} className="text-tgui-hint" />}
+        header="قیمت‌ها ممکن است قدیمی باشند"
+        className="text-tgui-hint"
+      />
     )
   }
 

@@ -1,4 +1,4 @@
-import { Caption, LargeTitle, Section, Text } from '@telegram-apps/telegram-ui'
+import { Cell, Placeholder, Section, Text } from '@telegram-apps/telegram-ui'
 
 import { findBySymbol, formatIRT, IRT_ENTRY } from '@/lib/prices'
 import type { PriceItem } from '@/modules/API/Swagger/ecotrust/gen/models'
@@ -16,12 +16,8 @@ export function CalculatorResult({
 }: CalculatorResultProps) {
   if (!result) {
     return (
-      <Section>
-        <div className="flex min-h-[80px] items-center justify-center p-4">
-          <Caption level="1" className="text-tgui-hint">
-            نتیجه اینجا نمایش داده می‌شود
-          </Caption>
-        </div>
+      <Section header="نتیجه">
+        <Placeholder header="نتیجه اینجا نمایش داده می‌شود" />
       </Section>
     )
   }
@@ -52,16 +48,11 @@ export function CalculatorResult({
 
   return (
     <Section header="نتیجه">
-      <div className="flex flex-col items-center gap-1 p-6">
-        <div className="flex items-baseline gap-1.5">
-          <LargeTitle weight="2" style={{ fontVariantNumeric: 'tabular-nums' }}>
-            {formattedResult}
-          </LargeTitle>
-          <Text weight="3" className="text-tgui-hint">
-            {toItem?.fa ?? toSymbol}
-          </Text>
-        </div>
-      </div>
+      <Cell subtitle={toItem?.fa ?? toSymbol}>
+        <Text weight="2" className="tabular-nums">
+          {formattedResult}
+        </Text>
+      </Cell>
     </Section>
   )
 }

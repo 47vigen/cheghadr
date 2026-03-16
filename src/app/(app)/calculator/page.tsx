@@ -4,6 +4,7 @@ import { useState } from 'react'
 
 import { IconArrowsExchange } from '@tabler/icons-react'
 import {
+  Cell,
   IconButton,
   Input,
   List,
@@ -55,6 +56,17 @@ export default function CalculatorPage() {
           onChange={setFromSymbol}
           items={prices}
         />
+        <Cell onClick={handleSwap}>
+          <IconButton size="m" mode="bezeled">
+            <IconArrowsExchange size={24} />
+          </IconButton>
+        </Cell>
+        <AssetSelector
+          label="به"
+          value={toSymbol}
+          onChange={setToSymbol}
+          items={prices}
+        />
         <Input
           header="مقدار"
           type="number"
@@ -62,17 +74,6 @@ export default function CalculatorPage() {
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           placeholder="مقدار را وارد کنید"
-        />
-        <div className="flex justify-center py-2">
-          <IconButton size="m" mode="bezeled" onClick={handleSwap}>
-            <IconArrowsExchange size={24} />
-          </IconButton>
-        </div>
-        <AssetSelector
-          label="به"
-          value={toSymbol}
-          onChange={setToSymbol}
-          items={prices}
         />
       </Section>
 

@@ -5,12 +5,12 @@ import { useState } from 'react'
 import {
   Avatar,
   Button,
+  Caption,
   Cell,
   Input,
-  List,
+  Placeholder,
   Section,
   Spinner,
-  Text,
 } from '@telegram-apps/telegram-ui'
 import { toast } from 'sonner'
 
@@ -62,8 +62,8 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="px-4 pt-3">
+    <>
+      <Section>
         <Input
           placeholder="جستجو..."
           value={search}
@@ -73,80 +73,72 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
           }}
           type="search"
         />
-      </div>
+      </Section>
 
       {selected && (
-        <div className="mx-4 rounded-xl bg-tgui-secondary-bg p-4">
-          <Text weight="2" style={{ display: 'block', marginBottom: '8px' }}>
-            {selected.name.fa} انتخاب شد
-          </Text>
-          <div className="flex gap-2">
-            <Input
-              type="number"
-              inputMode="decimal"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-              placeholder="مقدار را وارد کنید"
-              style={{ flex: 1 }}
-            />
-            <Button
-              mode="filled"
-              onClick={handleSave}
-              disabled={addMutation.isPending}
-            >
-              {addMutation.isPending ? <Spinner size="s" /> : 'ذخیره'}
-            </Button>
-          </div>
-        </div>
+        <Section header={`${selected.name.fa} انتخاب شد`}>
+          <Input
+            type="number"
+            inputMode="decimal"
+            value={quantity}
+            onChange={(e) => setQuantity(e.target.value)}
+            placeholder="مقدار را وارد کنید"
+          />
+          <Button
+            mode="filled"
+            stretched
+            onClick={handleSave}
+            disabled={addMutation.isPending}
+          >
+            {addMutation.isPending ? <Spinner size="s" /> : 'ذخیره'}
+          </Button>
+        </Section>
       )}
 
-      <List>
-        {entries.map(([category, categoryItems]) => (
-          <Section key={category} header={categoryLabels[category] ?? category}>
-            {categoryItems.map((item) => {
-              const icon = item.png ?? item.base_currency.png
-              const isSelected =
-                selected?.base_currency.symbol === item.base_currency.symbol
-              return (
-                <Cell
-                  key={item.symbol}
-                  before={
-                    icon ? (
-                      <Avatar src={icon} size={40} />
-                    ) : (
-                      <Avatar
-                        size={40}
-                        acronym={item.base_currency.symbol.slice(0, 2)}
-                      />
-                    )
-                  }
-                  subtitle={`${formatIRT(Number(item.sell_price))} ت`}
-                  after={
-                    isSelected ? (
-                      <span className="text-tgui-accent-text text-xs">
-                        ✓ انتخاب شد
-                      </span>
-                    ) : undefined
-                  }
-                  onClick={() => {
-                    setSelected(isSelected ? null : item)
-                    setQuantity('')
-                  }}
-                >
-                  {item.name.fa}
-                </Cell>
-              )
-            })}
-          </Section>
-        ))}
-        {entries.length === 0 && (
-          <Section>
-            <div className="py-10 text-center">
-              <Text className="text-tgui-hint">نتیجه‌ای یافت نشد</Text>
-            </div>
-          </Section>
-        )}
-      </List>
-    </div>
+      {entries.map(([category, categoryItems]) => (
+        <Section key={category} header={categoryLabels[category] ?? category}>
+          {categoryItems.map((item) => {
+            const icon = item.png ?? item.base_currency.png
+            const isSelected =
+              selected?.base_currency.symbol === item.base_currency.symbol
+            return (
+              <Cell
+                key={item.symbol}
+                before={
+                  icon ? (
+                    <Avatar src={icon} size={40} />
+                  ) : (
+                    <Avatar
+                      size={40}
+                      acronym={item.base_currency.symbol.slice(0, 2)}
+                    />
+                  )
+                }
+                subtitle={`${formatIRT(Number(item.sell_price))} ت`}
+                after={
+                  isSelected ? (
+                    <Caption level="2" className="text-tgui-accent-text">
+                      ✓ انتخاب شد
+                    </Caption>
+                  ) : undefined
+                }
+                onClick={() => {
+                  setSelected(isSelected ? null : item)
+                  setQuantity('')
+                }}
+              >
+                {item.name.fa}
+              </Cell>
+            )
+          })}
+        </Section>
+      ))}
+
+      {entries.length === 0 && (
+        <Section>
+          <Placeholder header="نتیجه‌ای یافت نشد" />
+        </Section>
+      )}
+    </>
   )
 }

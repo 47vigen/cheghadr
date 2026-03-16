@@ -1,4 +1,4 @@
-import { Avatar, Cell } from '@telegram-apps/telegram-ui'
+import { Avatar, Cell, Text } from '@telegram-apps/telegram-ui'
 
 import { ChangeLabel } from '@/components/change-label'
 
@@ -25,9 +25,9 @@ export function PriceRow({ item }: PriceRowProps) {
       }
       after={
         <div className="flex flex-col items-end gap-0.5">
-          <span className="font-medium text-sm tabular-nums">
+          <Text weight="2" className="tabular-nums" dir="ltr">
             {Number.isNaN(sellPrice) ? '—' : `${formatIRT(sellPrice)} ت`}
-          </span>
+          </Text>
           <ChangeLabel change={item.change} />
         </div>
       }

@@ -9,8 +9,8 @@ import {
   Input,
   List,
   Modal,
+  Placeholder,
   Section,
-  Text,
 } from '@telegram-apps/telegram-ui'
 
 import {
@@ -89,89 +89,81 @@ export function AssetSelector({
         }}
         header={<Modal.Header>{label} — انتخاب دارایی</Modal.Header>}
       >
-        <div className="flex flex-col gap-2 pb-6">
-          <div className="px-4 pt-2">
+        <List>
+          <Section>
             <Input
               placeholder="جستجو..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               type="search"
             />
-          </div>
+          </Section>
 
-          <List>
-            {!isSearching && (
-              <Section header={categoryLabels.CURRENCY ?? 'ارز'}>
-                <Cell
-                  before={<Avatar size={40} acronym="ت" />}
-                  subtitle="تومان ایران"
-                  after={
-                    value === 'IRT' ? (
-                      <Caption level="2" className="text-tgui-accent-text">
-                        ✓
-                      </Caption>
-                    ) : undefined
-                  }
-                  onClick={() => {
-                    onChange('IRT')
-                    closeModal()
-                  }}
-                >
-                  تومان
-                </Cell>
-              </Section>
-            )}
-
-            {entries.map(([category, categoryItems]) => (
-              <Section
-                key={category}
-                header={categoryLabels[category] ?? category}
+          {!isSearching && (
+            <Section header={categoryLabels.CURRENCY ?? 'ارز'}>
+              <Cell
+                before={<Avatar size={40} acronym="ت" />}
+                subtitle="تومان ایران"
+                after={
+                  value === 'IRT' ? (
+                    <Caption level="2" className="text-tgui-accent-text">
+                      ✓
+                    </Caption>
+                  ) : undefined
+                }
+                onClick={() => {
+                  onChange('IRT')
+                  closeModal()
+                }}
               >
-                {categoryItems.map((item) => {
-                  const icon = item.png ?? item.base_currency.png
-                  const isSelected = value === item.base_currency.symbol
-                  return (
-                    <Cell
-                      key={item.symbol}
-                      before={
-                        icon ? (
-                          <Avatar src={icon} size={40} />
-                        ) : (
-                          <Avatar
-                            size={40}
-                            acronym={item.base_currency.symbol.slice(0, 2)}
-                          />
-                        )
-                      }
-                      subtitle={item.base_currency.en}
-                      after={
-                        isSelected ? (
-                          <Caption level="2" className="text-tgui-accent-text">
-                            ✓
-                          </Caption>
-                        ) : undefined
-                      }
-                      onClick={() => {
-                        onChange(item.base_currency.symbol)
-                        closeModal()
-                      }}
-                    >
-                      {item.name.fa || item.base_currency.fa}
-                    </Cell>
-                  )
-                })}
-              </Section>
-            ))}
+                تومان
+              </Cell>
+            </Section>
+          )}
 
-            {entries.length === 0 && (
-              <Section>
-                <div className="py-10 text-center">
-                  <Text className="text-tgui-hint">نتیجه‌ای یافت نشد</Text>
-                </div>
-              </Section>
-            )}
-          </List>
-        </div>
+          {entries.map(([category, categoryItems]) => (
+            <Section
+              key={category}
+              header={categoryLabels[category] ?? category}
+            >
+              {categoryItems.map((item) => {
+                const icon = item.png ?? item.base_currency.png
+                const isSelected = value === item.base_currency.symbol
+                return (
+                  <Cell
+                    key={item.symbol}
+                    before={
+                      icon ? (
+                        <Avatar src={icon} size={40} />
+                      ) : (
+                        <Avatar
+                          size={40}
+                          acronym={item.base_currency.symbol.slice(0, 2)}
+                        />
+                      )
+                    }
+                    subtitle={item.base_currency.en}
+                    after={
+                      isSelected ? (
+                        <Caption level="2" className="text-tgui-accent-text">
+                          ✓
+                        </Caption>
+                      ) : undefined
+                    }
+                    onClick={() => {
+                      onChange(item.base_currency.symbol)
+                      closeModal()
+                    }}
+                  >
+                    {item.name.fa || item.base_currency.fa}
+                  </Cell>
+                )
+              })}
+            </Section>
+          ))}
+
+          {entries.length === 0 && <Placeholder header="نتیجه‌ای یافت نشد" />}
+        </List>
       </Modal>
     </>
   )

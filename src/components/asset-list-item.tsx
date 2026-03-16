@@ -10,7 +10,9 @@ import {
   IconButton,
   Input,
   Modal,
+  Section,
   Spinner,
+  Subheadline,
   Text,
 } from '@telegram-apps/telegram-ui'
 import { toast } from 'sonner'
@@ -91,7 +93,7 @@ export function AssetListItem({
         after={
           <div className="flex items-center gap-2">
             <div className="flex flex-col items-end gap-0.5">
-              <Text weight="2" style={{ fontVariantNumeric: 'tabular-nums' }}>
+              <Text weight="2" className="tabular-nums">
                 {formatIRT(valueIRT)} ت
               </Text>
               <ChangeLabel change={change} />
@@ -126,7 +128,8 @@ export function AssetListItem({
         onOpenChange={setEditOpen}
         header={<Modal.Header>ویرایش مقدار — {assetName}</Modal.Header>}
       >
-        <div className="flex flex-col gap-4 p-4 pb-8">
+        <Modal.Overlay />
+        <Section>
           <Input
             type="number"
             inputMode="decimal"
@@ -143,7 +146,8 @@ export function AssetListItem({
           >
             {updateMutation.isPending ? <Spinner size="s" /> : 'ذخیره'}
           </Button>
-        </div>
+        </Section>
+        <Modal.Close />
       </Modal>
 
       <Modal
@@ -151,11 +155,12 @@ export function AssetListItem({
         onOpenChange={setDeleteOpen}
         header={<Modal.Header>حذف دارایی</Modal.Header>}
       >
-        <div className="flex flex-col gap-3 p-4 pb-8">
-          <p className="text-center text-subheadline2 text-tgui-text">
+        <Modal.Overlay />
+        <Section>
+          <Subheadline level="2" className="mb-4 text-center">
             آیا مطمئن هستید که می‌خواهید <strong>{assetName}</strong> را حذف
             کنید؟
-          </p>
+          </Subheadline>
           <div className="flex gap-2">
             <Button
               mode="bezeled"
@@ -174,7 +179,8 @@ export function AssetListItem({
               {deleteMutation.isPending ? <Spinner size="s" /> : 'حذف'}
             </Button>
           </div>
-        </div>
+        </Section>
+        <Modal.Close />
       </Modal>
     </>
   )

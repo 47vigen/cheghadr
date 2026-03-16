@@ -2,13 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 
-import {
-  Headline,
-  List,
-  Section,
-  Spinner,
-  Subheadline,
-} from '@telegram-apps/telegram-ui'
+import { List, Section, Spinner, Subheadline } from '@telegram-apps/telegram-ui'
 
 import { AssetPicker } from '@/components/asset-picker'
 
@@ -30,18 +24,13 @@ export default function AddAssetPage() {
   }
 
   return (
-    <div>
-      <List>
-        <Section>
-          <div className="flex flex-col gap-1 px-4 py-3">
-            <Headline weight="2">افزودن دارایی</Headline>
-            <Subheadline level="2" weight="3" className="text-tgui-hint">
-              دارایی مورد نظر را جستجو و انتخاب کنید
-            </Subheadline>
-          </div>
-        </Section>
-      </List>
+    <List>
+      <Section header="افزودن دارایی">
+        <Subheadline level="2" weight="3" className="text-tgui-hint">
+          دارایی مورد نظر را جستجو و انتخاب کنید
+        </Subheadline>
+      </Section>
       <AssetPicker priceData={data?.data} onSaved={() => router.push('/')} />
-    </div>
+    </List>
   )
 }

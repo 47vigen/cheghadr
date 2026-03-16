@@ -76,7 +76,7 @@ export default function AssetsPage() {
       </List>
 
       {data.assets.length > 0 && (
-        <div className="fixed inset-x-0 bottom-[var(--tabbar-height)] flex justify-center px-4 pb-4">
+        <div className="fixed inset-inline-0 bottom-[var(--bottom-above-tabbar)] z-10 flex justify-center px-4 pb-[var(--bottom-safe)]">
           <Button
             stretched
             mode="filled"

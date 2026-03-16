@@ -30,27 +30,24 @@ export default function PricesPage() {
   const grouped = groupByCategory(prices)
   const entries = sortedGroupEntries(grouped)
 
-  return (
-    <div>
-      <div className="px-4 py-3">
-        <StalenessBadge
-          snapshotAt={data?.snapshotAt ?? null}
-          stale={data?.stale ?? true}
-        />
-      </div>
+  if (entries.length === 0) {
+    return (
+      <Placeholder
+        header="قیمت‌ها در دسترس نیست"
+        description="لطفاً بعداً دوباره بررسی کنید"
+      />
+    )
+  }
 
-      {entries.length === 0 ? (
-        <Placeholder
-          header="قیمت‌ها در دسترس نیست"
-          description="لطفاً بعداً دوباره بررسی کنید"
-        />
-      ) : (
-        <List>
-          {entries.map(([category, items]) => (
-            <PriceSection key={category} category={category} items={items} />
-          ))}
-        </List>
-      )}
-    </div>
+  return (
+    <List>
+      <StalenessBadge
+        snapshotAt={data?.snapshotAt ?? null}
+        stale={data?.stale ?? true}
+      />
+      {entries.map(([category, items]) => (
+        <PriceSection key={category} category={category} items={items} />
+      ))}
+    </List>
   )
 }

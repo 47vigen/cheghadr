@@ -18,7 +18,7 @@ export function PortfolioTotal({
   return (
     <div className="flex flex-col items-center gap-2 py-4">
       <div className="flex items-baseline gap-1.5">
-        <LargeTitle weight="2" style={{ fontVariantNumeric: 'tabular-nums' }}>
+        <LargeTitle weight="2" className="tabular-nums">
           {formatIRT(totalIRT)}
         </LargeTitle>
         <Text weight="3" className="text-tgui-hint">

@@ -10,13 +10,13 @@ export function ChangeLabel({ change }: ChangeLabelProps) {
   const formatted = formatChange(change)
   if (!formatted) return null
 
+  // Semantic state colors (green/red) — minimal override using TGUI variables
+  const colorClass = formatted.positive
+    ? 'text-tgui-green'
+    : 'text-tgui-destructive-text'
+
   return (
-    <Caption
-      level="2"
-      className={
-        formatted.positive ? 'text-tgui-green' : 'text-tgui-destructive-text'
-      }
-    >
+    <Caption level="2" className={colorClass}>
       {formatted.text}
     </Caption>
   )

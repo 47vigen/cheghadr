@@ -101,6 +101,8 @@
     -webkit-tap-highlight-color: transparent;
     -webkit-text-size-adjust: 100%;
     --tabbar-height: 64px;
+    --bottom-above-tabbar: var(--tabbar-height, 72px);
+    --bottom-safe: max(16px, env(safe-area-inset-bottom));
   }
 
   body {
