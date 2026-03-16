@@ -2,8 +2,6 @@
 
 import type { PropsWithChildren } from 'react'
 
-import { Toaster } from 'sonner'
-
 import dynamic from 'next/dynamic'
 
 const TelegramProvider = dynamic(() => import('./telegram-provider'), {
@@ -11,10 +9,5 @@ const TelegramProvider = dynamic(() => import('./telegram-provider'), {
 })
 
 export function ClientProviders(props: PropsWithChildren) {
-  return (
-    <TelegramProvider>
-      {props.children}
-      <Toaster richColors position="top-center" />
-    </TelegramProvider>
-  )
+  return <TelegramProvider>{props.children}</TelegramProvider>
 }
