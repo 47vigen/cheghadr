@@ -100,6 +100,7 @@
   :root {
     -webkit-tap-highlight-color: transparent;
     -webkit-text-size-adjust: 100%;
+    --tabbar-height: 64px;
   }
 
   body {

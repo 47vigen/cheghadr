@@ -1,6 +1,6 @@
 ---
 name: telegram-mini-app
-description: "Expert in building Telegram Mini Apps (TWA) - web apps that run inside Telegram with native-like experience. Covers the TON ecosystem, Telegram Web App API, payments, user authentication, and build..."
+description: "Expert in building Telegram Mini Apps (TWA) with @telegram-apps/telegram-ui. No shadcn. Design like a Telegram product designer: compose TGUI components like puzzle pieces, no custom styles. Use Context7 MCP or tgui.xelene.me for component docs. Vazirmatn font first. Use when building Mini App UI, migrating from shadcn, or designing Telegram-native interfaces."
 risk: unknown
 source: "vibeship-spawner-skills (Apache 2.0)"
 date_added: "2026-02-27"
@@ -15,6 +15,46 @@ the Mini App ecosystem is exploding - games, DeFi, utilities, social
 apps. You know TON blockchain and how to monetize with crypto. You
 design for the Telegram UX paradigm, not traditional web.
 
+## Design & UI (Mandatory)
+
+**When to apply**: Any UI work for Telegram Mini Apps — new features, refactors, migrations, or design reviews.
+
+### Core Rules
+
+1. **No shadcn** — Remove all shadcn/ui, Radix UI primitives used for shadcn, and `cn()` utilities. Use only `@telegram-apps/telegram-ui`.
+2. **Design like a Telegram product designer** — Think native Telegram: Settings, Wallet, Channels. Match spacing, hierarchy, and interaction patterns.
+3. **Puzzle-piece composition** — Stick Telegram UI components together. No custom styles. No `className` overrides for layout/colors. If TGUI doesn't have it, compose existing components.
+4. **globals.css from TGUI variables** — Regenerate via Telegram theme variables. No shadcn/Radix CSS variables. See "globals.css structure" below.
+5. **Vazirmatn font** — Add from Google Fonts and use as first priority in `font-family` for RTL/Persian.
+
+### globals.css Structure
+
+- Import `@telegram-apps/telegram-ui/dist/styles.css`
+- Override `--tgui--font-family` for RTL: put Vazirmatn first
+- Define `@theme inline` (Tailwind v4) or `:root` tokens from TGUI variables only
+- TGUI provides light/dark via `--tg-theme-*`; fallbacks come from TGUI defaults
+
+**TGUI variable reference** (from `@telegram-apps/telegram-ui`):
+
+- Colors: `--tgui--bg_color`, `--tgui--text_color`, `--tgui--hint_color`, `--tgui--link_color`, `--tgui--button_color`, `--tgui--button_text_color`, `--tgui--secondary_bg_color`, `--tgui--header_bg_color`, `--tgui--accent_text_color`, `--tgui--section_bg_color`, `--tgui--section_header_text_color`, `--tgui--subtitle_text_color`, `--tgui--destructive_text_color`, `--tgui--skeleton`, `--tgui--divider`, `--tgui--outline`, `--tgui--surface_primary`, `--tgui--tertiary_bg_color`, `--tgui--quartenary_bg_color`, `--tgui--segmented_control_active_bg`, `--tgui--card_bg_color`, `--tgui--secondary_hint_color`, `--tgui--secondary_fill`, `--tgui--green`, `--tgui--destructive_background`, `--tgui--plain_background`, `--tgui--plain_foreground`
+- Typography: `--tgui--font-family`, `--tgui--font_weight--accent1/2/3`, `--tgui--large_title--font_size`, `--tgui--title1/2/3--font_size`, `--tgui--headline--font_size`, `--tgui--text--font_size`, `--tgui--subheadline1/2--font_size`, `--tgui--caption1/2--font_size`
+- All map to `var(--tg-theme-*)` with TGUI fallbacks (e.g. `var(--tg-theme-bg-color, #212121)`)
+
+### Component Discovery
+
+1. **Context7 MCP** — Query `@telegram-apps/telegram-ui` for component API, props, and usage. Use first.
+2. **Fallback** — [Telegram UI Storybook](https://tgui.xelene.me/) for visual reference and examples.
+
+### Migration Checklist
+
+When refactoring existing UI:
+
+- [ ] Remove shadcn imports and `src/components/ui/` shadcn components
+- [ ] Regenerate `globals.css` from TGUI variables; remove shadcn variables
+- [ ] Review every page, section, component
+- [ ] Rewrite using TGUI components only (Cell, Section, List, Modal, Input, Button, etc.)
+- [ ] Add Vazirmatn from Google Fonts; set as first in `font-family` for RTL
+
 ## Capabilities
 
 - Telegram Web App API
@@ -25,6 +65,7 @@ design for the Telegram UX paradigm, not traditional web.
 - Mini App UX patterns
 - Viral Mini App mechanics
 - TON blockchain integration
+- **Telegram UI (TGUI)** — exclusive UI toolkit, no shadcn
 
 ## Patterns
 
@@ -101,6 +142,58 @@ bot.command('app', (ctx) => {
   });
 });
 ```
+```
+
+### TGUI Setup (Next.js)
+
+**When to use**: Setting up UI for a Telegram Mini App with React/Next.js
+
+```jsx
+// layout.tsx - AppRoot + Vazirmatn via next/font
+import { AppRoot } from "@telegram-apps/telegram-ui";
+import { Vazirmatn } from "next/font/google";
+import "./globals.css";
+
+const vazirmatn = Vazirmatn({
+  subsets: ["arabic"],
+  variable: "--font-vazirmatn",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="fa" dir="rtl" className={vazirmatn.variable}>
+      <body>
+        <AppRoot appearance="dark" platform="ios">
+          {children}
+        </AppRoot>
+      </body>
+    </html>
+  );
+}
+```
+
+For non-Next.js: add Vazirmatn via `<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet" />` and use `font-family: "Vazirmatn", ...` in CSS.
+
+```css
+/* globals.css - TGUI variables only, no shadcn */
+@import "tailwindcss";
+@import "@telegram-apps/telegram-ui/dist/styles.css";
+
+[dir="rtl"] {
+  --tgui--font-family:
+    var(--font-vazirmatn), system-ui, -apple-system, BlinkMacSystemFont,
+    "Roboto", "Apple Color Emoji", "Helvetica Neue", sans-serif;
+}
+
+@theme inline {
+  /* Map TGUI to Tailwind tokens - no shadcn variables */
+  --color-tgui-bg: var(--tgui--bg_color);
+  --color-tgui-text: var(--tgui--text_color);
+  --color-tgui-hint: var(--tgui--hint_color);
+  /* ... */
+}
 ```
 
 ### TON Connect Integration
@@ -231,6 +324,18 @@ function ReferralShare() {
 
 ## Anti-Patterns
 
+### ❌ Using shadcn or Custom UI Libraries
+
+**Why bad**: Inconsistent with Telegram. Feels like a generic web app. Users expect native Telegram look.
+
+**Instead**: Use only `@telegram-apps/telegram-ui`. Compose TGUI components. No custom `Button`, `Input`, `Dialog` from shadcn/Radix.
+
+### ❌ Custom Styles and Overrides
+
+**Why bad**: Breaks theme sync. Hard to maintain. Doesn't adapt to Telegram light/dark.
+
+**Instead**: Stick to TGUI components like puzzle pieces. Use TGUI props and composition. Avoid `className` for colors/spacing.
+
 ### ❌ Ignoring Telegram Theme
 
 **Why bad**: Feels foreign in Telegram.
@@ -281,4 +386,20 @@ Optimistic updates.
 Works well with: `telegram-bot-builder`, `frontend`, `blockchain-defi`, `viral-generator-builder`
 
 ## When to Use
-This skill is applicable to execute the workflow or actions described in the overview.
+
+This skill applies when:
+- Building or refactoring Telegram Mini App UI
+- Migrating from shadcn to Telegram UI
+- Designing new pages/sections for a Mini App
+- User asks for "Telegram-native" or "design like Telegram" UI
+
+## Refactor Prompt (Agent Reference)
+
+When asked to apply this design approach, execute:
+
+1. **Remove shadcn** — Uninstall shadcn, delete `src/components/ui/` shadcn components, remove `cn()` usage
+2. **Regenerate globals.css** — Import TGUI styles; define tokens from TGUI variables only; add Vazirmatn override for RTL
+3. **Review & rewrite** — Every page, section, component → use TGUI components only
+4. **Design mindset** — Think Telegram product designer; compose TGUI like puzzle pieces; no custom styles
+5. **Component docs** — Use Context7 MCP for `@telegram-apps/telegram-ui`; fallback: https://tgui.xelene.me/
+6. **Font** — Add Vazirmatn from Google Fonts; use as first priority in `font-family`

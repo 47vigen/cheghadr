@@ -54,27 +54,29 @@ export default function AssetsPage() {
   }
 
   return (
-    <div>
-      <PortfolioTotal
-        totalIRT={data.totalIRT}
-        stale={data.stale}
-        snapshotAt={data.snapshotAt}
-      />
+    <>
+      <List>
+        <Section header="ارزش کل دارایی‌ها">
+          <PortfolioTotal
+            totalIRT={data.totalIRT}
+            stale={data.stale}
+            snapshotAt={data.snapshotAt}
+          />
+        </Section>
 
-      {data.assets.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <List>
+        {data.assets.length === 0 ? (
+          <EmptyState />
+        ) : (
           <Section header="دارایی‌های من">
             {data.assets.map((asset) => (
               <AssetListItem key={asset.id} {...asset} />
             ))}
           </Section>
-        </List>
-      )}
+        )}
+      </List>
 
       {data.assets.length > 0 && (
-        <div className="fixed right-0 bottom-[var(--tabbar-height,72px)] left-0 flex justify-center p-4">
+        <div className="fixed inset-x-0 bottom-[var(--tabbar-height)] flex justify-center px-4 pb-4">
           <Button
             stretched
             mode="filled"
@@ -85,6 +87,6 @@ export default function AssetsPage() {
           </Button>
         </div>
       )}
-    </div>
+    </>
   )
 }

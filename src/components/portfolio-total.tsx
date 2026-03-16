@@ -1,4 +1,4 @@
-import { Caption, LargeTitle, Text } from '@telegram-apps/telegram-ui'
+import { LargeTitle, Text } from '@telegram-apps/telegram-ui'
 
 import { StalenessBadge } from '@/components/staleness-badge'
 
@@ -16,10 +16,7 @@ export function PortfolioTotal({
   snapshotAt,
 }: PortfolioTotalProps) {
   return (
-    <div className="flex flex-col items-center gap-2 px-4 py-8">
-      <Caption level="1" className="text-tgui-hint">
-        ارزش کل دارایی‌ها
-      </Caption>
+    <div className="flex flex-col items-center gap-2 py-4">
       <div className="flex items-baseline gap-1.5">
         <LargeTitle weight="2" style={{ fontVariantNumeric: 'tabular-nums' }}>
           {formatIRT(totalIRT)}

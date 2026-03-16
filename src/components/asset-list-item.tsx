@@ -11,6 +11,7 @@ import {
   Input,
   Modal,
   Spinner,
+  Text,
 } from '@telegram-apps/telegram-ui'
 import { toast } from 'sonner'
 
@@ -88,20 +89,14 @@ export function AssetListItem({
         }
         subtitle={`${new Intl.NumberFormat('fa-IR').format(Number(quantity))} واحد`}
         after={
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <div className="flex flex-col items-end gap-0.5">
-              <span
-                style={{
-                  fontVariantNumeric: 'tabular-nums',
-                  fontSize: '14px',
-                  fontWeight: 500,
-                }}
-              >
+              <Text weight="2" style={{ fontVariantNumeric: 'tabular-nums' }}>
                 {formatIRT(valueIRT)} ت
-              </span>
+              </Text>
               <ChangeLabel change={change} />
             </div>
-            <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-0.5">
               <IconButton
                 size="s"
                 mode="plain"
