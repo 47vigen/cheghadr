@@ -1,7 +1,11 @@
 import type { ReactNode } from 'react'
 
-// Root layout: minimal pass-through. The [locale] layout provides <html>/<body>.
-// Required by Next.js when a not-found page or other root-level file exists.
+// Root layout: provides required <html>/<body> tags for error pages and API routes.
+// The [locale] layout provides its own <html>/<body> with locale-specific config.
 export default function RootLayout({ children }: { children: ReactNode }) {
-  return children
+  return (
+    <html suppressHydrationWarning>
+      <body>{children}</body>
+    </html>
+  )
 }
