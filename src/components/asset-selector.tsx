@@ -12,12 +12,15 @@ import {
   Placeholder,
   Section,
 } from '@telegram-apps/telegram-ui'
+import { useLocale, useTranslations } from 'next-intl'
 
 import {
-  categoryLabels,
   filterPriceItems,
+  getLocalizedItemName,
+  getLocalizedIrtName,
   groupByCategory,
   IRT_ENTRY,
+  knownCategories,
   sortedGroupEntries,
 } from '@/lib/prices'
 import type { PriceItem } from '@/modules/API/Swagger/ecotrust/gen/models'
@@ -32,13 +35,19 @@ interface AssetSelectorProps {
 function getCurrentDisplay(
   value: string,
   items: PriceItem[],
-): { symbol: string; fa: string; png: string | null } {
-  if (value === 'IRT') return IRT_ENTRY
+  locale: string,
+): { symbol: string; displayName: string; png: string | null } {
+  if (value === 'IRT')
+    return {
+      symbol: IRT_ENTRY.symbol,
+      displayName: getLocalizedIrtName(locale),
+      png: IRT_ENTRY.png,
+    }
   const found = items.find((i) => i.base_currency.symbol === value)
-  if (!found) return { symbol: value, fa: value, png: null }
+  if (!found) return { symbol: value, displayName: value, png: null }
   return {
     symbol: found.base_currency.symbol,
-    fa: found.name.fa || found.base_currency.fa,
+    displayName: getLocalizedItemName(found, locale),
     png: found.png ?? found.base_currency.png ?? null,
   }
 }
@@ -49,6 +58,9 @@ export function AssetSelector({
   onChange,
   items,
 }: AssetSelectorProps) {
+  const tPicker = useTranslations('picker')
+  const tCat = useTranslations('categories')
+  const locale = useLocale()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
 
@@ -57,7 +69,7 @@ export function AssetSelector({
   const entries = sortedGroupEntries(grouped)
   const isSearching = search.trim().length > 0
 
-  const current = getCurrentDisplay(value, items)
+  const current = getCurrentDisplay(value, items, locale)
 
   const closeModal = () => {
     setOpen(false)
@@ -78,7 +90,7 @@ export function AssetSelector({
         subtitle={current.symbol}
         onClick={() => setOpen(true)}
       >
-        {current.fa}
+        {current.displayName}
       </Cell>
 
       <Modal
@@ -87,12 +99,16 @@ export function AssetSelector({
           if (!v) closeModal()
           else setOpen(true)
         }}
-        header={<Modal.Header>{label} — انتخاب دارایی</Modal.Header>}
+        header={
+          <Modal.Header>
+            {label} — {tPicker('selectAsset')}
+          </Modal.Header>
+        }
       >
         <List>
           <Section>
             <Input
-              placeholder="جستجو..."
+              placeholder={tPicker('search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               type="search"
@@ -100,10 +116,19 @@ export function AssetSelector({
           </Section>
 
           {!isSearching && (
-            <Section header={categoryLabels.CURRENCY ?? 'ارز'}>
+            <Section header={tCat('CURRENCY')}>
               <Cell
-                before={<Avatar size={40} acronym="ت" />}
-                subtitle="تومان ایران"
+                before={
+                  <Avatar
+                    size={40}
+                    acronym={
+                      locale === 'fa'
+                        ? IRT_ENTRY.fa.charAt(0)
+                        : IRT_ENTRY.en.slice(0, 2)
+                    }
+                  />
+                }
+                subtitle={tPicker('iranianToman')}
                 after={
                   value === 'IRT' ? (
                     <Caption level="2" className="text-tgui-accent-text">
@@ -116,19 +141,24 @@ export function AssetSelector({
                   closeModal()
                 }}
               >
-                تومان
+                {tPicker('toman')}
               </Cell>
             </Section>
           )}
 
-          {entries.map(([category, categoryItems]) => (
+          {entries.map(([category, categoryItems]) => {
+            const catLabel = knownCategories.has(category)
+              ? tCat(category as Parameters<typeof tCat>[0])
+              : category
+            return (
             <Section
               key={category}
-              header={categoryLabels[category] ?? category}
+              header={catLabel}
             >
               {categoryItems.map((item) => {
                 const icon = item.png ?? item.base_currency.png
                 const isSelected = value === item.base_currency.symbol
+                const name = getLocalizedItemName(item, locale)
                 return (
                   <Cell
                     key={item.symbol}
@@ -155,14 +185,17 @@ export function AssetSelector({
                       closeModal()
                     }}
                   >
-                    {item.name.fa || item.base_currency.fa}
+                    {name}
                   </Cell>
                 )
               })}
             </Section>
-          ))}
+            )
+          })}
 
-          {entries.length === 0 && <Placeholder header="نتیجه‌ای یافت نشد" />}
+          {entries.length === 0 && (
+            <Placeholder header={tPicker('noResults')} />
+          )}
         </List>
       </Modal>
     </>

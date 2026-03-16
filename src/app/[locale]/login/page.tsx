@@ -1,7 +1,8 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
+
+import { useRouter } from '@/i18n/navigation'
 
 import {
   Caption,
@@ -11,12 +12,14 @@ import {
   Text,
 } from '@telegram-apps/telegram-ui'
 import { signIn } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 
 import { env } from '@/env'
 import { getRawInitData } from '@/utils/telegram'
 
 export default function LoginPage() {
   const router = useRouter()
+  const t = useTranslations('login')
   const widgetContainerRef = useRef<HTMLDivElement>(null)
   const [mode, setMode] = useState<'loading' | 'miniapp' | 'standalone'>(
     'loading',
@@ -42,15 +45,15 @@ export default function LoginPage() {
         if (result?.ok) {
           router.replace('/')
         } else {
-          setError('خطا در ورود از طریق تلگرام')
+          setError(t('errorTelegram'))
           setMode('standalone')
         }
       })
       .catch(() => {
-        setError('خطا در ورود از طریق تلگرام')
+        setError(t('errorTelegram'))
         setMode('standalone')
       })
-  }, [router])
+  }, [router, t])
 
   useEffect(() => {
     if (mode !== 'standalone') return
@@ -65,7 +68,7 @@ export default function LoginPage() {
       if (result?.ok) {
         router.push('/')
       } else {
-        setError('خطا در ورود')
+        setError(t('error'))
       }
     }
 
@@ -86,18 +89,18 @@ export default function LoginPage() {
       script.remove()
       delete window.onTelegramAuth
     }
-  }, [mode, router])
+  }, [mode, router, t])
 
   if (mode === 'loading' || mode === 'miniapp') {
-    return <Placeholder header="در حال ورود…" action={<Spinner size="l" />} />
+    return <Placeholder header={t('loading')} action={<Spinner size="l" />} />
   }
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-8 p-6">
       <div className="flex flex-col items-center gap-3 text-center">
-        <LargeTitle weight="1">چه‌قدر؟</LargeTitle>
+        <LargeTitle weight="1">{t('title')}</LargeTitle>
         <Text weight="3" className="text-tgui-hint">
-          برای ادامه با تلگرام وارد شوید
+          {t('subtitle')}
         </Text>
       </div>
 

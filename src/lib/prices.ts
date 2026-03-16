@@ -24,7 +24,7 @@ export function filterPriceItems(
   if (!q) return items
   return items.filter(
     (item) =>
-      item.name.fa.includes(q) ||
+      item.name.fa.toLowerCase().includes(q) ||
       item.base_currency.fa.toLowerCase().includes(q) ||
       item.name.en.toLowerCase().includes(q) ||
       item.base_currency.symbol.toLowerCase().includes(q),
@@ -42,22 +42,6 @@ export function groupByCategory(items: PriceItem[]): Map<string, PriceItem[]> {
   return groups
 }
 
-export const categoryLabels: Record<string, string> = {
-  CURRENCY: 'ارز',
-  CRYPTOCURRENCY: 'رمزارز',
-  GOLD: 'طلا',
-  COIN: 'سکه',
-  SILVER: 'نقره',
-  BORS: 'بورس',
-  GOLD_FUNDS: 'صندوق طلا',
-  STOCK_FUNDS: 'صندوق سهام',
-  FIXED_INCOME_FUNDS: 'صندوق درآمد ثابت',
-  MIXED_ASSET_FUNDS: 'صندوق مختلط',
-  LEVERAGED_FUNDS: 'صندوق اهرمی',
-  SECTOR_FUNDS: 'صندوق بخشی',
-  PROPERTY_FUNDS: 'صندوق املاک',
-  COMMODITY_SAFFRON_FUNDS: 'صندوق زعفران',
-}
 
 export const categoryOrder: string[] = [
   'CURRENCY',
@@ -74,7 +58,10 @@ export const categoryOrder: string[] = [
   'SECTOR_FUNDS',
   'PROPERTY_FUNDS',
   'COMMODITY_SAFFRON_FUNDS',
+  'OTHER',
 ]
+
+export const knownCategories = new Set(categoryOrder)
 
 export function sortedGroupEntries(
   grouped: Map<string, PriceItem[]>,
@@ -90,18 +77,25 @@ export function sortedGroupEntries(
   return ordered
 }
 
-export function formatIRT(value: number): string {
-  return new Intl.NumberFormat('fa-IR').format(Math.round(value))
+function toIntlLocale(locale: string): string {
+  return locale === 'fa' ? 'fa-IR' : 'en-US'
 }
 
-export function formatChange(change: string | null | undefined): {
+export function formatIRT(value: number, locale = 'fa'): string {
+  return new Intl.NumberFormat(toIntlLocale(locale)).format(Math.round(value))
+}
+
+export function formatChange(
+  change: string | null | undefined,
+  locale = 'fa',
+): {
   text: string
   positive: boolean
 } | null {
   if (!change) return null
   const n = Number(change)
   if (Number.isNaN(n)) return null
-  const formatted = new Intl.NumberFormat('fa-IR', {
+  const formatted = new Intl.NumberFormat(toIntlLocale(locale), {
     signDisplay: 'always',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -143,4 +137,13 @@ export const IRT_ENTRY = {
   fa: 'تومان',
   en: 'Toman',
   png: null as string | null,
+}
+
+export function getLocalizedItemName(item: PriceItem, locale: string): string {
+  if (locale === 'fa') return item.name.fa || item.base_currency.fa
+  return item.name.en || item.base_currency.en || item.name.fa || item.base_currency.fa
+}
+
+export function getLocalizedIrtName(locale: string): string {
+  return locale === 'fa' ? IRT_ENTRY.fa : IRT_ENTRY.en
 }

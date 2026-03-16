@@ -12,13 +12,15 @@ import {
   Section,
   Spinner,
 } from '@telegram-apps/telegram-ui'
+import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 import {
-  categoryLabels,
   filterPriceItems,
   formatIRT,
+  getLocalizedItemName,
   groupByCategory,
+  knownCategories,
   parsePriceSnapshot,
   sortedGroupEntries,
 } from '@/lib/prices'
@@ -31,6 +33,11 @@ interface AssetPickerProps {
 }
 
 export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
+  const t = useTranslations('assets')
+  const tPicker = useTranslations('picker')
+  const tCat = useTranslations('categories')
+  const locale = useLocale()
+
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<PriceItem | null>(null)
   const [quantity, setQuantity] = useState('')
@@ -40,10 +47,10 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
   const addMutation = api.assets.add.useMutation({
     onSuccess: () => {
       void utils.assets.list.invalidate()
-      toast.success('دارایی اضافه شد')
+      toast.success(t('toastAdded'))
       onSaved()
     },
-    onError: (err) => toast.error(err.message || 'خطا در افزودن'),
+    onError: (err) => toast.error(err.message || t('toastAddError')),
   })
 
   const items = parsePriceSnapshot(priceData)
@@ -55,7 +62,7 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
     if (!selected) return
     const qty = Number(quantity)
     if (!quantity || Number.isNaN(qty) || qty <= 0) {
-      toast.error('مقدار باید عددی مثبت باشد')
+      toast.error(t('toastInvalidQuantity'))
       return
     }
     addMutation.mutate({ symbol: selected.base_currency.symbol, quantity })
@@ -65,7 +72,7 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
     <>
       <Section>
         <Input
-          placeholder="جستجو..."
+          placeholder={tPicker('search')}
           value={search}
           onChange={(e) => {
             setSearch(e.target.value)
@@ -76,13 +83,17 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
       </Section>
 
       {selected && (
-        <Section header={`${selected.name.fa} انتخاب شد`}>
+        <Section
+          header={tPicker('selectedHeader', {
+            name: getLocalizedItemName(selected, locale),
+          })}
+        >
           <Input
             type="number"
             inputMode="decimal"
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
-            placeholder="مقدار را وارد کنید"
+            placeholder={tPicker('enterQuantity')}
           />
           <Button
             mode="filled"
@@ -90,17 +101,25 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
             onClick={handleSave}
             disabled={addMutation.isPending}
           >
-            {addMutation.isPending ? <Spinner size="s" /> : 'ذخیره'}
+            {addMutation.isPending ? <Spinner size="s" /> : tPicker('save')}
           </Button>
         </Section>
       )}
 
-      {entries.map(([category, categoryItems]) => (
-        <Section key={category} header={categoryLabels[category] ?? category}>
+      {entries.map(([category, categoryItems]) => {
+        const catLabel = knownCategories.has(category)
+          ? tCat(category as Parameters<typeof tCat>[0])
+          : category
+        return (
+        <Section
+          key={category}
+          header={catLabel}
+        >
           {categoryItems.map((item) => {
             const icon = item.png ?? item.base_currency.png
             const isSelected =
               selected?.base_currency.symbol === item.base_currency.symbol
+            const name = getLocalizedItemName(item, locale)
             return (
               <Cell
                 key={item.symbol}
@@ -114,11 +133,11 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
                     />
                   )
                 }
-                subtitle={`${formatIRT(Number(item.sell_price))} ت`}
+                subtitle={`${formatIRT(Number(item.sell_price), locale)} ${t('tomanAbbr')}`}
                 after={
                   isSelected ? (
                     <Caption level="2" className="text-tgui-accent-text">
-                      ✓ انتخاب شد
+                      {tPicker('checkmark')}
                     </Caption>
                   ) : undefined
                 }
@@ -127,16 +146,17 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
                   setQuantity('')
                 }}
               >
-                {item.name.fa}
+                {name}
               </Cell>
             )
           })}
         </Section>
-      ))}
+        )
+      })}
 
       {entries.length === 0 && (
         <Section>
-          <Placeholder header="نتیجه‌ای یافت نشد" />
+          <Placeholder header={tPicker('noResults')} />
         </Section>
       )}
     </>

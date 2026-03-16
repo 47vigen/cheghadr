@@ -1,6 +1,7 @@
 'use client'
 
 import { List, Placeholder, Spinner } from '@telegram-apps/telegram-ui'
+import { useTranslations } from 'next-intl'
 
 import { PriceSection } from '@/components/price-section'
 
@@ -12,6 +13,7 @@ import {
 import { api } from '@/trpc/react'
 
 export default function PricesPage() {
+  const t = useTranslations('prices')
   const { data, isLoading } = api.prices.latest.useQuery(undefined, {
     refetchInterval: 30 * 60 * 1000,
     refetchOnWindowFocus: true,
@@ -32,8 +34,8 @@ export default function PricesPage() {
   if (entries.length === 0) {
     return (
       <Placeholder
-        header="قیمت‌ها در دسترس نیست"
-        description="لطفاً بعداً دوباره بررسی کنید"
+        header={t('unavailable')}
+        description={t('checkLater')}
       />
     )
   }

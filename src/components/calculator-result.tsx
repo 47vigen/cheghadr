@@ -1,6 +1,15 @@
-import { Cell, Placeholder, Section, Text } from '@telegram-apps/telegram-ui'
+'use client'
 
-import { findBySymbol, formatIRT, IRT_ENTRY } from '@/lib/prices'
+import { Cell, Placeholder, Section, Text } from '@telegram-apps/telegram-ui'
+import { useLocale, useTranslations } from 'next-intl'
+
+import {
+  findBySymbol,
+  formatIRT,
+  getLocalizedIrtName,
+  getLocalizedItemName,
+  IRT_ENTRY,
+} from '@/lib/prices'
 import type { PriceItem } from '@/modules/API/Swagger/ecotrust/gen/models'
 
 interface CalculatorResultProps {
@@ -14,24 +23,27 @@ export function CalculatorResult({
   toSymbol,
   items,
 }: CalculatorResultProps) {
+  const t = useTranslations('calculator')
+  const locale = useLocale()
+  const intlLocale = locale === 'fa' ? 'fa-IR' : 'en-US'
+
   if (!result) {
     return (
-      <Section header="نتیجه">
-        <Placeholder header="نتیجه اینجا نمایش داده می‌شود" />
+      <Section header={t('resultTitle')}>
+        <Placeholder header={t('resultPlaceholder')} />
       </Section>
     )
   }
 
   const toItem =
     toSymbol === 'IRT'
-      ? IRT_ENTRY
+      ? { symbol: IRT_ENTRY.symbol, displayName: getLocalizedIrtName(locale), png: IRT_ENTRY.png }
       : (() => {
           const found = findBySymbol(items, toSymbol)
           return found
             ? {
                 symbol: found.base_currency.symbol,
-                fa: found.name.fa || found.base_currency.fa,
-                en: found.name.en || found.base_currency.en,
+                displayName: getLocalizedItemName(found, locale),
                 png: found.png ?? found.base_currency.png ?? null,
               }
             : null
@@ -40,15 +52,15 @@ export function CalculatorResult({
   const numResult = Number(result)
   const formattedResult =
     toSymbol === 'IRT'
-      ? formatIRT(numResult)
-      : new Intl.NumberFormat('fa-IR', {
+      ? formatIRT(numResult, locale)
+      : new Intl.NumberFormat(intlLocale, {
           minimumFractionDigits: 0,
           maximumFractionDigits: 4,
         }).format(numResult)
 
   return (
-    <Section header="نتیجه">
-      <Cell subtitle={toItem?.fa ?? toSymbol}>
+    <Section header={t('resultTitle')}>
+      <Cell subtitle={toItem?.displayName ?? toSymbol}>
         <Text weight="2" className="tabular-nums">
           {formattedResult}
         </Text>

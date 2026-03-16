@@ -1,7 +1,5 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-
 import { IconPlus } from '@tabler/icons-react'
 import {
   Button,
@@ -11,7 +9,9 @@ import {
   Spinner,
   Text,
 } from '@telegram-apps/telegram-ui'
+import { useTranslations } from 'next-intl'
 
+import { useRouter } from '@/i18n/navigation'
 import { AssetListItem } from '@/components/asset-list-item'
 import { EmptyState } from '@/components/empty-state'
 import { PortfolioTotal } from '@/components/portfolio-total'
@@ -20,6 +20,7 @@ import { api } from '@/trpc/react'
 
 export default function AssetsPage() {
   const router = useRouter()
+  const t = useTranslations('assets')
 
   const { data, isLoading, isError, error, refetch } = api.assets.list.useQuery(
     undefined,
@@ -32,11 +33,11 @@ export default function AssetsPage() {
   if (isError) {
     return (
       <Placeholder
-        header="خطا در بارگذاری"
-        description={error.message || 'لطفاً دوباره تلاش کنید'}
+        header={t('loadError')}
+        description={error.message || t('retryButton')}
         action={
           <Button mode="filled" onClick={() => void refetch()}>
-            تلاش مجدد
+            {t('retryButton')}
           </Button>
         }
       >
@@ -56,14 +57,14 @@ export default function AssetsPage() {
   return (
     <>
       <List>
-        <Section header="ارزش کل دارایی‌ها">
+        <Section header={t('totalValue')}>
           <PortfolioTotal totalIRT={data.totalIRT} />
         </Section>
 
         {data.assets.length === 0 ? (
           <EmptyState />
         ) : (
-          <Section header="دارایی‌های من">
+          <Section header={t('myAssets')}>
             {data.assets.map((asset) => (
               <AssetListItem key={asset.id} {...asset} />
             ))}
@@ -79,7 +80,7 @@ export default function AssetsPage() {
             before={<IconPlus size={18} />}
             onClick={() => router.push('/assets/add')}
           >
-            افزودن دارایی
+            {t('addAsset')}
           </Button>
         </div>
       )}

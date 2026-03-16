@@ -3,10 +3,13 @@
 
 /*
  * Override TGUI's font-family variable to put Vazirmatn first.
- * The [dir="rtl"] selector targets AppRoot (and html), both of which have
- * dir="rtl". This rule appears AFTER the TGUI import so it wins the cascade.
+ * Applied for both RTL (Persian) and LTR (English) since Vazirmatn
+ * supports both Arabic and Latin subsets. Appears AFTER the TGUI
+ * import so it wins the cascade.
  */
-[dir="rtl"] {
+:root,
+[dir="rtl"],
+[dir="ltr"] {
   --tgui--font-family:
     var(--font-vazirmatn), system-ui, -apple-system, BlinkMacSystemFont,
     "Roboto", "Apple Color Emoji", "Helvetica Neue", sans-serif;

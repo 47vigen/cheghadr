@@ -1,0 +1,91 @@
+{
+  "nav": {
+    "assets": "دارایی‌های من",
+    "prices": "قیمت‌ها",
+    "calculator": "ماشین حساب"
+  },
+  "login": {
+    "title": "چه‌قدر؟",
+    "subtitle": "برای ادامه با تلگرام وارد شوید",
+    "loading": "در حال ورود…",
+    "errorTelegram": "خطا در ورود از طریق تلگرام",
+    "error": "خطا در ورود"
+  },
+  "assets": {
+    "totalValue": "ارزش کل دارایی‌ها",
+    "myAssets": "دارایی‌های من",
+    "addAsset": "افزودن دارایی",
+    "loadError": "خطا در بارگذاری",
+    "retryButton": "تلاش مجدد",
+    "emptyTitle": "هنوز دارایی اضافه نکرده‌اید",
+    "emptyDescription": "دارایی‌های خود را اضافه کنید تا ارزش کل سبد خود را ببینید",
+    "toman": "تومان",
+    "tomanAbbr": "ت",
+    "units": "واحد",
+    "editTitle": "ویرایش مقدار — {name}",
+    "editQuantityHeader": "مقدار",
+    "editQuantityPlaceholder": "مقدار جدید",
+    "save": "ذخیره",
+    "cancel": "انصراف",
+    "deleteTitle": "حذف دارایی",
+    "deleteConfirm": "آیا مطمئن هستید که می‌خواهید {name} را حذف کنید؟",
+    "delete": "حذف",
+    "toastUpdated": "دارایی به‌روز شد",
+    "toastUpdateError": "خطا در به‌روزرسانی",
+    "toastDeleted": "دارایی حذف شد",
+    "toastDeleteError": "خطا در حذف",
+    "toastAdded": "دارایی اضافه شد",
+    "toastAddError": "خطا در افزودن",
+    "toastInvalidQuantity": "مقدار باید عددی مثبت باشد"
+  },
+  "prices": {
+    "unavailable": "قیمت‌ها در دسترس نیست",
+    "checkLater": "لطفاً بعداً دوباره بررسی کنید"
+  },
+  "calculator": {
+    "title": "ماشین حساب",
+    "from": "از",
+    "to": "به",
+    "amount": "مقدار",
+    "amountPlaceholder": "مقدار را وارد کنید",
+    "resultTitle": "نتیجه",
+    "resultPlaceholder": "نتیجه اینجا نمایش داده می‌شود"
+  },
+  "addAsset": {
+    "title": "افزودن دارایی",
+    "subtitle": "دارایی مورد نظر را جستجو و انتخاب کنید"
+  },
+  "picker": {
+    "search": "جستجو...",
+    "selectedHeader": "{name} انتخاب شد",
+    "enterQuantity": "مقدار را وارد کنید",
+    "save": "ذخیره",
+    "checkmark": "✓ انتخاب شد",
+    "noResults": "نتیجه‌ای یافت نشد",
+    "selectAsset": "انتخاب دارایی",
+    "iranianToman": "تومان ایران",
+    "toman": "تومان"
+  },
+  "common": {
+    "error": "خطایی رخ داد",
+    "tryAgain": "لطفاً دوباره تلاش کنید",
+    "retry": "تلاش مجدد"
+  },
+  "categories": {
+    "CURRENCY": "ارز",
+    "CRYPTOCURRENCY": "رمزارز",
+    "GOLD": "طلا",
+    "COIN": "سکه",
+    "SILVER": "نقره",
+    "BORS": "بورس",
+    "GOLD_FUNDS": "صندوق طلا",
+    "STOCK_FUNDS": "صندوق سهام",
+    "FIXED_INCOME_FUNDS": "صندوق درآمد ثابت",
+    "MIXED_ASSET_FUNDS": "صندوق مختلط",
+    "LEVERAGED_FUNDS": "صندوق اهرمی",
+    "SECTOR_FUNDS": "صندوق بخشی",
+    "PROPERTY_FUNDS": "صندوق املاک",
+    "COMMODITY_SAFFRON_FUNDS": "صندوق زعفران",
+    "OTHER": "سایر"
+  }
+}

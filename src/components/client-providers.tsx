@@ -4,8 +4,6 @@ import type { PropsWithChildren } from 'react'
 
 import { Toaster } from 'sonner'
 
-import '@/styles/globals.css'
-
 import dynamic from 'next/dynamic'
 
 const TelegramProvider = dynamic(() => import('./telegram-provider'), {

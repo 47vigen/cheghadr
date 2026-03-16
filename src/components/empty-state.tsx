@@ -1,20 +1,22 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-
 import { IconWallet } from '@tabler/icons-react'
 import { Button, Placeholder } from '@telegram-apps/telegram-ui'
+import { useTranslations } from 'next-intl'
+
+import { useRouter } from '@/i18n/navigation'
 
 export function EmptyState() {
   const router = useRouter()
+  const t = useTranslations('assets')
 
   return (
     <Placeholder
-      header="هنوز دارایی اضافه نکرده‌اید"
-      description="دارایی‌های خود را اضافه کنید تا ارزش کل سبد خود را ببینید"
+      header={t('emptyTitle')}
+      description={t('emptyDescription')}
       action={
         <Button mode="filled" onClick={() => router.push('/assets/add')}>
-          افزودن دارایی
+          {t('addAsset')}
         </Button>
       }
     >

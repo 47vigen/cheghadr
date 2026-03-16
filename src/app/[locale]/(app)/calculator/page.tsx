@@ -11,6 +11,7 @@ import {
   Section,
   Spinner,
 } from '@telegram-apps/telegram-ui'
+import { useTranslations } from 'next-intl'
 
 import { AssetSelector } from '@/components/asset-selector'
 import { CalculatorResult } from '@/components/calculator-result'
@@ -19,6 +20,7 @@ import { computeConversion, parsePriceSnapshot } from '@/lib/prices'
 import { api } from '@/trpc/react'
 
 export default function CalculatorPage() {
+  const t = useTranslations('calculator')
   const { data, isLoading } = api.prices.latest.useQuery(undefined, {
     refetchInterval: 30 * 60 * 1000,
     refetchOnWindowFocus: true,
@@ -49,9 +51,9 @@ export default function CalculatorPage() {
 
   return (
     <List>
-      <Section header="ماشین حساب">
+      <Section header={t('title')}>
         <AssetSelector
-          label="از"
+          label={t('from')}
           value={fromSymbol}
           onChange={setFromSymbol}
           items={prices}
@@ -62,18 +64,18 @@ export default function CalculatorPage() {
           </IconButton>
         </Cell>
         <AssetSelector
-          label="به"
+          label={t('to')}
           value={toSymbol}
           onChange={setToSymbol}
           items={prices}
         />
         <Input
-          header="مقدار"
+          header={t('amount')}
           type="number"
           inputMode="decimal"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          placeholder="مقدار را وارد کنید"
+          placeholder={t('amountPlaceholder')}
         />
       </Section>
 

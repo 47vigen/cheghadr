@@ -1,36 +1,7 @@
-import type { Metadata } from 'next'
-import type { PropsWithChildren } from 'react'
+import type { ReactNode } from 'react'
 
-import { Toaster } from 'sonner'
-
-import '@/styles/globals.css'
-
-import { ClientProviders } from '@/components/client-providers'
-
-import { Vazirmatn } from '@/styles/fonts'
-import { TRPCReactProvider } from '@/trpc/react'
-
-export const metadata: Metadata = {
-  title: 'چه‌قدر؟',
-  description: 'ردیاب ارزش خالص دارایی',
-}
-
-export default function RootLayout(props: PropsWithChildren) {
-  return (
-    <html
-      lang="fa"
-      dir="rtl"
-      suppressHydrationWarning
-      className={Vazirmatn.variable}
-    >
-      <body>
-        <TRPCReactProvider>
-          <ClientProviders>
-            {props.children}
-            <Toaster richColors position="top-center" />
-          </ClientProviders>
-        </TRPCReactProvider>
-      </body>
-    </html>
-  )
+// Root layout: minimal pass-through. The [locale] layout provides <html>/<body>.
+// Required by Next.js when a not-found page or other root-level file exists.
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return children
 }

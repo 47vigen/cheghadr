@@ -15,6 +15,7 @@ import {
   Subheadline,
   Text,
 } from '@telegram-apps/telegram-ui'
+import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 import { ChangeLabel } from '@/components/change-label'
@@ -42,6 +43,8 @@ export function AssetListItem({
   assetIcon,
   change,
 }: AssetListItemProps) {
+  const t = useTranslations('assets')
+  const locale = useLocale()
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [newQuantity, setNewQuantity] = useState(String(quantity))
@@ -52,24 +55,24 @@ export function AssetListItem({
     onSuccess: () => {
       void utils.assets.list.invalidate()
       setEditOpen(false)
-      toast.success('دارایی به‌روز شد')
+      toast.success(t('toastUpdated'))
     },
-    onError: (err) => toast.error(err.message || 'خطا در به‌روزرسانی'),
+    onError: (err) => toast.error(err.message || t('toastUpdateError')),
   })
 
   const deleteMutation = api.assets.delete.useMutation({
     onSuccess: () => {
       void utils.assets.list.invalidate()
       setDeleteOpen(false)
-      toast.success('دارایی حذف شد')
+      toast.success(t('toastDeleted'))
     },
-    onError: (err) => toast.error(err.message || 'خطا در حذف'),
+    onError: (err) => toast.error(err.message || t('toastDeleteError')),
   })
 
   const handleUpdate = () => {
     const qty = Number(newQuantity)
     if (!newQuantity || Number.isNaN(qty) || qty <= 0) {
-      toast.error('مقدار باید عددی مثبت باشد')
+      toast.error(t('toastInvalidQuantity'))
       return
     }
     updateMutation.mutate({ id, quantity: newQuantity })
@@ -89,12 +92,12 @@ export function AssetListItem({
             <Avatar size={40} acronym={symbol.slice(0, 2)} />
           )
         }
-        subtitle={`${new Intl.NumberFormat('fa-IR').format(Number(quantity))} واحد`}
+        subtitle={`${new Intl.NumberFormat(locale === 'fa' ? 'fa-IR' : 'en-US').format(Number(quantity))} ${t('units')}`}
         after={
           <div className="flex items-center gap-2">
             <div className="flex flex-col items-end gap-0.5">
               <Text weight="2" className="tabular-nums">
-                {formatIRT(valueIRT)} ت
+                {formatIRT(valueIRT, locale)} {t('tomanAbbr')}
               </Text>
               <ChangeLabel change={change} />
             </div>
@@ -126,7 +129,9 @@ export function AssetListItem({
       <Modal
         open={editOpen}
         onOpenChange={setEditOpen}
-        header={<Modal.Header>ویرایش مقدار — {assetName}</Modal.Header>}
+        header={
+          <Modal.Header>{t('editTitle', { name: assetName })}</Modal.Header>
+        }
       >
         <Modal.Overlay />
         <Section>
@@ -135,8 +140,8 @@ export function AssetListItem({
             inputMode="decimal"
             value={newQuantity}
             onChange={(e) => setNewQuantity(e.target.value)}
-            placeholder="مقدار جدید"
-            header="مقدار"
+            placeholder={t('editQuantityPlaceholder')}
+            header={t('editQuantityHeader')}
           />
           <Button
             mode="filled"
@@ -144,7 +149,7 @@ export function AssetListItem({
             onClick={handleUpdate}
             disabled={updateMutation.isPending}
           >
-            {updateMutation.isPending ? <Spinner size="s" /> : 'ذخیره'}
+            {updateMutation.isPending ? <Spinner size="s" /> : t('save')}
           </Button>
         </Section>
         <Modal.Close />
@@ -153,13 +158,12 @@ export function AssetListItem({
       <Modal
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
-        header={<Modal.Header>حذف دارایی</Modal.Header>}
+        header={<Modal.Header>{t('deleteTitle')}</Modal.Header>}
       >
         <Modal.Overlay />
         <Section>
           <Subheadline level="2" className="mb-4 text-center">
-            آیا مطمئن هستید که می‌خواهید <strong>{assetName}</strong> را حذف
-            کنید؟
+            {t('deleteConfirm', { name: assetName })}
           </Subheadline>
           <div className="flex gap-2">
             <Button
@@ -167,7 +171,7 @@ export function AssetListItem({
               stretched
               onClick={() => setDeleteOpen(false)}
             >
-              انصراف
+              {t('cancel')}
             </Button>
             <Button
               mode="bezeled"
@@ -176,7 +180,7 @@ export function AssetListItem({
               disabled={deleteMutation.isPending}
               className="text-tgui-destructive-text"
             >
-              {deleteMutation.isPending ? <Spinner size="s" /> : 'حذف'}
+              {deleteMutation.isPending ? <Spinner size="s" /> : t('delete')}
             </Button>
           </div>
         </Section>
