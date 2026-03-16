@@ -1,23 +1,20 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Vazirmatn } from 'next/font/google'
 import type { ReactNode } from 'react'
+
+import { Toaster } from 'sonner'
 
 import './globals.css'
 
 import { TelegramProvider } from '@/components/telegram-provider'
-import { ThemeProvider } from '@/components/theme-provider'
 
 import { TRPCReactProvider } from '@/trpc/react'
-import { cn } from '@/utils/style'
 
-const fontSans = Geist({
-  subsets: ['latin'],
-  variable: '--font-sans',
-})
-
-const fontMono = Geist_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
+const vazirmatn = Vazirmatn({
+  subsets: ['arabic'],
+  variable: '--font-vazirmatn',
+  display: 'swap',
+  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
 })
 
 export const metadata: Metadata = {
@@ -35,19 +32,13 @@ export default function RootLayout({
       lang="fa"
       dir="rtl"
       suppressHydrationWarning
-      className={cn(
-        'antialiased',
-        fontMono.variable,
-        'font-sans',
-        fontSans.variable,
-      )}
+      className={vazirmatn.variable}
     >
       <body>
-        <ThemeProvider>
-          <TRPCReactProvider>
-            <TelegramProvider>{children}</TelegramProvider>
-          </TRPCReactProvider>
-        </ThemeProvider>
+        <TRPCReactProvider>
+          <TelegramProvider>{children}</TelegramProvider>
+        </TRPCReactProvider>
+        <Toaster richColors position="top-center" />
       </body>
     </html>
   )

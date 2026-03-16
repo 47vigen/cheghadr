@@ -3,12 +3,18 @@
 import { useRouter } from 'next/navigation'
 
 import { IconPlus } from '@tabler/icons-react'
-import { List, Section, Spinner } from '@telegram-apps/telegram-ui'
+import {
+  Button,
+  List,
+  Placeholder,
+  Section,
+  Spinner,
+  Text,
+} from '@telegram-apps/telegram-ui'
 
 import { AssetListItem } from '@/components/asset-list-item'
 import { EmptyState } from '@/components/empty-state'
 import { PortfolioTotal } from '@/components/portfolio-total'
-import { Button } from '@/components/ui/button'
 
 import { api } from '@/trpc/react'
 
@@ -25,10 +31,17 @@ export default function AssetsPage() {
 
   if (isError) {
     return (
-      <div className="flex min-h-svh flex-col items-center justify-center gap-4 p-6 text-center">
-        <p className="text-sm">{error.message || 'خطا در بارگذاری'}</p>
-        <Button onClick={() => void refetch()}>تلاش مجدد</Button>
-      </div>
+      <Placeholder
+        header="خطا در بارگذاری"
+        description={error.message || 'لطفاً دوباره تلاش کنید'}
+        action={
+          <Button mode="filled" onClick={() => void refetch()}>
+            تلاش مجدد
+          </Button>
+        }
+      >
+        <Text style={{ color: 'var(--tgui--hint_color)' }}>⚠️</Text>
+      </Placeholder>
     )
   }
 
@@ -63,8 +76,9 @@ export default function AssetsPage() {
       {data.assets.length > 0 && (
         <div className="fixed right-0 bottom-[var(--tabbar-height,72px)] left-0 flex justify-center p-4">
           <Button
+            mode="filled"
+            stretched
             onClick={() => router.push('/assets/add')}
-            className="w-full max-w-sm shadow-lg"
           >
             <IconPlus size={18} />
             افزودن دارایی

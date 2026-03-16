@@ -4,11 +4,13 @@ import { useState } from 'react'
 
 import {
   Avatar,
+  Caption,
   Cell,
   Input,
   List,
   Modal,
   Section,
+  Text,
 } from '@telegram-apps/telegram-ui'
 
 import {
@@ -64,24 +66,20 @@ export function AssetSelector({
 
   return (
     <>
-      <div className="flex flex-col gap-1">
-        <p className="text-muted-foreground text-xs">{label}</p>
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2.5 text-right"
-        >
-          {current.png ? (
-            <Avatar src={current.png} size={28} />
+      <Cell
+        before={
+          current.png ? (
+            <Avatar src={current.png} size={40} />
           ) : (
-            <Avatar size={28} acronym={current.symbol.slice(0, 2)} />
-          )}
-          <span className="font-medium">{current.fa}</span>
-          <span className="mr-auto text-muted-foreground text-xs">
-            {current.symbol}
-          </span>
-        </button>
-      </div>
+            <Avatar size={40} acronym={current.symbol.slice(0, 2)} />
+          )
+        }
+        subhead={label}
+        subtitle={current.symbol}
+        onClick={() => setOpen(true)}
+      >
+        {current.fa}
+      </Cell>
 
       <Modal
         open={open}
@@ -109,7 +107,12 @@ export function AssetSelector({
                   subtitle="تومان ایران"
                   after={
                     value === 'IRT' ? (
-                      <span className="text-primary text-xs">✓</span>
+                      <Caption
+                        level="2"
+                        style={{ color: 'var(--tgui--accent_text_color)' }}
+                      >
+                        ✓
+                      </Caption>
                     ) : undefined
                   }
                   onClick={() => {
@@ -146,7 +149,14 @@ export function AssetSelector({
                       subtitle={item.base_currency.en}
                       after={
                         isSelected ? (
-                          <span className="text-primary text-xs">✓</span>
+                          <Caption
+                            level="2"
+                            style={{
+                              color: 'var(--tgui--accent_text_color)',
+                            }}
+                          >
+                            ✓
+                          </Caption>
                         ) : undefined
                       }
                       onClick={() => {
@@ -162,9 +172,13 @@ export function AssetSelector({
             ))}
 
             {entries.length === 0 && (
-              <div className="py-10 text-center text-muted-foreground text-sm">
-                نتیجه‌ای یافت نشد
-              </div>
+              <Section>
+                <div className="py-10 text-center">
+                  <Text style={{ color: 'var(--tgui--hint_color)' }}>
+                    نتیجه‌ای یافت نشد
+                  </Text>
+                </div>
+              </Section>
             )}
           </List>
         </div>

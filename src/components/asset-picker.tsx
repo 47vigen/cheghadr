@@ -4,15 +4,15 @@ import { useState } from 'react'
 
 import {
   Avatar,
+  Button,
   Cell,
   Input,
   List,
   Section,
   Spinner,
+  Text,
 } from '@telegram-apps/telegram-ui'
 import { toast } from 'sonner'
-
-import { Button } from '@/components/ui/button'
 
 import {
   categoryLabels,
@@ -76,23 +76,26 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
       </div>
 
       {selected && (
-        <div className="mx-4 rounded-xl border border-border bg-card p-4">
-          <p className="mb-2 font-medium text-sm">
+        <div
+          className="mx-4 rounded-xl p-4"
+          style={{ background: 'var(--tgui--secondary_bg_color)' }}
+        >
+          <Text weight="2" style={{ display: 'block', marginBottom: '8px' }}>
             {selected.name.fa} انتخاب شد
-          </p>
+          </Text>
           <div className="flex gap-2">
-            <input
+            <Input
               type="number"
               inputMode="decimal"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               placeholder="مقدار را وارد کنید"
-              className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-right text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              style={{ flex: 1 }}
             />
             <Button
+              mode="filled"
               onClick={handleSave}
               disabled={addMutation.isPending}
-              className="shrink-0"
             >
               {addMutation.isPending ? <Spinner size="s" /> : 'ذخیره'}
             </Button>
@@ -123,7 +126,14 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
                   subtitle={`${formatIRT(Number(item.sell_price))} ت`}
                   after={
                     isSelected ? (
-                      <span className="text-primary text-xs">✓ انتخاب شد</span>
+                      <span
+                        style={{
+                          color: 'var(--tgui--accent_text_color)',
+                          fontSize: '12px',
+                        }}
+                      >
+                        ✓ انتخاب شد
+                      </span>
                     ) : undefined
                   }
                   onClick={() => {
@@ -138,9 +148,13 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
           </Section>
         ))}
         {entries.length === 0 && (
-          <div className="py-10 text-center text-muted-foreground text-sm">
-            نتیجه‌ای یافت نشد
-          </div>
+          <Section>
+            <div className="py-10 text-center">
+              <Text style={{ color: 'var(--tgui--hint_color)' }}>
+                نتیجه‌ای یافت نشد
+              </Text>
+            </div>
+          </Section>
         )}
       </List>
     </div>

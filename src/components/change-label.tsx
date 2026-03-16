@@ -1,15 +1,22 @@
+import { Caption } from '@telegram-apps/telegram-ui'
+
 import { formatChange } from '@/lib/prices'
 
 interface ChangeLabelProps {
   change: string | null | undefined
-  className?: string
 }
 
-export function ChangeLabel({ change, className }: ChangeLabelProps) {
+export function ChangeLabel({ change }: ChangeLabelProps) {
   const formatted = formatChange(change)
   if (!formatted) return null
 
-  const defaultClass = formatted.positive ? 'text-green-600' : 'text-red-500'
+  const color = formatted.positive
+    ? 'var(--tgui--green)'
+    : 'var(--tgui--destructive_text_color)'
 
-  return <span className={className ?? defaultClass}>{formatted.text}</span>
+  return (
+    <Caption level="2" style={{ color }}>
+      {formatted.text}
+    </Caption>
+  )
 }

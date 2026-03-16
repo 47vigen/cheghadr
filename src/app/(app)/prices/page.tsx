@@ -1,6 +1,6 @@
 'use client'
 
-import { List, Spinner } from '@telegram-apps/telegram-ui'
+import { List, Placeholder, Spinner } from '@telegram-apps/telegram-ui'
 
 import { PriceSection } from '@/components/price-section'
 import { StalenessBadge } from '@/components/staleness-badge'
@@ -38,16 +38,19 @@ export default function PricesPage() {
           stale={data?.stale ?? true}
         />
       </div>
-      <List>
-        {entries.map(([category, items]) => (
-          <PriceSection key={category} category={category} items={items} />
-        ))}
-        {entries.length === 0 && (
-          <div className="py-12 text-center text-muted-foreground text-sm">
-            قیمت‌ها در دسترس نیست
-          </div>
-        )}
-      </List>
+
+      {entries.length === 0 ? (
+        <Placeholder
+          header="قیمت‌ها در دسترس نیست"
+          description="لطفاً بعداً دوباره بررسی کنید"
+        />
+      ) : (
+        <List>
+          {entries.map(([category, items]) => (
+            <PriceSection key={category} category={category} items={items} />
+          ))}
+        </List>
+      )}
     </div>
   )
 }

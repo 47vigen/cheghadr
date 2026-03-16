@@ -1,3 +1,5 @@
+import { Caption, LargeTitle, Section, Text } from '@telegram-apps/telegram-ui'
+
 import { findBySymbol, formatIRT, IRT_ENTRY } from '@/lib/prices'
 import type { PriceItem } from '@/modules/API/Swagger/ecotrust/gen/models'
 
@@ -14,11 +16,13 @@ export function CalculatorResult({
 }: CalculatorResultProps) {
   if (!result) {
     return (
-      <div className="flex min-h-[80px] items-center justify-center rounded-xl border border-border bg-muted/50 p-4">
-        <p className="text-muted-foreground text-sm">
-          نتیجه اینجا نمایش داده می‌شود
-        </p>
-      </div>
+      <Section>
+        <div className="flex min-h-[80px] items-center justify-center p-4">
+          <Caption level="1" style={{ color: 'var(--tgui--hint_color)' }}>
+            نتیجه اینجا نمایش داده می‌شود
+          </Caption>
+        </div>
+      </Section>
     )
   }
 
@@ -47,16 +51,17 @@ export function CalculatorResult({
         }).format(numResult)
 
   return (
-    <div className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card p-6">
-      <p className="text-muted-foreground text-xs">نتیجه</p>
-      <div className="flex items-baseline gap-1.5">
-        <span className="font-bold text-3xl tabular-nums">
-          {formattedResult}
-        </span>
-        <span className="text-muted-foreground text-sm">
-          {toItem?.fa ?? toSymbol}
-        </span>
+    <Section header="نتیجه">
+      <div className="flex flex-col items-center gap-1 p-6">
+        <div className="flex items-baseline gap-1.5">
+          <LargeTitle weight="2" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            {formattedResult}
+          </LargeTitle>
+          <Text weight="3" style={{ color: 'var(--tgui--hint_color)' }}>
+            {toItem?.fa ?? toSymbol}
+          </Text>
+        </div>
       </div>
-    </div>
+    </Section>
   )
 }

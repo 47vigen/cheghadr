@@ -5,15 +5,16 @@ import { useState } from 'react'
 import { IconEdit, IconTrash } from '@tabler/icons-react'
 import {
   Avatar,
+  Button,
   Cell,
   IconButton,
+  Input,
   Modal,
   Spinner,
 } from '@telegram-apps/telegram-ui'
 import { toast } from 'sonner'
 
 import { ChangeLabel } from '@/components/change-label'
-import { Button } from '@/components/ui/button'
 
 import { formatIRT } from '@/lib/prices'
 import { api } from '@/trpc/react'
@@ -88,8 +89,14 @@ export function AssetListItem({
         subtitle={`${new Intl.NumberFormat('fa-IR').format(Number(quantity))} واحد`}
         after={
           <div className="flex items-center gap-1">
-            <div className="flex flex-col items-end gap-0.5 text-sm">
-              <span className="font-medium tabular-nums">
+            <div className="flex flex-col items-end gap-0.5">
+              <span
+                style={{
+                  fontVariantNumeric: 'tabular-nums',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                }}
+              >
                 {formatIRT(valueIRT)} ت
               </span>
               <ChangeLabel change={change} />
@@ -110,7 +117,10 @@ export function AssetListItem({
                 mode="plain"
                 onClick={() => setDeleteOpen(true)}
               >
-                <IconTrash size={16} className="text-destructive" />
+                <IconTrash
+                  size={16}
+                  style={{ color: 'var(--tgui--destructive_text_color)' }}
+                />
               </IconButton>
             </div>
           </div>
@@ -119,55 +129,61 @@ export function AssetListItem({
         {assetName}
       </Cell>
 
-      {/* Edit modal */}
       <Modal
         open={editOpen}
         onOpenChange={setEditOpen}
         header={<Modal.Header>ویرایش مقدار — {assetName}</Modal.Header>}
       >
-        <div className="flex flex-col gap-4 p-4">
-          <input
+        <div className="flex flex-col gap-4 p-4 pb-8">
+          <Input
             type="number"
             inputMode="decimal"
             value={newQuantity}
             onChange={(e) => setNewQuantity(e.target.value)}
             placeholder="مقدار جدید"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-right text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            header="مقدار"
           />
           <Button
+            mode="filled"
+            stretched
             onClick={handleUpdate}
             disabled={updateMutation.isPending}
-            className="w-full"
           >
             {updateMutation.isPending ? <Spinner size="s" /> : 'ذخیره'}
           </Button>
         </div>
       </Modal>
 
-      {/* Delete confirmation modal */}
       <Modal
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         header={<Modal.Header>حذف دارایی</Modal.Header>}
       >
-        <div className="flex flex-col gap-4 p-4">
-          <p className="text-center text-sm">
+        <div className="flex flex-col gap-3 p-4 pb-8">
+          <p
+            style={{
+              textAlign: 'center',
+              fontSize: '15px',
+              color: 'var(--tgui--text_color)',
+            }}
+          >
             آیا مطمئن هستید که می‌خواهید <strong>{assetName}</strong> را حذف
             کنید؟
           </p>
           <div className="flex gap-2">
             <Button
-              variant="outline"
+              mode="bezeled"
+              stretched
               onClick={() => setDeleteOpen(false)}
-              className="flex-1"
             >
               انصراف
             </Button>
             <Button
-              variant="destructive"
+              mode="bezeled"
+              stretched
               onClick={handleDelete}
               disabled={deleteMutation.isPending}
-              className="flex-1"
+              style={{ color: 'var(--tgui--destructive_text_color)' }}
             >
               {deleteMutation.isPending ? <Spinner size="s" /> : 'حذف'}
             </Button>

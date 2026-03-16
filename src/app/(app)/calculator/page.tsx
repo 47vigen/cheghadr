@@ -3,7 +3,13 @@
 import { useState } from 'react'
 
 import { IconArrowsExchange } from '@tabler/icons-react'
-import { IconButton, Spinner } from '@telegram-apps/telegram-ui'
+import {
+  IconButton,
+  Input,
+  List,
+  Section,
+  Spinner,
+} from '@telegram-apps/telegram-ui'
 
 import { AssetSelector } from '@/components/asset-selector'
 import { CalculatorResult } from '@/components/calculator-result'
@@ -41,42 +47,36 @@ export default function CalculatorPage() {
   }
 
   return (
-    <div className="flex flex-col gap-5 px-4 py-5">
-      <h1 className="font-semibold text-base">ماشین حساب</h1>
-
-      <AssetSelector
-        label="از"
-        value={fromSymbol}
-        onChange={setFromSymbol}
-        items={prices}
-      />
-
-      <div className="flex flex-col gap-1">
-        <p className="text-muted-foreground text-xs">مقدار</p>
-        <input
+    <List>
+      <Section header="ماشین حساب">
+        <AssetSelector
+          label="از"
+          value={fromSymbol}
+          onChange={setFromSymbol}
+          items={prices}
+        />
+        <Input
+          header="مقدار"
           type="number"
           inputMode="decimal"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           placeholder="مقدار را وارد کنید"
-          className="w-full rounded-xl border border-border bg-background px-4 py-3 text-right text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         />
-      </div>
-
-      <div className="flex justify-center">
-        <IconButton size="m" mode="bezeled" onClick={handleSwap}>
-          <IconArrowsExchange size={24} />
-        </IconButton>
-      </div>
-
-      <AssetSelector
-        label="به"
-        value={toSymbol}
-        onChange={setToSymbol}
-        items={prices}
-      />
+        <div className="flex justify-center py-2">
+          <IconButton size="m" mode="bezeled" onClick={handleSwap}>
+            <IconArrowsExchange size={24} />
+          </IconButton>
+        </div>
+        <AssetSelector
+          label="به"
+          value={toSymbol}
+          onChange={setToSymbol}
+          items={prices}
+        />
+      </Section>
 
       <CalculatorResult result={result} toSymbol={toSymbol} items={prices} />
-    </div>
+    </List>
   )
 }
