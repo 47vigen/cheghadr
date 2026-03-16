@@ -14,6 +14,7 @@ import { useTranslations } from 'next-intl'
 
 import { useRouter } from '@/i18n/navigation'
 import { AssetListItem } from '@/components/asset-list-item'
+import { DynamicLoader } from '@/components/dynamic-loader'
 import { EmptyState } from '@/components/empty-state'
 import { PortfolioTotal } from '@/components/portfolio-total'
 import { AssetsSkeleton } from '@/components/skeletons/assets-skeleton'
@@ -24,7 +25,7 @@ import { api } from '@/trpc/react'
 
 const PortfolioChart = dynamic(
   () => import('@/components/portfolio-chart').then((m) => ({ default: m.PortfolioChart })),
-  { ssr: false, loading: () => <div className="h-[180px] animate-pulse rounded-lg bg-tgui-section" /> },
+  { ssr: false, loading: () => <DynamicLoader height={180} /> },
 )
 
 export default function AssetsPage() {
