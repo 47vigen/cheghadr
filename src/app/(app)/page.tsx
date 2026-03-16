@@ -76,11 +76,11 @@ export default function AssetsPage() {
       {data.assets.length > 0 && (
         <div className="fixed right-0 bottom-[var(--tabbar-height,72px)] left-0 flex justify-center p-4">
           <Button
-            mode="filled"
             stretched
+            mode="filled"
+            before={<IconPlus size={18} />}
             onClick={() => router.push('/assets/add')}
           >
-            <IconPlus size={18} />
             افزودن دارایی
           </Button>
         </div>
