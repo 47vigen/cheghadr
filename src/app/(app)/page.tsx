@@ -1,6 +1,7 @@
 'use client'
 
 import { IconPlus } from '@tabler/icons-react'
+import dynamic from 'next/dynamic'
 import {
   Button,
   List,
@@ -14,13 +15,17 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import { AssetListItem } from '@/components/asset-list-item'
 import { EmptyState } from '@/components/empty-state'
-import { PortfolioChart } from '@/components/portfolio-chart'
 import { PortfolioTotal } from '@/components/portfolio-total'
 import { AssetsSkeleton } from '@/components/skeletons/assets-skeleton'
 import { StalenessBanner } from '@/components/staleness-banner'
 
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
 import { api } from '@/trpc/react'
+
+const PortfolioChart = dynamic(
+  () => import('@/components/portfolio-chart').then((m) => ({ default: m.PortfolioChart })),
+  { ssr: false, loading: () => <div className="h-[180px] animate-pulse rounded-lg bg-tgui-section" /> },
+)
 
 export default function AssetsPage() {
   const router = useRouter()
