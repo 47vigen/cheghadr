@@ -6,8 +6,9 @@ import { useEffect, useState } from 'react'
 import { AppRoot } from '@telegram-apps/telegram-ui'
 import WebApp from '@twa-dev/sdk'
 
-import { useViewportHeight } from '@/hooks/use-viewport-height'
 import { usePlatform } from '@/hooks/use-platform'
+import { useViewportHeight } from '@/hooks/use-viewport-height'
+import { getRawInitData } from '@/utils/telegram'
 
 export default function TelegramProvider(props: PropsWithChildren) {
   const platform = usePlatform()
@@ -18,13 +19,18 @@ export default function TelegramProvider(props: PropsWithChildren) {
   useViewportHeight()
 
   useEffect(() => {
+    if (!getRawInitData()) return
+    WebApp.expand()
+    WebApp.ready()
+
     if (['ios', 'android'].includes(platform)) {
-      WebApp.requestFullscreen()
+      // WebApp.requestFullscreen()
     }
   }, [platform])
 
   useEffect(() => {
     const handler = () => setAppearance(WebApp.colorScheme)
+
     WebApp.onEvent('themeChanged', handler)
     return () => WebApp.offEvent('themeChanged', handler)
   }, [])
