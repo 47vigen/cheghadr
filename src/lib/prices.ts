@@ -16,6 +16,21 @@ export function findBySymbol(
   return items.find((item) => item.base_currency.symbol === symbol)
 }
 
+export function filterPriceItems(
+  items: PriceItem[],
+  query: string,
+): PriceItem[] {
+  const q = query.trim().toLowerCase()
+  if (!q) return items
+  return items.filter(
+    (item) =>
+      item.name.fa.includes(q) ||
+      item.base_currency.fa.toLowerCase().includes(q) ||
+      item.name.en.toLowerCase().includes(q) ||
+      item.base_currency.symbol.toLowerCase().includes(q),
+  )
+}
+
 export function groupByCategory(items: PriceItem[]): Map<string, PriceItem[]> {
   const groups = new Map<string, PriceItem[]>()
   for (const item of items) {
@@ -94,6 +109,16 @@ export function formatChange(change: string | null | undefined): {
   return { text: `${formatted}%`, positive: n >= 0 }
 }
 
+export const STALE_AFTER_MINUTES = 60
+
+function parseSellPrice(symbol: string, items: PriceItem[]): number {
+  if (symbol === 'IRT') return 1
+  const raw = findBySymbol(items, symbol)?.sell_price
+  if (!raw) return 0
+  const n = Number.parseFloat(raw)
+  return Number.isNaN(n) ? 0 : n
+}
+
 export function computeConversion(
   amount: string,
   fromSymbol: string,
@@ -103,14 +128,8 @@ export function computeConversion(
   const qty = Number(amount)
   if (!qty || qty <= 0) return null
 
-  const fromSell =
-    fromSymbol === 'IRT'
-      ? 1
-      : Number(findBySymbol(items, fromSymbol)?.sell_price ?? 0)
-  const toSell =
-    toSymbol === 'IRT'
-      ? 1
-      : Number(findBySymbol(items, toSymbol)?.sell_price ?? 0)
+  const fromSell = parseSellPrice(fromSymbol, items)
+  const toSell = parseSellPrice(toSymbol, items)
 
   if (fromSell === 0 || toSell === 0) return null
 

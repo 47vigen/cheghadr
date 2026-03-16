@@ -1,13 +1,10 @@
 'use client'
 
-import { Tabbar } from '@telegram-apps/telegram-ui'
-import {
-  IconCalculator,
-  IconChartLine,
-  IconCoins,
-} from '@tabler/icons-react'
 import { usePathname, useRouter } from 'next/navigation'
 import type { ComponentType } from 'react'
+
+import { IconCalculator, IconChartLine, IconCoins } from '@tabler/icons-react'
+import { Tabbar } from '@telegram-apps/telegram-ui'
 
 type AppRoute = '/' | '/prices' | '/calculator'
 

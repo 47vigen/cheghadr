@@ -1,10 +1,25 @@
+import type { PrismaClient } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
-import { findBySymbol, parsePriceSnapshot } from '@/lib/prices'
+import {
+  findBySymbol,
+  parsePriceSnapshot,
+  STALE_AFTER_MINUTES,
+} from '@/lib/prices'
 import { protectedProcedure, router } from '@/server/api/trpc'
 
-const STALE_AFTER_MINUTES = 60
+async function requireOwnedAsset(
+  database: PrismaClient,
+  id: string,
+  userId: string,
+) {
+  const asset = await database.userAsset.findUnique({ where: { id } })
+  if (!asset || asset.userId !== userId) {
+    throw new TRPCError({ code: 'NOT_FOUND' })
+  }
+  return asset
+}
 
 const quantitySchema = z.string().refine(
   (v) => {
@@ -87,14 +102,9 @@ export const assetsRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const asset = await ctx.db.userAsset.findUnique({
-        where: { id: input.id },
-      })
-      if (!asset || asset.userId !== ctx.user.id) {
-        throw new TRPCError({ code: 'NOT_FOUND' })
-      }
+      await requireOwnedAsset(ctx.db, input.id, ctx.user.id)
       return ctx.db.userAsset.update({
-        where: { id: input.id },
+        where: { id: input.id, userId: ctx.user.id },
         data: { quantity: input.quantity },
       })
     }),
@@ -102,12 +112,9 @@ export const assetsRouter = router({
   delete: protectedProcedure
     .input(z.object({ id: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
-      const asset = await ctx.db.userAsset.findUnique({
-        where: { id: input.id },
+      await requireOwnedAsset(ctx.db, input.id, ctx.user.id)
+      await ctx.db.userAsset.delete({
+        where: { id: input.id, userId: ctx.user.id },
       })
-      if (!asset || asset.userId !== ctx.user.id) {
-        throw new TRPCError({ code: 'NOT_FOUND' })
-      }
-      await ctx.db.userAsset.delete({ where: { id: input.id } })
     }),
 })

@@ -1,10 +1,15 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 export function useTelegramBackButton(show: boolean) {
   const router = useRouter()
+  // Keep a stable ref so the effect only re-runs on `show` changes
+  const routerRef = useRef(router)
+  useEffect(() => {
+    routerRef.current = router
+  }, [router])
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp
@@ -12,7 +17,7 @@ export function useTelegramBackButton(show: boolean) {
 
     if (show) {
       tg.BackButton.show()
-      const handler = () => router.back()
+      const handler = () => routerRef.current.back()
       tg.BackButton.onClick(handler)
       return () => {
         tg.BackButton?.offClick(handler)
@@ -21,5 +26,8 @@ export function useTelegramBackButton(show: boolean) {
     }
 
     tg.BackButton.hide()
-  }, [show, router])
+    return () => {
+      tg.BackButton?.hide()
+    }
+  }, [show])
 }

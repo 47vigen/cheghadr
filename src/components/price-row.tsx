@@ -12,7 +12,7 @@ interface PriceRowProps {
 export function PriceRow({ item }: PriceRowProps) {
   const icon = item.png ?? item.base_currency.png
   const name = item.name.fa || item.base_currency.fa
-  const sellPrice = Number(item.sell_price)
+  const sellPrice = Number.parseFloat(item.sell_price)
 
   return (
     <Cell
@@ -26,9 +26,9 @@ export function PriceRow({ item }: PriceRowProps) {
       after={
         <div className="flex flex-col items-end gap-0.5">
           <span className="font-medium text-sm tabular-nums">
-            {formatIRT(sellPrice)} ت
+            {Number.isNaN(sellPrice) ? '—' : `${formatIRT(sellPrice)} ت`}
           </span>
-          <ChangeLabel change={item.change} className={undefined} />
+          <ChangeLabel change={item.change} />
         </div>
       }
     >

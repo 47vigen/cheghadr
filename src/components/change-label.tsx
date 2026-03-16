@@ -9,13 +9,7 @@ export function ChangeLabel({ change, className }: ChangeLabelProps) {
   const formatted = formatChange(change)
   if (!formatted) return null
 
-  return (
-    <span
-      className={
-        className ?? (formatted.positive ? 'text-green-600' : 'text-red-500')
-      }
-    >
-      {formatted.text}
-    </span>
-  )
+  const defaultClass = formatted.positive ? 'text-green-600' : 'text-red-500'
+
+  return <span className={className ?? defaultClass}>{formatted.text}</span>
 }

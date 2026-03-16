@@ -13,6 +13,7 @@ import {
 
 import {
   categoryLabels,
+  filterPriceItems,
   groupByCategory,
   IRT_ENTRY,
   sortedGroupEntries,
@@ -26,6 +27,20 @@ interface AssetSelectorProps {
   items: PriceItem[]
 }
 
+function getCurrentDisplay(
+  value: string,
+  items: PriceItem[],
+): { symbol: string; fa: string; png: string | null } {
+  if (value === 'IRT') return IRT_ENTRY
+  const found = items.find((i) => i.base_currency.symbol === value)
+  if (!found) return { symbol: value, fa: value, png: null }
+  return {
+    symbol: found.base_currency.symbol,
+    fa: found.name.fa || found.base_currency.fa,
+    png: found.png ?? found.base_currency.png ?? null,
+  }
+}
+
 export function AssetSelector({
   label,
   value,
@@ -35,38 +50,17 @@ export function AssetSelector({
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
 
-  const allItems: Array<{
-    symbol: string
-    fa: string
-    en: string
-    png: string | null
-    categorySymbol?: string
-  }> = [
-    { ...IRT_ENTRY, categorySymbol: 'CURRENCY' },
-    ...items.map((item) => ({
-      symbol: item.base_currency.symbol,
-      fa: item.name.fa || item.base_currency.fa,
-      en: item.name.en || item.base_currency.en,
-      png: item.png ?? item.base_currency.png ?? null,
-      categorySymbol: item.base_currency.category?.symbol,
-    })),
-  ]
-
-  const query = search.trim().toLowerCase()
-  const filteredItems = query
-    ? items.filter(
-        (item) =>
-          item.name.fa.includes(query) ||
-          item.base_currency.fa.toLowerCase().includes(query) ||
-          item.name.en.toLowerCase().includes(query) ||
-          item.base_currency.symbol.toLowerCase().includes(query),
-      )
-    : items
-
+  const filteredItems = filterPriceItems(items, search)
   const grouped = groupByCategory(filteredItems)
   const entries = sortedGroupEntries(grouped)
+  const isSearching = search.trim().length > 0
 
-  const current = allItems.find((i) => i.symbol === value)
+  const current = getCurrentDisplay(value, items)
+
+  const closeModal = () => {
+    setOpen(false)
+    setSearch('')
+  }
 
   return (
     <>
@@ -77,14 +71,14 @@ export function AssetSelector({
           onClick={() => setOpen(true)}
           className="flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2.5 text-right"
         >
-          {current?.png ? (
+          {current.png ? (
             <Avatar src={current.png} size={28} />
           ) : (
-            <Avatar size={28} acronym={current?.symbol?.slice(0, 2) ?? '?'} />
+            <Avatar size={28} acronym={current.symbol.slice(0, 2)} />
           )}
-          <span className="font-medium">{current?.fa ?? value}</span>
+          <span className="font-medium">{current.fa}</span>
           <span className="mr-auto text-muted-foreground text-xs">
-            {current?.symbol}
+            {current.symbol}
           </span>
         </button>
       </div>
@@ -92,8 +86,8 @@ export function AssetSelector({
       <Modal
         open={open}
         onOpenChange={(v) => {
-          setOpen(v)
-          if (!v) setSearch('')
+          if (!v) closeModal()
+          else setOpen(true)
         }}
         header={<Modal.Header>{label} — انتخاب دارایی</Modal.Header>}
       >
@@ -108,8 +102,7 @@ export function AssetSelector({
           </div>
 
           <List>
-            {/* IRT entry only when not searching */}
-            {!query && (
+            {!isSearching && (
               <Section header={categoryLabels.CURRENCY ?? 'ارز'}>
                 <Cell
                   before={<Avatar size={40} acronym="ت" />}
@@ -121,8 +114,7 @@ export function AssetSelector({
                   }
                   onClick={() => {
                     onChange('IRT')
-                    setOpen(false)
-                    setSearch('')
+                    closeModal()
                   }}
                 >
                   تومان
@@ -159,8 +151,7 @@ export function AssetSelector({
                       }
                       onClick={() => {
                         onChange(item.base_currency.symbol)
-                        setOpen(false)
-                        setSearch('')
+                        closeModal()
                       }}
                     >
                       {item.name.fa || item.base_currency.fa}

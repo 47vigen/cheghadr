@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 
 import {
   categoryLabels,
+  filterPriceItems,
   formatIRT,
   groupByCategory,
   parsePriceSnapshot,
@@ -46,18 +47,7 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
   })
 
   const items = parsePriceSnapshot(priceData)
-  const query = search.trim().toLowerCase()
-
-  const filtered = query
-    ? items.filter(
-        (item) =>
-          item.name.fa.includes(query) ||
-          item.base_currency.fa.toLowerCase().includes(query) ||
-          item.name.en.toLowerCase().includes(query) ||
-          item.base_currency.symbol.toLowerCase().includes(query),
-      )
-    : items
-
+  const filtered = filterPriceItems(items, search)
   const grouped = groupByCategory(filtered)
   const entries = sortedGroupEntries(grouped)
 

@@ -92,7 +92,7 @@ export function AssetListItem({
               <span className="font-medium tabular-nums">
                 {formatIRT(valueIRT)} ت
               </span>
-              <ChangeLabel change={change} className={undefined} />
+              <ChangeLabel change={change} />
             </div>
             <div className="flex flex-col gap-1">
               <IconButton

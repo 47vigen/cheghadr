@@ -23,19 +23,19 @@ export default function AssetsPage() {
     },
   )
 
-  if (isLoading || !data) {
-    return (
-      <div className="flex min-h-svh items-center justify-center">
-        <Spinner size="l" />
-      </div>
-    )
-  }
-
   if (isError) {
     return (
       <div className="flex min-h-svh flex-col items-center justify-center gap-4 p-6 text-center">
         <p className="text-sm">{error.message || 'خطا در بارگذاری'}</p>
         <Button onClick={() => void refetch()}>تلاش مجدد</Button>
+      </div>
+    )
+  }
+
+  if (isLoading || !data) {
+    return (
+      <div className="flex min-h-svh items-center justify-center">
+        <Spinner size="l" />
       </div>
     )
   }

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   computeConversion,
+  filterPriceItems,
   findBySymbol,
   formatChange,
   formatIRT,
@@ -174,5 +175,36 @@ describe('computeConversion', () => {
 
   it('returns null for empty amount', () => {
     expect(computeConversion('', 'USD', 'IRT', items)).toBeNull()
+  })
+
+  it('returns null for NaN sell_price', () => {
+    const badItem = makeItem('BAD', 'not-a-number', 'CURRENCY')
+    expect(computeConversion('10', 'BAD', 'IRT', [badItem])).toBeNull()
+  })
+
+  it('handles IRT-to-IRT conversion (result = amount)', () => {
+    const result = computeConversion('42', 'IRT', 'IRT', items)
+    expect(result).toBe('42.0000')
+  })
+})
+
+describe('filterPriceItems', () => {
+  const items = [USD, BTC, GOLD]
+
+  it('returns all items for empty query', () => {
+    expect(filterPriceItems(items, '')).toHaveLength(3)
+    expect(filterPriceItems(items, '   ')).toHaveLength(3)
+  })
+
+  it('filters by Persian name', () => {
+    const result = filterPriceItems(items, 'فارسی USD')
+    expect(result).toHaveLength(1)
+    expect(result[0]?.base_currency.symbol).toBe('USD')
+  })
+
+  it('filters by English symbol case-insensitive', () => {
+    const result = filterPriceItems(items, 'btc')
+    expect(result).toHaveLength(1)
+    expect(result[0]?.base_currency.symbol).toBe('BTC')
   })
 })
