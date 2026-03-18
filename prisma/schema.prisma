@@ -9,12 +9,24 @@ datasource db {
   provider = "postgresql"
 }
 
+enum AlertType {
+  PRICE
+  PORTFOLIO
+}
+
+enum AlertDir {
+  ABOVE
+  BELOW
+}
+
 model User {
-  id             String              @id @default(cuid())
-  telegramUserId BigInt              @unique
-  createdAt      DateTime            @default(now())
-  assets         UserAsset[]
-  portfolioSnaps PortfolioSnapshot[]
+  id                 String              @id @default(cuid())
+  telegramUserId     BigInt              @unique
+  dailyDigestEnabled Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  assets             UserAsset[]
+  portfolioSnaps     PortfolioSnapshot[]
+  alerts             Alert[]
 }
 
 model UserAsset {
@@ -47,4 +59,21 @@ model PortfolioSnapshot {
   breakdown  Json
 
   @@index([userId, snapshotAt(sort: Desc)])
+}
+
+model Alert {
+  id           String    @id @default(cuid())
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  type         AlertType
+  symbol       String?
+  direction    AlertDir
+  thresholdIRT Decimal   @db.Decimal(24, 2)
+  isActive     Boolean   @default(true)
+  triggeredAt  DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([userId, isActive])
+  @@index([symbol, isActive])
+  @@index([type, isActive])
 }

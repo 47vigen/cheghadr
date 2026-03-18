@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-import { createPortfolioSnapshot } from '@/lib/portfolio'
+import { evaluatePriceAlerts } from '@/lib/alert-evaluation'
 import { db } from '@/server/db'
 
 const ECOTRUST_API_URL = process.env.NEXT_PUBLIC_ECOTRUST_API_URL
@@ -45,9 +45,21 @@ export async function GET(request: NextRequest) {
       throw new Error('Ecotrust API returned empty or invalid data')
     }
 
-    await db.priceSnapshot.create({
+    // Load previous snapshot before saving the new one
+    const previousSnapshot = await db.priceSnapshot.findFirst({
+      orderBy: { snapshotAt: 'desc' },
+    })
+
+    const currentSnapshot = await db.priceSnapshot.create({
       data: { data: data as object },
     })
+
+    // Evaluate price alerts (compare previous vs current prices)
+    const { evaluated, triggered } = await evaluatePriceAlerts(
+      db,
+      currentSnapshot,
+      previousSnapshot,
+    )
 
     // Prune price snapshots older than 90 days
     const ninetyDaysAgo = new Date()
@@ -57,30 +69,12 @@ export async function GET(request: NextRequest) {
       where: { snapshotAt: { lt: ninetyDaysAgo } },
     })
 
-    // Create daily portfolio snapshots for all active users
-    const activeUsers = await db.user.findMany({
-      where: { assets: { some: {} } },
-      select: { id: true },
-    })
-
-    let portfolioSnapshotCount = 0
-    for (const user of activeUsers) {
-      const snap = await createPortfolioSnapshot(db, user.id)
-      if (snap) portfolioSnapshotCount++
-    }
-
-    // Prune portfolio snapshots older than 365 days
-    const yearAgo = new Date()
-    yearAgo.setDate(yearAgo.getDate() - 365)
-    await db.portfolioSnapshot.deleteMany({
-      where: { snapshotAt: { lt: yearAgo } },
-    })
-
     return NextResponse.json({
       success: true,
       assetsCount: data.data.length,
       prunedCount: prunedPrices,
-      portfolioSnapshotCount,
+      alertsEvaluated: evaluated,
+      alertsTriggered: triggered,
     })
   } catch (error) {
     console.error('[CRON] Price snapshot failed:', error)
