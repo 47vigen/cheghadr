@@ -1,7 +1,7 @@
 import { JetBrains_Mono, Vazirmatn as VazirmatnFont } from 'next/font/google'
 
 export const Vazirmatn = VazirmatnFont({
-  subsets: ['arabic', 'latin'],
+  subsets: ['arabic'],
   variable: '--font-vazirmatn',
   display: 'swap',
   weight: ['400', '500', '600', '700'],
