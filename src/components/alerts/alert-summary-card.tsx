@@ -19,7 +19,7 @@ export function AlertSummaryCard({
 
   if (activeCount === 0 && triggeredCount === 0) {
     return (
-      <div className="flex items-center justify-between gap-2 px-1 py-1">
+      <div className="flex items-center justify-between gap-2 px-2 py-2">
         <div className="flex items-center gap-2">
           <IconBellPlus size={16} className="shrink-0 text-muted-foreground" />
           <div className="min-w-0">
@@ -36,12 +36,14 @@ export function AlertSummaryCard({
   }
 
   return (
-    <div className="flex items-center justify-between gap-2 px-1 py-1">
+    <div className="flex items-center justify-between gap-2 px-2 py-2">
       <div className="flex items-center gap-2">
         <IconBell
           size={16}
           className={
-            triggeredCount > 0 ? 'shrink-0 text-warning' : 'shrink-0 text-accent'
+            triggeredCount > 0
+              ? 'shrink-0 text-warning'
+              : 'shrink-0 text-accent'
           }
         />
         <div className="min-w-0">

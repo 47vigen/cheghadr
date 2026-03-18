@@ -11,7 +11,11 @@ import { AssetSelector } from '@/components/asset-selector'
 
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 import { MAX_ACTIVE_ALERTS } from '@/lib/alert-utils'
-import { formatIRT, getSellPriceBySymbol, parsePriceSnapshot } from '@/lib/prices'
+import {
+  formatIRT,
+  getSellPriceBySymbol,
+  parsePriceSnapshot,
+} from '@/lib/prices'
 import { api } from '@/trpc/react'
 
 type AlertType = 'PRICE' | 'PORTFOLIO'
@@ -98,11 +102,11 @@ export function CreateAlertForm() {
           {t('selectPortfolio')}
         </Button>
 
-        {/* Asset selector (only prices, no IRT) */}
-        {prices.length > 0 && (
+        {/* Asset selector (only when not Portfolio — hide when Portfolio selected) */}
+        {prices.length > 0 && !isPortfolio && (
           <AssetSelector
             label={t('selectAsset')}
-            value={isPortfolio ? '' : selectedSymbol}
+            value={selectedSymbol}
             onChange={(sym) => {
               if (sym === 'IRT') return
               setSelectedSymbol(sym)
@@ -162,12 +166,11 @@ export function CreateAlertForm() {
         fullWidth
         onPress={handleSubmit}
         isDisabled={!canSubmit}
+        isPending={createMutation.isPending}
       >
-        {createMutation.isPending ? (
-          <Spinner size="sm" color="current" />
-        ) : (
-          t('createButton')
-        )}
+        {({ isPending }) =>
+          isPending ? <Spinner size="sm" color="current" /> : t('createButton')
+        }
       </Button>
     </div>
   )

@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 
-import type { Alert } from '@prisma/client'
 import { Button, Modal, Spinner, Switch, Text } from '@heroui/react'
+import type { Alert } from '@prisma/client'
 import { IconBell, IconTrash } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
@@ -92,7 +92,11 @@ export function AlertListItem({ alert }: AlertListItemProps) {
               onChange={() => toggleMutation.mutate({ id: alert.id })}
               size="sm"
               aria-label={title}
-            />
+            >
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+            </Switch>
             <Button
               isIconOnly
               variant="ghost"
@@ -112,7 +116,10 @@ export function AlertListItem({ alert }: AlertListItemProps) {
       <Modal>
         <Modal.Backdrop isOpen={deleteOpen} onOpenChange={setDeleteOpen}>
           <Modal.Container>
-            <Modal.Dialog className="sm:max-w-[360px]">
+            <Modal.Dialog
+              className="sm:max-w-[360px]"
+              dir={locale === 'fa' ? 'rtl' : 'ltr'}
+            >
               <Modal.CloseTrigger />
               <Modal.Header>
                 <Modal.Heading>{t('deleteTitle')}</Modal.Heading>

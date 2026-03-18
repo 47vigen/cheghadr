@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 
 import { AlertListItem } from '@/components/alerts/alert-list-item'
 import { CreateAlertForm } from '@/components/alerts/create-alert-form'
+import { AlertsSkeleton } from '@/components/skeletons/alerts-skeleton'
 import { ErrorState } from '@/components/ui/async-states'
 import { PageShell } from '@/components/ui/page-shell'
 import { Placeholder } from '@/components/ui/placeholder'
@@ -23,8 +24,13 @@ export default function AlertsPage() {
   const { notificationOccurred } = useTelegramHaptics()
   const [digestEnabled, setDigestEnabled] = useState<boolean | null>(null)
 
-  const { data: alerts, isLoading, isError, error, refetch } =
-    api.alerts.list.useQuery()
+  const {
+    data: alerts,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = api.alerts.list.useQuery()
 
   const { data: settingsData } = api.alerts.settings.useQuery()
 
@@ -57,8 +63,13 @@ export default function AlertsPage() {
     )
   }
 
+  if (isLoading) {
+    return <AlertsSkeleton />
+  }
+
   const activeAlerts = alerts?.filter((a) => a.isActive) ?? []
-  const triggeredAlerts = alerts?.filter((a) => !a.isActive && a.triggeredAt) ?? []
+  const triggeredAlerts =
+    alerts?.filter((a) => !a.isActive && a.triggeredAt) ?? []
 
   return (
     <PageShell>
@@ -74,24 +85,25 @@ export default function AlertsPage() {
 
       <div>
         <Section header={t('create')}>
-          <CreateAlertForm />
+          {alerts && alerts.length === 0 ? (
+            <>
+              <Placeholder
+                variant="empty"
+                iconSize="md"
+                header={t('noAlerts')}
+                description={t('noAlertsDescription')}
+              >
+                <IconBellPlus />
+              </Placeholder>
+              <div className="mt-3">
+                <CreateAlertForm />
+              </div>
+            </>
+          ) : (
+            <CreateAlertForm />
+          )}
         </Section>
       </div>
-
-      {!isLoading && alerts && alerts.length === 0 && (
-        <div>
-          <Section>
-            <Placeholder
-              variant="empty"
-              iconSize="md"
-              header={t('noAlerts')}
-              description={t('noAlertsDescription')}
-            >
-              <IconBellPlus />
-            </Placeholder>
-          </Section>
-        </div>
-      )}
 
       {activeAlerts.length > 0 && (
         <div>
@@ -123,16 +135,28 @@ export default function AlertsPage() {
               </Text>
             </div>
             <Switch
-              isSelected={digestEnabled ?? settingsData?.dailyDigestEnabled ?? false}
-              isDisabled={toggleDigestMutation.isPending || digestEnabled === null}
+              isSelected={
+                digestEnabled ?? settingsData?.dailyDigestEnabled ?? false
+              }
+              isDisabled={
+                toggleDigestMutation.isPending || digestEnabled === null
+              }
               onChange={() =>
                 toggleDigestMutation.mutate({
-                  enabled: !(digestEnabled ?? settingsData?.dailyDigestEnabled ?? false),
+                  enabled: !(
+                    digestEnabled ??
+                    settingsData?.dailyDigestEnabled ??
+                    false
+                  ),
                 })
               }
               size="sm"
               aria-label={t('dailyDigest')}
-            />
+            >
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+            </Switch>
           </div>
         </Section>
       </div>
