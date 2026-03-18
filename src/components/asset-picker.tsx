@@ -10,7 +10,6 @@ import { AssetSearchPanel } from '@/components/asset-search-panel'
 import { useAssetSearchGroups } from '@/components/use-asset-search-groups'
 
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
-import { useTelegramMainButton } from '@/hooks/use-telegram-main-button'
 import type { PriceItem } from '@/lib/prices'
 import {
   formatIRT,
@@ -75,16 +74,6 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
     }
     addMutation.mutate({ symbol: modalItem.base_currency.symbol, quantity })
   }
-
-  const qty = Number(quantity)
-  const canSave = !!modalItem && !!quantity && !Number.isNaN(qty) && qty > 0
-
-  useTelegramMainButton({
-    text: tPicker('save'),
-    onClick: handleSave,
-    isVisible: canSave,
-    isLoading: addMutation.isPending,
-  })
 
   return (
     <>
