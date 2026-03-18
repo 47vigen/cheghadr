@@ -1,8 +1,12 @@
 'use client'
 
-import { Cell, Placeholder, Section, Text } from '@telegram-apps/telegram-ui'
 import { useLocale, useTranslations } from 'next-intl'
 
+import { Cell } from '@/components/ui/cell'
+import { Placeholder } from '@/components/ui/placeholder'
+import { Section } from '@/components/ui/section'
+
+import type { PriceItem } from '@/lib/prices'
 import {
   findBySymbol,
   formatIRT,
@@ -10,7 +14,6 @@ import {
   getLocalizedItemName,
   IRT_ENTRY,
 } from '@/lib/prices'
-import type { PriceItem } from '@/modules/API/Swagger/ecotrust/gen/models'
 
 interface CalculatorResultProps {
   result: string | null
@@ -65,9 +68,9 @@ export function CalculatorResult({
   return (
     <Section header={t('resultTitle')}>
       <Cell subtitle={toItem?.displayName ?? toSymbol}>
-        <Text weight="2" className="tabular-nums">
+        <span className="font-display font-semibold tabular-nums">
           {formattedResult}
-        </Text>
+        </span>
       </Cell>
     </Section>
   )

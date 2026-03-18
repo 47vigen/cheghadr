@@ -1,20 +1,17 @@
 'use client'
 
 import type { PropsWithChildren } from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
-import { AppRoot } from '@telegram-apps/telegram-ui'
 import WebApp from '@twa-dev/sdk'
 
 import { usePlatform } from '@/hooks/use-platform'
 import { useViewportHeight } from '@/hooks/use-viewport-height'
 import { getRawInitData } from '@/utils/telegram'
+import { applyTheme, resolveRuntimeTheme } from '@/utils/theme'
 
 export default function TelegramProvider(props: PropsWithChildren) {
   const platform = usePlatform()
-  const [appearance, setAppearance] = useState<'light' | 'dark'>(
-    WebApp.colorScheme,
-  )
 
   useViewportHeight()
 
@@ -28,20 +25,30 @@ export default function TelegramProvider(props: PropsWithChildren) {
     }
   }, [platform])
 
-  useEffect(() => {
-    const handler = () => setAppearance(WebApp.colorScheme)
+  const inTelegram = !!getRawInitData()
 
+  useEffect(() => {
+    if (inTelegram) {
+      applyTheme(resolveRuntimeTheme(WebApp.colorScheme))
+    } else {
+      const mq = window.matchMedia('(prefers-color-scheme: dark)')
+      const apply = () => applyTheme(mq.matches ? 'dark' : 'light')
+      apply()
+      mq.addEventListener('change', apply)
+      return () => mq.removeEventListener('change', apply)
+    }
+  }, [inTelegram])
+
+  useEffect(() => {
+    if (!inTelegram) return
+    const handler = () => applyTheme(resolveRuntimeTheme(WebApp.colorScheme))
     WebApp.onEvent('themeChanged', handler)
     return () => WebApp.offEvent('themeChanged', handler)
-  }, [])
+  }, [inTelegram])
 
   return (
-    <AppRoot
-      className="h-full w-full"
-      appearance={appearance}
-      platform={['macos', 'ios'].includes(platform) ? 'ios' : 'base'}
-    >
+    <div className="h-full min-h-(--app-viewport-height) w-full">
       {props.children}
-    </AppRoot>
+    </div>
   )
 }

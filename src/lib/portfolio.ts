@@ -1,6 +1,6 @@
 import type { PortfolioSnapshot, PrismaClient } from '@prisma/client'
 
-import { findBySymbol, parsePriceSnapshot } from '@/lib/prices'
+import { getSellPriceBySymbol, parsePriceSnapshot } from '@/lib/prices'
 
 const DEDUP_WINDOW_MINUTES = 5
 
@@ -42,8 +42,7 @@ export async function createPortfolioSnapshot(
   let totalIRT = 0
 
   for (const asset of userAssets) {
-    const priceItem = findBySymbol(prices, asset.symbol)
-    const sellPrice = priceItem ? Number(priceItem.sell_price) : 0
+    const sellPrice = getSellPriceBySymbol(asset.symbol, prices)
     const qty = Number(asset.quantity)
     const valueIRT = qty * sellPrice
     totalIRT += valueIRT

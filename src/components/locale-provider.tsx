@@ -43,7 +43,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   const [locale, setLocale] = useState<Locale>(() =>
     typeof window !== 'undefined' ? detectLocale() : 'en',
   )
-  const [messages, setMessages] = useState<Record<string, unknown> | null>(null)
+  const [messages, setMessages] = useState<Record<string, unknown>>({})
 
   const loadMessages = useCallback(async (l: Locale) => {
     const m = await import(`../../messages/${l}.json`)
@@ -58,17 +58,6 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     document.documentElement.lang = locale
     document.documentElement.dir = locale === 'fa' ? 'rtl' : 'ltr'
   }, [locale])
-
-  if (!messages) {
-    return (
-      <div className="flex min-h-svh items-center justify-center">
-        <div
-          className="size-10 animate-spin rounded-full border-2 border-neutral-400 border-t-transparent"
-          aria-hidden
-        />
-      </div>
-    )
-  }
 
   return (
     <LocaleContext.Provider value={{ locale, setLocale }}>

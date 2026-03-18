@@ -45,7 +45,6 @@ export function useTelegramMainButton({
       WebApp.MainButton?.offClick(handler)
       WebApp.MainButton?.hide()
     }
-    // biome-ignore lint/correctness/useExhaustiveDependencies: stable-ref pattern — onClick intentionally omitted
   }, [isVisible, text])
 
   useEffect(() => {

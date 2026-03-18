@@ -1,12 +1,12 @@
 'use client'
 
-import { Section } from '@telegram-apps/telegram-ui'
 import { useTranslations } from 'next-intl'
 
 import { PriceRow } from '@/components/price-row'
+import { Section } from '@/components/ui/section'
 
+import type { PriceItem } from '@/lib/prices'
 import { knownCategories } from '@/lib/prices'
-import type { PriceItem } from '@/modules/API/Swagger/ecotrust/gen/models'
 
 interface PriceSectionProps {
   category: string

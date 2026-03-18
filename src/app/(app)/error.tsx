@@ -1,8 +1,8 @@
 'use client'
 
-import { IconAlertTriangle } from '@tabler/icons-react'
-import { Button, Placeholder } from '@telegram-apps/telegram-ui'
 import { useTranslations } from 'next-intl'
+
+import { ErrorState } from '@/components/ui/async-states'
 
 import { useRouter } from '@/i18n/navigation'
 
@@ -39,47 +39,32 @@ export default function AppError({
 
   if (isUnauthorized(error)) {
     return (
-      <Placeholder
+      <ErrorState
         header={t('sessionExpired')}
         description={t('sessionExpiredDescription')}
-        action={
-          <Button mode="filled" onClick={() => router.push('/login')}>
-            {t('reLogin')}
-          </Button>
-        }
-      >
-        <IconAlertTriangle size={64} className="text-tgui-destructive-text" />
-      </Placeholder>
+        retryLabel={t('reLogin')}
+        onRetry={() => router.push('/login')}
+      />
     )
   }
 
   if (isConnectionError(error)) {
     return (
-      <Placeholder
+      <ErrorState
         header={t('connectionError')}
         description={t('connectionErrorDescription')}
-        action={
-          <Button mode="filled" onClick={reset}>
-            {t('retry')}
-          </Button>
-        }
-      >
-        <IconAlertTriangle size={64} className="text-tgui-destructive-text" />
-      </Placeholder>
+        retryLabel={t('retry')}
+        onRetry={reset}
+      />
     )
   }
 
   return (
-    <Placeholder
+    <ErrorState
       header={t('error')}
       description={error.message || t('tryAgain')}
-      action={
-        <Button mode="filled" onClick={reset}>
-          {t('retry')}
-        </Button>
-      }
-    >
-      <IconAlertTriangle size={64} className="text-tgui-destructive-text" />
-    </Placeholder>
+      retryLabel={t('retry')}
+      onRetry={reset}
+    />
   )
 }

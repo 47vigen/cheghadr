@@ -2,34 +2,42 @@
 
 import { useState } from 'react'
 
+import { Button, Input, Label, TextField } from '@heroui/react'
 import { IconArrowsExchange } from '@tabler/icons-react'
-import {
-  Cell,
-  IconButton,
-  Input,
-  List,
-  Section,
-} from '@telegram-apps/telegram-ui'
 import { useTranslations } from 'next-intl'
 
 import { AssetSelector } from '@/components/asset-selector'
 import { CalculatorResult } from '@/components/calculator-result'
 import { CalculatorSkeleton } from '@/components/skeletons/calculator-skeleton'
+import {
+  EmptyStateBase,
+  ErrorState,
+  RefreshIndicator,
+} from '@/components/ui/async-states'
+import { PageShell } from '@/components/ui/page-shell'
+import { Section } from '@/components/ui/section'
 
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 import { computeConversion, parsePriceSnapshot } from '@/lib/prices'
 import { api } from '@/trpc/react'
 
 export default function CalculatorPage() {
   const t = useTranslations('calculator')
-  const { data, isLoading } = api.prices.latest.useQuery(undefined, {
-    refetchInterval: 30 * 60 * 1000,
-    refetchOnWindowFocus: true,
-  })
+  const tCommon = useTranslations('common')
+  const { data, isLoading, isError, error, refetch } =
+    api.prices.latest.useQuery(undefined, {
+      refetchInterval: 30 * 60 * 1000,
+      refetchOnWindowFocus: true,
+    })
 
   const [fromSymbol, setFromSymbol] = useState('USD')
   const [toSymbol, setToSymbol] = useState('IRT')
   const [amount, setAmount] = useState('')
+
+  const { isRefreshing } = usePullToRefresh(async () => {
+    await refetch()
+  })
 
   const prices = parsePriceSnapshot(data?.data)
   const { selectionChanged } = useTelegramHaptics()
@@ -48,41 +56,78 @@ export default function CalculatorPage() {
     return <CalculatorSkeleton />
   }
 
-  return (
-    <List>
-      <Section header={t('title')}>
-        <AssetSelector
-          label={t('from')}
-          value={fromSymbol}
-          onChange={setFromSymbol}
-          items={prices}
-        />
-        <Cell
-          onClick={handleSwap}
-          className="min-h-[44px]"
-          aria-label={t('swap')}
-        >
-          <IconButton size="m" mode="bezeled">
-            <IconArrowsExchange size={24} />
-          </IconButton>
-        </Cell>
-        <AssetSelector
-          label={t('to')}
-          value={toSymbol}
-          onChange={setToSymbol}
-          items={prices}
-        />
-        <Input
-          header={t('amount')}
-          type="number"
-          inputMode="decimal"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder={t('amountPlaceholder')}
-        />
-      </Section>
+  if (isError) {
+    return (
+      <ErrorState
+        header={t('title')}
+        description={error?.message || t('resultPlaceholder')}
+        retryLabel={tCommon('retry')}
+        onRetry={() => void refetch()}
+      />
+    )
+  }
 
-      <CalculatorResult result={result} toSymbol={toSymbol} items={prices} />
-    </List>
+  if (!data) {
+    return (
+      <EmptyStateBase
+        header={t('title')}
+        description={t('resultPlaceholder')}
+      />
+    )
+  }
+
+  return (
+    <>
+      <RefreshIndicator isRefreshing={isRefreshing} />
+      <PageShell>
+        <Section header={t('title')} variant="hero">
+          <AssetSelector
+            label={t('from')}
+            value={fromSymbol}
+            onChange={setFromSymbol}
+            items={prices}
+          />
+          <div className="relative my-2 h-px w-full bg-border">
+            <Button
+              size="md"
+              isIconOnly
+              variant="primary"
+              onPress={handleSwap}
+              aria-label={t('swap')}
+              className="absolute inset-e-0 top-1/2 -translate-y-1/2"
+            >
+              <IconArrowsExchange size={24} className="rotate-90" />
+            </Button>
+          </div>
+          <AssetSelector
+            items={prices}
+            label={t('to')}
+            value={toSymbol}
+            onChange={setToSymbol}
+          />
+          <TextField
+            fullWidth
+            value={amount}
+            className="mt-6"
+            onChange={setAmount}
+          >
+            <Label>{t('amount')}</Label>
+            <Input
+              type="number"
+              inputMode="decimal"
+              placeholder={t('amountPlaceholder')}
+            />
+          </TextField>
+        </Section>
+
+        <div>
+          <CalculatorResult
+            result={result}
+            toSymbol={toSymbol}
+            items={prices}
+          />
+        </div>
+      </PageShell>
+    </>
   )
 }

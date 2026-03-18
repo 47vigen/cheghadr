@@ -5,8 +5,9 @@ import { z } from 'zod'
 import { createPortfolioSnapshot } from '@/lib/portfolio'
 import {
   findBySymbol,
+  getSellPriceBySymbol,
+  getSnapshotStaleness,
   parsePriceSnapshot,
-  STALE_AFTER_MINUTES,
 } from '@/lib/prices'
 import { protectedProcedure, router } from '@/server/api/trpc'
 
@@ -46,7 +47,7 @@ export const assetsRouter = router({
 
     const assets = userAssets.map((asset) => {
       const priceItem = findBySymbol(prices, asset.symbol)
-      const sellPrice = priceItem ? Number(priceItem.sell_price) : 0
+      const sellPrice = getSellPriceBySymbol(asset.symbol, prices)
       const qty = Number(asset.quantity)
       return {
         ...asset,
@@ -61,10 +62,7 @@ export const assetsRouter = router({
 
     const totalIRT = assets.reduce((sum, a) => sum + a.valueIRT, 0)
 
-    const minutesOld = snapshot
-      ? (Date.now() - snapshot.snapshotAt.getTime()) / 1000 / 60
-      : Infinity
-    const stale = minutesOld > STALE_AFTER_MINUTES
+    const { stale } = getSnapshotStaleness(snapshot?.snapshotAt)
 
     return {
       assets,

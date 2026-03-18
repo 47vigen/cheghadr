@@ -1,6 +1,6 @@
 'use client'
 
-import { LargeTitle, Text } from '@telegram-apps/telegram-ui'
+import { Text } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { formatIRT } from '@/lib/prices'
@@ -14,12 +14,15 @@ export function PortfolioTotal({ totalIRT }: PortfolioTotalProps) {
   const locale = useLocale()
 
   return (
-    <div className="flex flex-col items-center gap-2 py-4">
+    <div className="flex flex-col items-start gap-0.5 py-2 ps-1">
+      <Text className="label-compact text-muted-foreground">
+        {t('totalValue')}
+      </Text>
       <div className="flex items-baseline gap-1.5">
-        <LargeTitle weight="2" className="tabular-nums">
+        <Text className="font-display font-semibold text-2xl tabular-nums sm:text-3xl">
           {formatIRT(totalIRT, locale)}
-        </LargeTitle>
-        <Text weight="3" className="text-tgui-hint">
+        </Text>
+        <Text className="font-display text-muted-foreground text-sm">
           {t('toman')}
         </Text>
       </div>

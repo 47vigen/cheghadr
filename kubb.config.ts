@@ -1,7 +1,5 @@
 import { defineConfig } from '@kubb/core'
-import { pluginClient } from '@kubb/plugin-client'
 import { pluginOas } from '@kubb/plugin-oas'
-import { pluginReactQuery } from '@kubb/plugin-react-query'
 import { pluginTs } from '@kubb/plugin-ts'
 
 const banner = [
@@ -22,13 +20,6 @@ export default defineConfig({
     pluginOas(),
     pluginTs({
       output: { banner, path: 'models' },
-    }),
-    pluginClient({
-      output: { banner, path: 'clients' },
-      importPath: '@/modules/API/Http/mutator.ts',
-    }),
-    pluginReactQuery({
-      output: { banner, path: 'hooks' },
     }),
   ],
 })

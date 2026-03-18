@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import type { ReactNode } from 'react'
 
-import '@telegram-apps/telegram-ui/dist/styles.css'
 import '@/styles/globals.css'
 
 import { ClientRootWrapper } from '@/components/client-root-wrapper'
 
-import { Vazirmatn } from '@/styles/fonts'
+import { JetBrainsMono, Vazirmatn } from '@/styles/fonts'
 
 export const metadata: Metadata = {
   title: 'Cheghadr?',
@@ -19,9 +19,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       lang="en"
       dir="ltr"
       suppressHydrationWarning
-      className={Vazirmatn.variable}
+      className={`${Vazirmatn.variable} ${JetBrainsMono.variable}`}
     >
       <body>
+        <Script src="/theme-init.js" strategy="beforeInteractive" />
         <ClientRootWrapper>{children}</ClientRootWrapper>
       </body>
     </html>

@@ -2,20 +2,19 @@
 
 import { useState } from 'react'
 
-import {
-  Button,
-  Input,
-  List,
-  Placeholder,
-  Section,
-  Spinner,
-  Text,
-} from '@telegram-apps/telegram-ui'
+import { Input, TextField } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { PriceSection } from '@/components/price-section'
 import { PricesSkeleton } from '@/components/skeletons/prices-skeleton'
 import { StalenessBanner } from '@/components/staleness-banner'
+import {
+  EmptyStateBase,
+  ErrorState,
+  RefreshIndicator,
+} from '@/components/ui/async-states'
+import { PageShell } from '@/components/ui/page-shell'
+import { Section } from '@/components/ui/section'
 
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
 import {
@@ -33,13 +32,11 @@ export default function PricesPage() {
   const locale = useLocale()
   const [search, setSearch] = useState('')
 
-  const { data, isLoading, isError, refetch } = api.prices.latest.useQuery(
-    undefined,
-    {
+  const { data, isLoading, isError, error, refetch } =
+    api.prices.latest.useQuery(undefined, {
       refetchInterval: 30 * 60 * 1000,
       refetchOnWindowFocus: true,
-    },
-  )
+    })
 
   const { isRefreshing } = usePullToRefresh(async () => {
     await refetch()
@@ -51,65 +48,71 @@ export default function PricesPage() {
 
   if (isError) {
     return (
-      <Placeholder
+      <ErrorState
         header={t('unavailable')}
-        description={t('checkLater')}
-        action={
-          <Button mode="filled" onClick={() => void refetch()}>
-            {tCommon('retry')}
-          </Button>
-        }
-      >
-        <Text className="text-tgui-hint">⚠️</Text>
-      </Placeholder>
+        description={error?.message || t('checkLater')}
+        retryLabel={tCommon('retry')}
+        onRetry={() => void refetch()}
+      />
     )
   }
 
-  const prices = parsePriceSnapshot(data?.data)
+  if (!data) {
+    return (
+      <EmptyStateBase header={t('unavailable')} description={t('checkLater')} />
+    )
+  }
+
+  const prices = parsePriceSnapshot(data.data)
   const filtered = filterPriceItems(prices, search)
   const grouped = groupByCategory(filtered)
   const entries = sortedGroupEntries(grouped)
 
   return (
     <>
-      {isRefreshing && (
-        <div className="flex justify-center py-2">
-          <Spinner size="s" />
+      <RefreshIndicator isRefreshing={isRefreshing} />
+
+      <PageShell>
+        <div>
+          <Section header={tNav('prices')} variant="hero">
+            <TextField value={search} onChange={setSearch} fullWidth>
+              <Input
+                placeholder={t('search')}
+                type="search"
+                dir={locale === 'fa' ? 'rtl' : 'ltr'}
+              />
+            </TextField>
+            {data?.stale && (
+              <div className="mt-2">
+                <StalenessBanner
+                  snapshotAt={data.snapshotAt}
+                  namespace="prices"
+                  onRefresh={() => void refetch()}
+                />
+              </div>
+            )}
+          </Section>
         </div>
-      )}
-
-      {data?.stale && (
-        <StalenessBanner
-          snapshotAt={data.snapshotAt}
-          namespace="prices"
-          onRefresh={() => void refetch()}
-        />
-      )}
-
-      <List>
-        <Section header={tNav('prices')}>
-          <Input
-            placeholder={t('search')}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            type="search"
-            dir={locale === 'fa' ? 'rtl' : 'ltr'}
-          />
-        </Section>
 
         {entries.length === 0 && search ? (
-          <Placeholder header={t('noResults')} />
+          <div>
+            <EmptyStateBase header={t('noResults')} />
+          </div>
         ) : entries.length === 0 ? (
-          <Placeholder
-            header={t('unavailable')}
-            description={t('checkLater')}
-          />
+          <div>
+            <EmptyStateBase
+              header={t('unavailable')}
+              description={t('checkLater')}
+            />
+          </div>
         ) : (
           entries.map(([category, items]) => (
-            <PriceSection key={category} category={category} items={items} />
+            <div key={category}>
+              <PriceSection category={category} items={items} />
+            </div>
           ))
         )}
-      </List>
+      </PageShell>
     </>
   )
 }

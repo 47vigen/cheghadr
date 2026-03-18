@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Section } from '@telegram-apps/telegram-ui'
+import { Button } from '@heroui/react'
 
 import { useLocaleContext } from '@/components/locale-provider'
 
@@ -21,16 +21,14 @@ export function DevLocaleSwitcher() {
 
   return (
     <div className="fixed end-2 top-2 z-50">
-      <Section>
-        <Button
-          mode="plain"
-          size="s"
-          onClick={() => setLocale(nextLocale)}
-          className="text-tgui-hint"
-        >
-          {locale === 'fa' ? 'EN' : 'فا'}
-        </Button>
-      </Section>
+      <Button
+        variant="ghost"
+        size="sm"
+        onPress={() => setLocale(nextLocale)}
+        className="text-muted-foreground"
+      >
+        {locale === 'fa' ? 'EN' : 'فا'}
+      </Button>
     </div>
   )
 }

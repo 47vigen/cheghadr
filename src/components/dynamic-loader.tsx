@@ -1,5 +1,7 @@
 'use client'
 
+import { Spinner } from '@heroui/react'
+
 interface DynamicLoaderProps {
   /** Inline loader with fixed height (e.g. for chart placeholder). Omit for full-screen. */
   height?: number | string
@@ -10,14 +12,7 @@ interface DynamicLoaderProps {
  * both inside and outside AppRoot (e.g. initial ClientRoot load).
  */
 export function DynamicLoader({ height }: DynamicLoaderProps) {
-  const size = height ? 32 : 40
-  const spinner = (
-    <div
-      className="animate-spin rounded-full border-2 border-neutral-400 border-t-transparent"
-      style={{ width: size, height: size }}
-      aria-hidden
-    />
-  )
+  const spinner = <Spinner size={height ? 'md' : 'lg'} />
 
   if (height !== undefined) {
     return (

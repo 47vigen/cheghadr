@@ -2,34 +2,28 @@
 
 import { useState } from 'react'
 
-import {
-  Avatar,
-  Caption,
-  Cell,
-  Input,
-  List,
-  Modal,
-  Placeholder,
-  Section,
-} from '@telegram-apps/telegram-ui'
+import { Modal } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
 
+import { AssetSearchPanel } from '@/components/asset-search-panel'
+import { AssetAvatar } from '@/components/ui/asset-avatar'
+import { Cell } from '@/components/ui/cell'
+import { Section } from '@/components/ui/section'
+import { useAssetSearchGroups } from '@/components/use-asset-search-groups'
+
+import type { PriceItem } from '@/lib/prices'
 import {
-  filterPriceItems,
   getLocalizedIrtName,
   getLocalizedItemName,
-  groupByCategory,
   IRT_ENTRY,
-  knownCategories,
-  sortedGroupEntries,
 } from '@/lib/prices'
-import type { PriceItem } from '@/modules/API/Swagger/ecotrust/gen/models'
 
 interface AssetSelectorProps {
   label: string
   value: string
   onChange: (symbol: string) => void
   items: PriceItem[]
+  cellClassName?: string
 }
 
 function getCurrentDisplay(
@@ -57,6 +51,7 @@ export function AssetSelector({
   value,
   onChange,
   items,
+  cellClassName,
 }: AssetSelectorProps) {
   const tPicker = useTranslations('picker')
   const tCat = useTranslations('categories')
@@ -64,10 +59,7 @@ export function AssetSelector({
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
 
-  const filteredItems = filterPriceItems(items, search)
-  const grouped = groupByCategory(filteredItems)
-  const entries = sortedGroupEntries(grouped)
-  const isSearching = search.trim().length > 0
+  const groups = useAssetSearchGroups(items, search)
 
   const current = getCurrentDisplay(value, items, locale)
 
@@ -79,12 +71,13 @@ export function AssetSelector({
   return (
     <>
       <Cell
+        className={cellClassName}
         before={
-          current.png ? (
-            <Avatar src={current.png} size={40} />
-          ) : (
-            <Avatar size={40} acronym={current.symbol.slice(0, 2)} />
-          )
+          <AssetAvatar
+            alt={current.displayName}
+            symbol={current.symbol}
+            src={current.png}
+          />
         }
         subhead={label}
         subtitle={current.symbol}
@@ -93,106 +86,74 @@ export function AssetSelector({
         {current.displayName}
       </Cell>
 
-      <Modal
-        open={open}
-        onOpenChange={(v) => {
-          if (!v) closeModal()
-          else setOpen(true)
-        }}
-      >
-        <Modal.Header>
-          {label} — {tPicker('selectAsset')}
-        </Modal.Header>
-        <List>
-          <Section>
-            <Input
-              placeholder={tPicker('search')}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              type="search"
-              dir={locale === 'fa' ? 'rtl' : 'ltr'}
-            />
-          </Section>
-
-          {!isSearching && (
-            <Section header={tCat('CURRENCY')}>
-              <Cell
-                before={
-                  <Avatar
-                    size={40}
-                    acronym={
-                      locale === 'fa'
-                        ? IRT_ENTRY.fa.charAt(0)
-                        : IRT_ENTRY.en.slice(0, 2)
-                    }
-                  />
-                }
-                subtitle={tPicker('iranianToman')}
-                after={
-                  value === 'IRT' ? (
-                    <Caption level="2" className="text-tgui-accent-text">
-                      ✓
-                    </Caption>
-                  ) : undefined
-                }
-                onClick={() => {
-                  onChange('IRT')
-                  closeModal()
-                }}
-              >
-                {tPicker('toman')}
-              </Cell>
-            </Section>
-          )}
-
-          {entries.map(([category, categoryItems]) => {
-            const catLabel = knownCategories.has(category)
-              ? tCat(category as Parameters<typeof tCat>[0])
-              : category
-            return (
-              <Section key={category} header={catLabel}>
-                {categoryItems.map((item) => {
-                  const icon = item.png ?? item.base_currency.png
-                  const isSelected = value === item.base_currency.symbol
-                  const name = getLocalizedItemName(item, locale)
-                  return (
-                    <Cell
-                      key={item.symbol}
-                      before={
-                        icon ? (
-                          <Avatar src={icon} size={40} />
-                        ) : (
-                          <Avatar
-                            size={40}
-                            acronym={item.base_currency.symbol.slice(0, 2)}
-                          />
-                        )
-                      }
-                      subtitle={item.base_currency.en}
-                      after={
-                        isSelected ? (
-                          <Caption level="2" className="text-tgui-accent-text">
-                            ✓
-                          </Caption>
-                        ) : undefined
-                      }
-                      onClick={() => {
-                        onChange(item.base_currency.symbol)
-                        closeModal()
-                      }}
-                    >
-                      {name}
-                    </Cell>
-                  )
-                })}
-              </Section>
-            )
-          })}
-
-          {entries.length === 0 && (
-            <Placeholder header={tPicker('noResults')} />
-          )}
-        </List>
+      <Modal>
+        <Modal.Backdrop
+          isOpen={open}
+          onOpenChange={(v: boolean) => {
+            if (!v) closeModal()
+            else setOpen(true)
+          }}
+        >
+          <Modal.Container>
+            <Modal.Dialog className="sm:max-w-[360px]">
+              <Modal.CloseTrigger />
+              <Modal.Header>
+                <Modal.Heading>
+                  {label} — {tPicker('selectAsset')}
+                </Modal.Heading>
+              </Modal.Header>
+              <Modal.Body>
+                <AssetSearchPanel
+                  search={search}
+                  onSearchChange={setSearch}
+                  locale={locale}
+                  searchPlaceholder={tPicker('search')}
+                  groups={groups}
+                  onSelect={(item) => {
+                    onChange(item.base_currency.symbol)
+                    closeModal()
+                  }}
+                  getSubtitle={(item) => item.base_currency.en}
+                  getAfter={(item) =>
+                    value === item.base_currency.symbol ? (
+                      <span className="text-accent">✓</span>
+                    ) : undefined
+                  }
+                  emptyHeader={tPicker('noResults')}
+                  beforeList={
+                    !search.trim() ? (
+                      <Section header={tCat('CURRENCY')}>
+                        <Cell
+                          before={
+                            <AssetAvatar
+                              alt={tPicker('toman')}
+                              symbol={
+                                locale === 'fa'
+                                  ? IRT_ENTRY.fa.charAt(0)
+                                  : IRT_ENTRY.en.slice(0, 2)
+                              }
+                            />
+                          }
+                          after={
+                            value === 'IRT' ? (
+                              <span className="text-accent">✓</span>
+                            ) : undefined
+                          }
+                          onClick={() => {
+                            onChange('IRT')
+                            closeModal()
+                          }}
+                        >
+                          {tPicker('toman')}
+                        </Cell>
+                      </Section>
+                    ) : null
+                  }
+                />
+              </Modal.Body>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
       </Modal>
     </>
   )

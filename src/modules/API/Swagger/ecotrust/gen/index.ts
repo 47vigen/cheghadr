@@ -1,16 +1,3 @@
-export { getPrices } from './clients/getPrices.ts'
-export type { GetPricesQueryKey } from './hooks/useGetPrices.ts'
-export {
-  getPricesQueryKey,
-  getPricesQueryOptions,
-  useGetPrices,
-} from './hooks/useGetPrices.ts'
-export type { GetPricesSuspenseQueryKey } from './hooks/useGetPricesSuspense.ts'
-export {
-  getPricesSuspenseQueryKey,
-  getPricesSuspenseQueryOptions,
-  useGetPricesSuspense,
-} from './hooks/useGetPricesSuspense.ts'
 export type { Category } from './models/Category.ts'
 export type {
   CategorySymbol,

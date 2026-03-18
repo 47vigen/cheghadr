@@ -1,0 +1,147 @@
+/*
+ * Elegant theme for Cheghadr (HeroUI v3)
+ * Sharp minimal variant: tighter radius, clear contrast
+ * Primary: Black (light) / White (dark)
+ */
+@layer base {
+  :root,
+  [data-theme="light"] {
+    color-scheme: light;
+
+    /* Sharp corners */
+    --radius: 0;
+
+    /* Primitive Colors */
+    --white: oklch(100% 0 0);
+    --black: oklch(0% 0 0);
+    --snow: oklch(0.9911 0 0);
+    --eclipse: oklch(0.2103 0.0059 285.89);
+
+    /* Layout */
+    --disabled-opacity: 0.5;
+
+    /* Base Colors - high contrast */
+    --background: oklch(100% 0 0);
+    --foreground: oklch(0.22 0.01 0);
+
+    /* Surface (content1-4) */
+    --surface: oklch(0.95 0.005 0);
+    --surface-foreground: var(--foreground);
+    --surface-secondary: oklch(0.92 0.005 0);
+    --surface-secondary-foreground: var(--foreground);
+    --surface-tertiary: oklch(0.89 0.005 0);
+    --surface-tertiary-foreground: var(--foreground);
+
+    /* Overlay */
+    --overlay: oklch(100% 0 0);
+    --overlay-foreground: var(--foreground);
+
+    /* Muted - slightly darker for legibility */
+    --muted: oklch(0.48 0.01 0);
+
+    /* Default (neutral gray) */
+    --default: oklch(0.94 0.001 0);
+    --default-foreground: var(--eclipse);
+
+    /* Accent = Primary (black) */
+    --accent: oklch(0% 0 0);
+    --accent-foreground: oklch(100% 0 0);
+
+    /* Accent Secondary (neutral gray) */
+    --accent-secondary: oklch(0.75 0.01 0);
+
+    /* Form Fields */
+    --field-background: var(--white);
+    --field-foreground: oklch(0.21 0.005 285.89);
+    --field-placeholder: var(--muted);
+    --field-border: transparent;
+
+    /* Status Colors - sharp, saturated accents */
+    --success: oklch(0.55 0.20 145);
+    --success-foreground: var(--eclipse);
+    --warning: oklch(0.75 0.18 75);
+    --warning-foreground: var(--eclipse);
+    --danger: oklch(0.55 0.22 25);
+    --danger-foreground: var(--snow);
+
+    /* Component Colors */
+    --segment: var(--white);
+    --segment-foreground: var(--foreground);
+
+    /* Misc - stronger borders */
+    --border: oklch(0.82 0.004 0);
+    --separator: oklch(0.92 0.004 0);
+    --focus: oklch(0.68 0.12 65);
+    --link: var(--foreground);
+
+    /* Card aliases (for components using card/card-elevated) */
+    --card: var(--surface);
+    --card-elevated: var(--surface-secondary);
+    --card-foreground: var(--foreground);
+    --muted-foreground: var(--muted);
+    --destructive: var(--danger);
+  }
+
+  [data-theme="dark"] {
+    color-scheme: dark;
+
+    /* Base Colors - high contrast */
+    --background: oklch(0% 0 0);
+    --foreground: oklch(0.88 0.01 0);
+
+    /* Surface */
+    --surface: oklch(0.20 0.005 0);
+    --surface-foreground: var(--foreground);
+    --surface-secondary: oklch(0.26 0.005 0);
+    --surface-secondary-foreground: var(--foreground);
+    --surface-tertiary: oklch(0.32 0.005 0);
+    --surface-tertiary-foreground: var(--foreground);
+
+    /* Overlay */
+    --overlay: oklch(0% 0 0);
+    --overlay-foreground: var(--foreground);
+
+    /* Muted */
+    --muted: oklch(0.68 0.01 0);
+
+    /* Default */
+    --default: oklch(0.27 0.006 0);
+    --default-foreground: var(--snow);
+
+    /* Accent = Primary (white) */
+    --accent: oklch(100% 0 0);
+    --accent-foreground: oklch(0% 0 0);
+
+    /* Accent Secondary (gray) */
+    --accent-secondary: oklch(0.42 0.01 0);
+
+    /* Form Fields */
+    --field-background: oklch(0.21 0.005 285.89);
+    --field-foreground: var(--foreground);
+
+    /* Status Colors - sharp accents */
+    --success: oklch(0.52 0.18 145);
+    --success-foreground: var(--eclipse);
+    --warning: oklch(0.68 0.20 55);
+    --warning-foreground: var(--eclipse);
+    --danger: oklch(0.58 0.24 25);
+    --danger-foreground: var(--snow);
+
+    /* Component Colors */
+    --segment: oklch(0.40 0.01 0);
+    --segment-foreground: var(--foreground);
+
+    /* Misc - lighter borders for dark mode */
+    --border: oklch(0.35 0.006 0);
+    --separator: oklch(0.32 0.006 0);
+    --focus: oklch(0% 0 0);
+    --link: var(--foreground);
+
+    /* Card aliases */
+    --card: var(--surface);
+    --card-elevated: var(--surface-secondary);
+    --card-foreground: var(--foreground);
+    --muted-foreground: var(--muted);
+    --destructive: var(--danger);
+  }
+}

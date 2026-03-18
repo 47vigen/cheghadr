@@ -2,16 +2,8 @@
 
 import dynamic from 'next/dynamic'
 
+import { Button } from '@heroui/react'
 import { IconPlus } from '@tabler/icons-react'
-import {
-  Button,
-  FixedLayout,
-  List,
-  Placeholder,
-  Section,
-  Spinner,
-  Text,
-} from '@telegram-apps/telegram-ui'
 import { useTranslations } from 'next-intl'
 
 import { AssetListItem } from '@/components/asset-list-item'
@@ -20,6 +12,9 @@ import { EmptyState } from '@/components/empty-state'
 import { PortfolioTotal } from '@/components/portfolio-total'
 import { AssetsSkeleton } from '@/components/skeletons/assets-skeleton'
 import { StalenessBanner } from '@/components/staleness-banner'
+import { ErrorState, RefreshIndicator } from '@/components/ui/async-states'
+import { PageShell } from '@/components/ui/page-shell'
+import { Section } from '@/components/ui/section'
 
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
 import { useRouter } from '@/i18n/navigation'
@@ -30,7 +25,7 @@ const PortfolioChart = dynamic(
     import('@/components/portfolio-chart').then((m) => ({
       default: m.PortfolioChart,
     })),
-  { ssr: false, loading: () => <DynamicLoader height={180} /> },
+  { ssr: false, loading: () => <DynamicLoader height={140} /> },
 )
 
 export default function AssetsPage() {
@@ -57,17 +52,12 @@ export default function AssetsPage() {
 
   if (isError) {
     return (
-      <Placeholder
+      <ErrorState
         header={t('loadError')}
         description={error.message || t('retryButton')}
-        action={
-          <Button mode="filled" onClick={() => void refetch()}>
-            {t('retryButton')}
-          </Button>
-        }
-      >
-        <Text className="text-tgui-hint">⚠️</Text>
-      </Placeholder>
+        retryLabel={t('retryButton')}
+        onRetry={() => void refetch()}
+      />
     )
   }
 
@@ -77,54 +67,66 @@ export default function AssetsPage() {
 
   return (
     <>
-      {isRefreshing && (
-        <div className="flex justify-center py-2">
-          <Spinner size="s" />
-        </div>
-      )}
+      <RefreshIndicator isRefreshing={isRefreshing} />
 
-      <List>
-        <Section header={tNav('assets')}>
-          <PortfolioTotal totalIRT={data.totalIRT} />
-          {data.stale && (
-            <StalenessBanner
-              snapshotAt={data.snapshotAt}
-              namespace="assets"
-              onRefresh={() =>
-                void Promise.all([refetch(), historyQuery.refetch()])
-              }
-            />
-          )}
-        </Section>
+      <PageShell>
+        <div>
+          <Section header={tNav('assets')} variant="hero">
+            <PortfolioTotal totalIRT={data.totalIRT} />
+            {data.stale && (
+              <div className="mt-2">
+                <StalenessBanner
+                  snapshotAt={data.snapshotAt}
+                  namespace="assets"
+                  onRefresh={() =>
+                    void Promise.all([refetch(), historyQuery.refetch()])
+                  }
+                />
+              </div>
+            )}
+          </Section>
+        </div>
 
         {historyQuery.data && (
-          <Section header={t('portfolioChart')}>
-            <PortfolioChart data={historyQuery.data} />
-          </Section>
+          <div>
+            <Section header={t('portfolioChart')}>
+              <PortfolioChart data={historyQuery.data} />
+            </Section>
+          </div>
         )}
 
         {data.assets.length === 0 ? (
-          <EmptyState />
+          <div>
+            <EmptyState />
+          </div>
         ) : (
-          <Section header={t('assetsList')}>
-            {data.assets.map((asset) => (
-              <AssetListItem key={asset.id} {...asset} />
-            ))}
-          </Section>
+          <div>
+            <Section header={t('assetsList')}>
+              {data.assets.map((asset) => (
+                <AssetListItem key={asset.id} {...asset} />
+              ))}
+            </Section>
+          </div>
         )}
-      </List>
+      </PageShell>
 
       {data.assets.length > 0 && (
-        <FixedLayout className="!bottom-(--bottom-above-tabbar) !pb-(--bottom-safe) p-4">
+        <div
+          className="fab-shadow fixed start-2 end-2 p-1.5"
+          style={{
+            bottom: 'calc(var(--bottom-above-tabbar) + var(--bottom-safe))',
+          }}
+        >
           <Button
-            stretched
-            mode="filled"
-            before={<IconPlus size={18} />}
-            onClick={() => router.push('/assets/add')}
+            variant="primary"
+            fullWidth
+            size="sm"
+            onPress={() => router.push('/assets/add')}
           >
+            <IconPlus size={18} />
             {t('addAsset')}
           </Button>
-        </FixedLayout>
+        </div>
       )}
     </>
   )

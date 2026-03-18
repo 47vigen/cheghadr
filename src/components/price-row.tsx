@@ -1,12 +1,14 @@
 'use client'
 
-import { Avatar, Cell, Text } from '@telegram-apps/telegram-ui'
+import { Text } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { ChangeLabel } from '@/components/change-label'
+import { AssetAvatar } from '@/components/ui/asset-avatar'
+import { Cell } from '@/components/ui/cell'
 
+import type { PriceItem } from '@/lib/prices'
 import { formatIRT, getLocalizedItemName } from '@/lib/prices'
-import type { PriceItem } from '@/modules/API/Swagger/ecotrust/gen/models'
 
 interface PriceRowProps {
   item: PriceItem
@@ -22,15 +24,14 @@ export function PriceRow({ item }: PriceRowProps) {
   return (
     <Cell
       before={
-        <Avatar
-          size={40}
-          src={icon ?? undefined}
-          acronym={item.base_currency.symbol.slice(0, 2)}
-        />
+        <AssetAvatar alt={name} symbol={item.base_currency.symbol} src={icon} />
       }
       after={
         <div className="flex flex-col items-end gap-0.5">
-          <Text weight="2" className="tabular-nums" dir="ltr">
+          <Text
+            className="font-display font-semibold text-sm tabular-nums"
+            dir="ltr"
+          >
             {Number.isNaN(sellPrice)
               ? '—'
               : `${formatIRT(sellPrice, locale)} ${t('tomanAbbr')}`}

@@ -1,43 +1,26 @@
-import { List, Section, Skeleton } from '@telegram-apps/telegram-ui'
+import { Skeleton } from '@heroui/react'
 
-function PriceRowSkeleton() {
-  return (
-    <div className="flex items-center gap-3 px-4 py-3">
-      <Skeleton visible>
-        <div className="size-10 rounded-full" />
-      </Skeleton>
-      <div className="flex flex-1 flex-col gap-1.5">
-        <Skeleton visible>
-          <div className="h-4 w-28 rounded" />
-        </Skeleton>
-        <Skeleton visible>
-          <div className="h-3 w-20 rounded" />
-        </Skeleton>
-      </div>
-      <Skeleton visible>
-        <div className="h-4 w-24 rounded" />
-      </Skeleton>
-    </div>
-  )
-}
+import {
+  ListRowsSkeleton,
+  PageSkeleton,
+  SectionHeaderSkeleton,
+} from '@/components/skeletons/skeleton-primitives'
+import { Section } from '@/components/ui/section'
 
 export function PricesSkeleton() {
   return (
-    <List>
-      {Array.from({ length: 3 }, (_, sectionIdx) => (
-        <Section
-          key={sectionIdx}
-          header={
-            <Skeleton visible>
-              <div className="h-4 w-20 rounded" />
-            </Skeleton>
-          }
-        >
-          {Array.from({ length: 5 }, (_, i) => (
-            <PriceRowSkeleton key={i} />
-          ))}
+    <PageSkeleton>
+      <Section header={<SectionHeaderSkeleton />} variant="hero">
+        <div className="px-2 py-1.5">
+          <Skeleton className="h-10 w-full" />
+        </div>
+      </Section>
+
+      {Array.from({ length: 2 }, (_, sectionIdx) => (
+        <Section key={sectionIdx} header={<SectionHeaderSkeleton />}>
+          <ListRowsSkeleton count={5} hasSubtitle={false} />
         </Section>
       ))}
-    </List>
+    </PageSkeleton>
   )
 }

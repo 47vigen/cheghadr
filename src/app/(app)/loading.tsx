@@ -1,11 +1,7 @@
 'use client'
 
-import { Spinner } from '@telegram-apps/telegram-ui'
+import { LoadingState } from '@/components/ui/async-states'
 
 export default function AppLoading() {
-  return (
-    <div className="flex min-h-svh items-center justify-center">
-      <Spinner size="l" />
-    </div>
-  )
+  return <LoadingState fullScreen />
 }

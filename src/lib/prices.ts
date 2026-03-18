@@ -1,7 +1,9 @@
 import type {
-  PriceItem,
+  PriceItem as EcotrustPriceItem,
   PricesResponse,
 } from '@/modules/API/Swagger/ecotrust/gen/models'
+
+export type PriceItem = EcotrustPriceItem
 
 export function parsePriceSnapshot(data: unknown): PriceItem[] {
   if (!data || typeof data !== 'object') return []
@@ -104,7 +106,22 @@ export function formatChange(
 
 export const STALE_AFTER_MINUTES = 60
 
-function parseSellPrice(symbol: string, items: PriceItem[]): number {
+export function getSnapshotStaleness(
+  snapshotAt: Date | null | undefined,
+  staleAfterMinutes = STALE_AFTER_MINUTES,
+): { stale: boolean; minutesOld: number } {
+  if (!snapshotAt) {
+    return { stale: true, minutesOld: Number.POSITIVE_INFINITY }
+  }
+
+  const minutesOld = (Date.now() - snapshotAt.getTime()) / 1000 / 60
+  return { stale: minutesOld > staleAfterMinutes, minutesOld }
+}
+
+export function getSellPriceBySymbol(
+  symbol: string,
+  items: PriceItem[],
+): number {
   if (symbol === 'IRT') return 1
   const raw = findBySymbol(items, symbol)?.sell_price
   if (!raw) return 0
@@ -121,8 +138,8 @@ export function computeConversion(
   const qty = Number(amount)
   if (!qty || qty <= 0) return null
 
-  const fromSell = parseSellPrice(fromSymbol, items)
-  const toSell = parseSellPrice(toSymbol, items)
+  const fromSell = getSellPriceBySymbol(fromSymbol, items)
+  const toSell = getSellPriceBySymbol(toSymbol, items)
 
   if (fromSell === 0 || toSell === 0) return null
 

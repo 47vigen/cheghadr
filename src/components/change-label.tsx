@@ -1,6 +1,5 @@
 'use client'
 
-import { Caption } from '@telegram-apps/telegram-ui'
 import { useLocale } from 'next-intl'
 
 import { formatChange } from '@/lib/prices'
@@ -14,14 +13,17 @@ export function ChangeLabel({ change }: ChangeLabelProps) {
   const formatted = formatChange(change, locale)
   if (!formatted) return null
 
-  // Semantic state colors (green/red) — minimal override using TGUI variables
-  const colorClass = formatted.positive
-    ? 'text-tgui-green'
-    : 'text-tgui-destructive-text'
+  const isPositive = formatted.positive
 
   return (
-    <Caption level="2" className={colorClass}>
+    <span
+      className={`inline-flex items-center px-1 py-0 font-display font-medium text-[length:var(--section-label-size)] ${
+        isPositive
+          ? 'bg-success/15 text-success'
+          : 'bg-destructive/15 text-destructive'
+      }`}
+    >
       {formatted.text}
-    </Caption>
+    </span>
   )
 }

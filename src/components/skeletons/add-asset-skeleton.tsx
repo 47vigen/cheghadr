@@ -1,33 +1,24 @@
-import { List, Section, Skeleton } from '@telegram-apps/telegram-ui'
+import { Skeleton } from '@heroui/react'
+
+import {
+  ListRowsSkeleton,
+  PageSkeleton,
+  SectionHeaderSkeleton,
+} from '@/components/skeletons/skeleton-primitives'
+import { Section } from '@/components/ui/section'
 
 export function AddAssetSkeleton() {
   return (
-    <List>
+    <PageSkeleton>
       <Section>
-        <div className="px-4 py-3">
-          <Skeleton visible>
-            <div className="h-10 w-full rounded" />
-          </Skeleton>
+        <div className="px-2 py-1.5">
+          <Skeleton className="h-10 w-full" />
         </div>
       </Section>
 
-      <Section header=" ">
-        {Array.from({ length: 6 }, (_, i) => (
-          <div key={i} className="flex items-center gap-3 px-4 py-3">
-            <Skeleton visible>
-              <div className="size-10 rounded-full" />
-            </Skeleton>
-            <div className="flex flex-1 flex-col gap-1.5">
-              <Skeleton visible>
-                <div className="h-4 w-24 rounded" />
-              </Skeleton>
-              <Skeleton visible>
-                <div className="h-3 w-16 rounded" />
-              </Skeleton>
-            </div>
-          </div>
-        ))}
+      <Section header={<SectionHeaderSkeleton />}>
+        <ListRowsSkeleton count={6} trailingValue={false} />
       </Section>
-    </List>
+    </PageSkeleton>
   )
 }

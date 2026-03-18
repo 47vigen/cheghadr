@@ -14,10 +14,10 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: '/',
     display: 'standalone',
     orientation: 'portrait',
-    background_color: '#212121',
-    theme_color: '#212121',
-    lang: 'fa',
-    dir: 'rtl',
+    background_color: '#ffffff',
+    theme_color: '#ffffff',
+    lang: 'en',
+    dir: 'ltr',
     icons: [
       {
         src: '/icon.svg',

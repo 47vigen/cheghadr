@@ -2,16 +2,17 @@
 
 import { useEffect, useState } from 'react'
 
-import { Placeholder } from '@telegram-apps/telegram-ui'
 import { useLocale, useTranslations } from 'next-intl'
 import {
-  Line,
-  LineChart,
+  Area,
+  AreaChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts'
+
+import { Placeholder } from '@/components/ui/placeholder'
 
 import { formatIRT } from '@/lib/prices'
 
@@ -39,15 +40,8 @@ function ChartTooltip({
   const point = payload[0]
   if (!point) return null
   return (
-    <div
-      className="rounded-lg px-3 py-2 text-sm shadow-section"
-      style={{
-        backgroundColor: 'var(--tgui--card_bg_color)',
-        color: 'var(--tgui--text_color)',
-        border: '1px solid var(--tgui--divider)',
-      }}
-    >
-      <div className="text-tgui-hint text-xs">
+    <div className="border border-border bg-surface px-1.5 py-1 font-display text-xs shadow-[0_2px_8px_oklch(0_0_0/0.12)]">
+      <div className="text-muted-foreground text-xs">
         {formatChartDate(point.payload.date, locale)}
       </div>
       <div className="font-semibold tabular-nums">
@@ -60,16 +54,15 @@ function ChartTooltip({
 export function PortfolioChart({ data }: PortfolioChartProps) {
   const t = useTranslations('assets')
   const locale = useLocale()
-  const [accentColor, setAccentColor] = useState('#2481cc')
-  const [dividerColor, setDividerColor] = useState('rgba(0,0,0,0.1)')
+  const [accentColor, setAccentColor] = useState('var(--accent)')
+  const [dividerColor, setDividerColor] = useState('var(--border)')
 
-  // Read TGUI CSS variables after mount so we get the correct theme colors
   useEffect(() => {
     const style = getComputedStyle(document.documentElement)
-    const accent = style.getPropertyValue('--tgui--accent_text_color').trim()
-    const divider = style.getPropertyValue('--tgui--divider').trim()
+    const accent = style.getPropertyValue('--accent').trim()
+    const border = style.getPropertyValue('--border').trim()
     if (accent) setAccentColor(accent)
-    if (divider) setDividerColor(divider)
+    if (border) setDividerColor(border)
   }, [])
 
   if (data.length < 2) {
@@ -81,13 +74,25 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
     return { date, totalIRT: d.totalIRT, label: formatChartDate(date, locale) }
   })
 
+  const gradientId = 'portfolio-chart-gradient'
+
   return (
-    <div dir="ltr" className="px-2 py-4">
-      <ResponsiveContainer width="100%" height={180}>
-        <LineChart data={chartData}>
+    <div dir="ltr" className="chart-mount px-1 py-1">
+      <ResponsiveContainer width="100%" height={140}>
+        <AreaChart data={chartData}>
+          <defs>
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={accentColor} stopOpacity={0.25} />
+              <stop offset="100%" stopColor={accentColor} stopOpacity={0} />
+            </linearGradient>
+          </defs>
           <XAxis
             dataKey="label"
-            tick={{ fontSize: 11, fill: 'var(--tgui--hint_color)' }}
+            tick={{
+              fontSize: 12,
+              fill: 'var(--muted-foreground)',
+              fontFamily: 'var(--font-display)',
+            }}
             tickLine={false}
             axisLine={false}
             interval="preserveStartEnd"
@@ -97,15 +102,19 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
             content={<ChartTooltip locale={locale} />}
             cursor={{ stroke: dividerColor, strokeWidth: 1 }}
           />
-          <Line
+          <Area
             type="monotone"
             dataKey="totalIRT"
             stroke={accentColor}
             strokeWidth={2}
+            fill={`url(#${gradientId})`}
             dot={false}
             activeDot={{ r: 4, fill: accentColor }}
+            isAnimationActive
+            animationDuration={600}
+            animationEasing="ease-out"
           />
-        </LineChart>
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   )

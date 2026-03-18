@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.2/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.4.7/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -18,7 +18,8 @@
       "**/*.json",
       "**/*.mdx",
       "!src/modules/API/Swagger/gen",
-      "!src/modules/API/Swagger/pure"
+      "!src/modules/API/Swagger/pure",
+      "!src/modules/API/Swagger/ecotrust/gen"
     ]
   },
   "formatter": {

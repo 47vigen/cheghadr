@@ -2,13 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-import {
-  Caption,
-  LargeTitle,
-  Placeholder,
-  Spinner,
-  Text,
-} from '@telegram-apps/telegram-ui'
+import { Spinner, Text } from '@heroui/react'
 import { signIn } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 
@@ -91,23 +85,29 @@ export default function LoginPage() {
   }, [mode, router, t])
 
   if (mode === 'loading' || mode === 'miniapp') {
-    return <Placeholder header={t('loading')} action={<Spinner size="l" />} />
+    return (
+      <div className="flex min-h-svh items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    )
   }
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center gap-8 p-6">
-      <div className="flex flex-col items-center gap-3 text-center">
-        <LargeTitle weight="1">{t('title')}</LargeTitle>
-        <Text weight="3" className="text-tgui-hint">
-          {t('subtitle')}
+    <div className="flex min-h-svh flex-col items-center justify-center gap-2 px-2 py-6 text-center">
+      <div className="flex flex-col items-center gap-1.5">
+        <span
+          className="font-display text-muted-foreground text-sm tracking-widest"
+          aria-hidden
+        >
+          Cheghadr?
+        </span>
+        <Text className="font-display font-semibold text-2xl">
+          {t('title')}
         </Text>
+        <Text className="text-muted-foreground text-sm">{t('subtitle')}</Text>
       </div>
 
-      {error && (
-        <Caption level="1" className="text-tgui-destructive-text">
-          {error}
-        </Caption>
-      )}
+      {error && <p className="error-text">{error}</p>}
 
       <div ref={widgetContainerRef} />
     </div>

@@ -1,6 +1,5 @@
+import { getSnapshotStaleness } from '@/lib/prices'
 import { publicProcedure, router } from '@/server/api/trpc'
-
-const STALE_AFTER_MINUTES = 60
 
 export const pricesRouter = router({
   latest: publicProcedure.query(async ({ ctx }) => {
@@ -12,8 +11,7 @@ export const pricesRouter = router({
       return { data: null, stale: true, snapshotAt: null }
     }
 
-    const minutesOld = (Date.now() - snapshot.snapshotAt.getTime()) / 1000 / 60
-    const stale = minutesOld > STALE_AFTER_MINUTES
+    const { stale } = getSnapshotStaleness(snapshot.snapshotAt)
 
     return {
       data: snapshot.data,

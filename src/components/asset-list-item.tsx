@@ -2,22 +2,23 @@
 
 import { useState } from 'react'
 
-import { IconEdit, IconTrash } from '@tabler/icons-react'
 import {
-  Avatar,
   Button,
-  Cell,
   Input,
+  Label,
   Modal,
-  Section,
   Spinner,
-  Subheadline,
   Text,
-} from '@telegram-apps/telegram-ui'
+  TextField,
+} from '@heroui/react'
+import { IconEdit, IconTrash } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 import { ChangeLabel } from '@/components/change-label'
+import { AssetAvatar } from '@/components/ui/asset-avatar'
+import { Cell } from '@/components/ui/cell'
+import { Section } from '@/components/ui/section'
 
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 import { formatIRT } from '@/lib/prices'
@@ -94,42 +95,39 @@ export function AssetListItem({
   return (
     <>
       <Cell
-        before={
-          assetIcon ? (
-            <Avatar src={assetIcon} size={40} />
-          ) : (
-            <Avatar size={40} acronym={symbol.slice(0, 2)} />
-          )
-        }
+        before={<AssetAvatar alt={assetName} symbol={symbol} src={assetIcon} />}
         subtitle={`${new Intl.NumberFormat(locale === 'fa' ? 'fa-IR' : 'en-US').format(Number(quantity))} ${t('units')}`}
         after={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <div className="flex flex-col items-end gap-0.5">
-              <Text weight="2" className="tabular-nums">
+              <Text className="font-display font-semibold text-sm tabular-nums">
                 {formatIRT(valueIRT, locale)} {t('tomanAbbr')}
               </Text>
               <ChangeLabel change={change} />
             </div>
             <div className="flex items-center gap-0.5">
-              <button
-                type="button"
-                onClick={() => {
+              <Button
+                isIconOnly
+                variant="ghost"
+                size="sm"
+                onPress={() => {
                   setNewQuantity(String(quantity))
                   setEditOpen(true)
                 }}
                 aria-label={t('editTitle', { name: assetName })}
-                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-tgui-text hover:bg-tgui-tertiary active:opacity-80"
               >
-                <IconEdit size={16} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setDeleteOpen(true)}
+                <IconEdit size={14} />
+              </Button>
+              <Button
+                isIconOnly
+                variant="ghost"
+                size="sm"
+                onPress={() => setDeleteOpen(true)}
                 aria-label={t('deleteTitle')}
-                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-tgui-destructive-text hover:bg-tgui-tertiary active:opacity-80"
+                className="text-destructive"
               >
-                <IconTrash size={16} />
-              </button>
+                <IconTrash size={14} />
+              </Button>
             </div>
           </div>
         }
@@ -137,57 +135,87 @@ export function AssetListItem({
         {assetName}
       </Cell>
 
-      <Modal
-        open={editOpen}
-        onOpenChange={setEditOpen}
-        header={
-          <Modal.Header>{t('editTitle', { name: assetName })}</Modal.Header>
-        }
-      >
-        <Input
-          type="number"
-          inputMode="decimal"
-          value={newQuantity}
-          header={t('editQuantityHeader')}
-          placeholder={t('editQuantityPlaceholder')}
-          onChange={(e) => setNewQuantity(e.target.value)}
-        />
-        <Button
-          stretched
-          mode="filled"
-          onClick={handleUpdate}
-          disabled={updateMutation.isPending}
-        >
-          {updateMutation.isPending ? <Spinner size="s" /> : t('save')}
-        </Button>
+      <Modal>
+        <Modal.Backdrop isOpen={editOpen} onOpenChange={setEditOpen}>
+          <Modal.Container>
+            <Modal.Dialog className="sm:max-w-[360px]">
+              <Modal.CloseTrigger />
+              <Modal.Header>
+                <Modal.Heading>
+                  {t('editTitle', { name: assetName })}
+                </Modal.Heading>
+              </Modal.Header>
+              <Modal.Body className="modal-body">
+                <TextField
+                  value={newQuantity}
+                  onChange={setNewQuantity}
+                  fullWidth
+                  name="quantity"
+                >
+                  <Label>{t('editQuantityHeader')}</Label>
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    placeholder={t('editQuantityPlaceholder')}
+                  />
+                </TextField>
+                <Button
+                  variant="primary"
+                  fullWidth
+                  onPress={handleUpdate}
+                  isDisabled={updateMutation.isPending}
+                >
+                  {updateMutation.isPending ? (
+                    <Spinner size="sm" color="current" />
+                  ) : (
+                    t('save')
+                  )}
+                </Button>
+              </Modal.Body>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
       </Modal>
 
-      <Modal open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <Modal.Header>{t('deleteTitle')}</Modal.Header>
-        <Section>
-          <Subheadline level="2" className="mb-4 text-center">
-            {t('deleteConfirm', { name: assetName })}
-          </Subheadline>
-          <div className="flex gap-2">
-            <Button
-              mode="bezeled"
-              stretched
-              onClick={() => setDeleteOpen(false)}
-            >
-              {t('cancel')}
-            </Button>
-            <Button
-              mode="bezeled"
-              stretched
-              onClick={handleDelete}
-              disabled={deleteMutation.isPending}
-              className="text-tgui-destructive-text"
-            >
-              {deleteMutation.isPending ? <Spinner size="s" /> : t('delete')}
-            </Button>
-          </div>
-        </Section>
-        <Modal.Close />
+      <Modal>
+        <Modal.Backdrop isOpen={deleteOpen} onOpenChange={setDeleteOpen}>
+          <Modal.Container>
+            <Modal.Dialog className="sm:max-w-[360px]">
+              <Modal.CloseTrigger />
+              <Modal.Header>
+                <Modal.Heading>{t('deleteTitle')}</Modal.Heading>
+              </Modal.Header>
+              <Modal.Body>
+                <Section>
+                  <Text className="mb-4 text-center text-muted-foreground text-sm">
+                    {t('deleteConfirm', { name: assetName })}
+                  </Text>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="secondary"
+                      fullWidth
+                      onPress={() => setDeleteOpen(false)}
+                    >
+                      {t('cancel')}
+                    </Button>
+                    <Button
+                      variant="danger"
+                      fullWidth
+                      onPress={handleDelete}
+                      isDisabled={deleteMutation.isPending}
+                    >
+                      {deleteMutation.isPending ? (
+                        <Spinner size="sm" color="current" />
+                      ) : (
+                        t('delete')
+                      )}
+                    </Button>
+                  </div>
+                </Section>
+              </Modal.Body>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
       </Modal>
     </>
   )

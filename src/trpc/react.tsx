@@ -3,8 +3,7 @@
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 
-import { QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { httpBatchStreamLink } from '@trpc/client'
 import { createTRPCReact } from '@trpc/react-query'
 import SuperJSON from 'superjson'
@@ -12,6 +11,11 @@ import SuperJSON from 'superjson'
 import type { AppRouter } from '@/server/api/root'
 import { getRawInitData } from '@/utils/telegram'
 
+import {
+  TRPC_QUERY_PERSIST_BUSTER,
+  TRPC_QUERY_PERSIST_MAX_AGE,
+  trpcQueryPersister,
+} from './persister'
 import { getQueryClient } from './query-client'
 
 export const api = createTRPCReact<AppRouter>()
@@ -36,10 +40,17 @@ export function TRPCReactProvider({ children }: { children: ReactNode }) {
 
   return (
     <api.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{
+          persister: trpcQueryPersister,
+          maxAge: TRPC_QUERY_PERSIST_MAX_AGE,
+          buster: TRPC_QUERY_PERSIST_BUSTER,
+        }}
+      >
         {children}
-        <ReactQueryDevtools initialIsOpen={false} buttonPosition="top-left" />
-      </QueryClientProvider>
+        {/* <ReactQueryDevtools initialIsOpen={false} buttonPosition="top-left" /> */}
+      </PersistQueryClientProvider>
     </api.Provider>
   )
 }

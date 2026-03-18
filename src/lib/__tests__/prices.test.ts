@@ -1,15 +1,17 @@
 import { describe, expect, it } from 'vitest'
 
+import type { PriceItem } from '@/lib/prices'
 import {
   computeConversion,
   filterPriceItems,
   findBySymbol,
   formatChange,
   formatIRT,
+  getSellPriceBySymbol,
+  getSnapshotStaleness,
   groupByCategory,
   parsePriceSnapshot,
 } from '@/lib/prices'
-import type { PriceItem } from '@/modules/API/Swagger/ecotrust/gen/models'
 
 const makeItem = (
   symbol: string,
@@ -185,6 +187,38 @@ describe('computeConversion', () => {
   it('handles IRT-to-IRT conversion (result = amount)', () => {
     const result = computeConversion('42', 'IRT', 'IRT', items)
     expect(result).toBe('42.0000')
+  })
+})
+
+describe('getSellPriceBySymbol', () => {
+  const items = [USD, BTC]
+
+  it('returns 1 for IRT', () => {
+    expect(getSellPriceBySymbol('IRT', items)).toBe(1)
+  })
+
+  it('returns parsed sell price for known symbol', () => {
+    expect(getSellPriceBySymbol('USD', items)).toBe(500000)
+  })
+
+  it('returns 0 for unknown symbol', () => {
+    expect(getSellPriceBySymbol('ETH', items)).toBe(0)
+  })
+})
+
+describe('getSnapshotStaleness', () => {
+  it('marks missing snapshot as stale', () => {
+    expect(getSnapshotStaleness(null).stale).toBe(true)
+  })
+
+  it('marks old snapshots as stale', () => {
+    const snapshotAt = new Date(Date.now() - 61 * 60 * 1000)
+    expect(getSnapshotStaleness(snapshotAt).stale).toBe(true)
+  })
+
+  it('marks recent snapshots as fresh', () => {
+    const snapshotAt = new Date(Date.now() - 10 * 60 * 1000)
+    expect(getSnapshotStaleness(snapshotAt).stale).toBe(false)
   })
 })
 
