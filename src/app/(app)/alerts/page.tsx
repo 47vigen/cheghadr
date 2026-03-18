@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Switch, Text } from '@heroui/react'
 import { IconBellPlus } from '@tabler/icons-react'
@@ -21,10 +21,18 @@ export default function AlertsPage() {
   const t = useTranslations('alerts')
   const tNav = useTranslations('nav')
   const { notificationOccurred } = useTelegramHaptics()
-  const [digestEnabled, setDigestEnabled] = useState(false)
+  const [digestEnabled, setDigestEnabled] = useState<boolean | null>(null)
 
   const { data: alerts, isLoading, isError, error, refetch } =
     api.alerts.list.useQuery()
+
+  const { data: settingsData } = api.alerts.settings.useQuery()
+
+  useEffect(() => {
+    if (settingsData && digestEnabled === null) {
+      setDigestEnabled(settingsData.dailyDigestEnabled)
+    }
+  }, [settingsData, digestEnabled])
 
   const toggleDigestMutation = api.alerts.toggleDigest.useMutation({
     onSuccess: (user) => {
@@ -115,10 +123,12 @@ export default function AlertsPage() {
               </Text>
             </div>
             <Switch
-              isSelected={digestEnabled}
-              isDisabled={toggleDigestMutation.isPending}
+              isSelected={digestEnabled ?? settingsData?.dailyDigestEnabled ?? false}
+              isDisabled={toggleDigestMutation.isPending || digestEnabled === null}
               onChange={() =>
-                toggleDigestMutation.mutate({ enabled: !digestEnabled })
+                toggleDigestMutation.mutate({
+                  enabled: !(digestEnabled ?? settingsData?.dailyDigestEnabled ?? false),
+                })
               }
               size="sm"
               aria-label={t('dailyDigest')}

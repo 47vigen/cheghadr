@@ -49,7 +49,7 @@ export function PortfolioDelta() {
       ? 'text-success'
       : 'text-destructive'
 
-  const sign = deltaIRT > 0 ? '+' : ''
+  const sign = deltaIRT > 0 ? '+' : deltaIRT < 0 ? '-' : ''
 
   const pctFormatted = new Intl.NumberFormat(
     locale === 'fa' ? 'fa-IR' : 'en-US',
@@ -78,7 +78,7 @@ export function PortfolioDelta() {
           className={`font-display font-semibold text-base tabular-nums ${colorClass}`}
         >
           {sign}
-          {formatIRT(Math.abs(deltaIRT), locale)}
+          {formatIRT(Math.abs(Math.round(deltaIRT)), locale)}
         </Text>
         <Text className={`font-display text-sm tabular-nums ${colorClass}`}>
           ({isPositive ? '+' : deltaIRT < 0 ? '-' : ''}

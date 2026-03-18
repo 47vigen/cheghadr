@@ -1,11 +1,14 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-import { portfolioAlertMessage, dailyDigestMessage } from '@/lib/alert-messages'
-import { createPortfolioSnapshot } from '@/lib/portfolio'
+import { dailyDigestMessage, portfolioAlertMessage } from '@/lib/alert-messages'
+import { hasCrossedThreshold } from '@/lib/alert-utils'
 import { NotificationQueue } from '@/lib/notifications'
+import { createPortfolioSnapshot } from '@/lib/portfolio'
 import { getSellPriceBySymbol, parsePriceSnapshot } from '@/lib/prices'
 import { db } from '@/server/db'
+
+const YESTERDAY_CUTOFF_MS = 23 * 60 * 60 * 1000
 
 export async function GET(request: NextRequest) {
   // Explicit guard: prevents "Bearer undefined" bypass when secret is unset
@@ -52,7 +55,7 @@ export async function GET(request: NextRequest) {
         db.portfolioSnapshot.findFirst({
           where: {
             userId: alert.userId,
-            snapshotAt: { lt: new Date(Date.now() - 23 * 60 * 60 * 1000) },
+            snapshotAt: { lt: new Date(Date.now() - YESTERDAY_CUTOFF_MS) },
           },
           orderBy: { snapshotAt: 'desc' },
           select: { id: true, totalIRT: true },
@@ -65,12 +68,12 @@ export async function GET(request: NextRequest) {
       const previousIRT = Number(previousSnap.totalIRT)
       const threshold = Number(alert.thresholdIRT)
 
-      let triggered = false
-      if (alert.direction === 'ABOVE') {
-        triggered = previousIRT < threshold && currentIRT >= threshold
-      } else {
-        triggered = previousIRT > threshold && currentIRT <= threshold
-      }
+      const triggered = hasCrossedThreshold(
+        previousIRT,
+        currentIRT,
+        alert.direction,
+        threshold,
+      )
 
       if (triggered) {
         const text = portfolioAlertMessage(
@@ -102,7 +105,7 @@ export async function GET(request: NextRequest) {
         db.portfolioSnapshot.findFirst({
           where: {
             userId: user.id,
-            snapshotAt: { lt: new Date(Date.now() - 23 * 60 * 60 * 1000) },
+            snapshotAt: { lt: new Date(Date.now() - YESTERDAY_CUTOFF_MS) },
           },
           orderBy: { snapshotAt: 'desc' },
           select: { totalIRT: true },

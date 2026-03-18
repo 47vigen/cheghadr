@@ -1,6 +1,7 @@
 import type { PrismaClient } from '@prisma/client'
 
 import { priceAlertMessage } from '@/lib/alert-messages'
+import { hasCrossedThreshold } from '@/lib/alert-utils'
 import { NotificationQueue } from '@/lib/notifications'
 import { findBySymbol, parsePriceSnapshot } from '@/lib/prices'
 
@@ -46,13 +47,21 @@ export async function evaluatePriceAlerts(
     const previousPrice = Number(previousItem.sell_price)
     const threshold = Number(alert.thresholdIRT)
 
-    let triggered = false
-
-    if (alert.direction === 'ABOVE') {
-      triggered = previousPrice < threshold && currentPrice >= threshold
-    } else {
-      triggered = previousPrice > threshold && currentPrice <= threshold
+    if (
+      !Number.isFinite(currentPrice) ||
+      !Number.isFinite(previousPrice) ||
+      currentPrice <= 0 ||
+      previousPrice <= 0
+    ) {
+      continue
     }
+
+    const triggered = hasCrossedThreshold(
+      previousPrice,
+      currentPrice,
+      alert.direction,
+      threshold,
+    )
 
     if (triggered) {
       const assetName =

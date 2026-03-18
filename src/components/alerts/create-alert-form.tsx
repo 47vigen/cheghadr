@@ -10,7 +10,8 @@ import { toast } from 'sonner'
 import { AssetSelector } from '@/components/asset-selector'
 
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
-import { formatIRT, parsePriceSnapshot, getSellPriceBySymbol } from '@/lib/prices'
+import { MAX_ACTIVE_ALERTS } from '@/lib/alert-utils'
+import { formatIRT, getSellPriceBySymbol, parsePriceSnapshot } from '@/lib/prices'
 import { api } from '@/trpc/react'
 
 type AlertType = 'PRICE' | 'PORTFOLIO'
@@ -34,7 +35,7 @@ export function CreateAlertForm() {
 
   const { data: alertsList } = api.alerts.list.useQuery()
   const activeCount = alertsList?.filter((a) => a.isActive).length ?? 0
-  const atLimit = activeCount >= 10
+  const atLimit = activeCount >= MAX_ACTIVE_ALERTS
 
   const createMutation = api.alerts.create.useMutation({
     onSuccess: () => {
@@ -79,7 +80,7 @@ export function CreateAlertForm() {
     <div className="flex flex-col gap-3 p-2">
       {atLimit && (
         <Text className="text-sm text-warning">
-          {t('maxAlertsReached', { max: 10 })}
+          {t('maxAlertsReached', { max: MAX_ACTIVE_ALERTS })}
         </Text>
       )}
 

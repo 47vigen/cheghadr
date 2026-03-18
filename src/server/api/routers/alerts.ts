@@ -2,9 +2,9 @@ import type { PrismaClient } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
+import { MAX_ACTIVE_ALERTS } from '@/lib/alert-utils'
+import { findBySymbol, parsePriceSnapshot } from '@/lib/prices'
 import { protectedProcedure, router } from '@/server/api/trpc'
-
-const MAX_ACTIVE_ALERTS = 10
 
 async function requireOwnedAlert(
   database: PrismaClient,
@@ -70,9 +70,6 @@ export const alertsRouter = router({
         })
 
         if (latestSnapshot) {
-          const { parsePriceSnapshot, findBySymbol } = await import(
-            '@/lib/prices'
-          )
           const prices = parsePriceSnapshot(latestSnapshot.data)
           const item = findBySymbol(prices, input.symbol)
           if (!item) {
@@ -130,6 +127,13 @@ export const alertsRouter = router({
         where: { id: input.id },
       })
     }),
+
+  settings: protectedProcedure.query(({ ctx }) => {
+    return ctx.db.user.findUniqueOrThrow({
+      where: { id: ctx.user.id },
+      select: { dailyDigestEnabled: true },
+    })
+  }),
 
   toggleDigest: protectedProcedure
     .input(z.object({ enabled: z.boolean() }))
