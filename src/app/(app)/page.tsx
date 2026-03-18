@@ -6,9 +6,11 @@ import { Button } from '@heroui/react'
 import { IconPlus } from '@tabler/icons-react'
 import { useTranslations } from 'next-intl'
 
+import { AlertSummaryCard } from '@/components/alerts/alert-summary-card'
 import { AssetListItem } from '@/components/asset-list-item'
 import { DynamicLoader } from '@/components/dynamic-loader'
 import { EmptyState } from '@/components/empty-state'
+import { PortfolioDelta } from '@/components/portfolio-delta'
 import { PortfolioTotal } from '@/components/portfolio-total'
 import { AssetsSkeleton } from '@/components/skeletons/assets-skeleton'
 import { StalenessBanner } from '@/components/staleness-banner'
@@ -32,6 +34,7 @@ export default function AssetsPage() {
   const router = useRouter()
   const t = useTranslations('assets')
   const tNav = useTranslations('nav')
+  const tAlerts = useTranslations('alerts')
 
   const { data, isLoading, isError, error, refetch } = api.assets.list.useQuery(
     undefined,
@@ -46,8 +49,12 @@ export default function AssetsPage() {
     { refetchInterval: 30 * 60 * 1000 },
   )
 
+  const alertsQuery = api.alerts.list.useQuery(undefined, {
+    refetchInterval: 30 * 60 * 1000,
+  })
+
   const { isRefreshing } = usePullToRefresh(async () => {
-    await Promise.all([refetch(), historyQuery.refetch()])
+    await Promise.all([refetch(), historyQuery.refetch(), alertsQuery.refetch()])
   })
 
   if (isError) {
@@ -73,6 +80,7 @@ export default function AssetsPage() {
         <div>
           <Section header={tNav('assets')} variant="hero">
             <PortfolioTotal totalIRT={data.totalIRT} />
+            <PortfolioDelta />
             {data.stale && (
               <div className="mt-2">
                 <StalenessBanner
@@ -91,6 +99,20 @@ export default function AssetsPage() {
           <div>
             <Section header={t('portfolioChart')}>
               <PortfolioChart data={historyQuery.data} />
+            </Section>
+          </div>
+        )}
+
+        {alertsQuery.data !== undefined && (
+          <div>
+            <Section header={tAlerts('sectionTitle')}>
+              <AlertSummaryCard
+                activeCount={alertsQuery.data.filter((a) => a.isActive).length}
+                triggeredCount={
+                  alertsQuery.data.filter((a) => !a.isActive && a.triggeredAt !== null).length
+                }
+                onManage={() => router.push('/alerts')}
+              />
             </Section>
           </div>
         )}
