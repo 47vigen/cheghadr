@@ -42,7 +42,6 @@ export function groupByCategory(items: PriceItem[]): Map<string, PriceItem[]> {
   return groups
 }
 
-
 export const categoryOrder: string[] = [
   'CURRENCY',
   'CRYPTOCURRENCY',
@@ -141,7 +140,12 @@ export const IRT_ENTRY = {
 
 export function getLocalizedItemName(item: PriceItem, locale: string): string {
   if (locale === 'fa') return item.name.fa || item.base_currency.fa
-  return item.name.en || item.base_currency.en || item.name.fa || item.base_currency.fa
+  return (
+    item.name.en ||
+    item.base_currency.en ||
+    item.name.fa ||
+    item.base_currency.fa
+  )
 }
 
 export function getLocalizedIrtName(locale: string): string {

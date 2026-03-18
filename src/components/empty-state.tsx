@@ -20,7 +20,7 @@ export function EmptyState() {
         </Button>
       }
     >
-      <IconWallet size={64} className="text-tgui-hint" />
+      <IconWallet size={80} className="text-tgui-hint" />
     </Placeholder>
   )
 }

@@ -73,12 +73,7 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
   }, [])
 
   if (data.length < 2) {
-    return (
-      <Placeholder
-        description={t('chartEmpty')}
-        className="py-6"
-      />
-    )
+    return <Placeholder description={t('chartEmpty')} className="py-6" />
   }
 
   const chartData = data.map((d) => {
@@ -97,10 +92,7 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
             axisLine={false}
             interval="preserveStartEnd"
           />
-          <YAxis
-            hide
-            domain={['auto', 'auto']}
-          />
+          <YAxis hide domain={['auto', 'auto']} />
           <Tooltip
             content={<ChartTooltip locale={locale} />}
             cursor={{ stroke: dividerColor, strokeWidth: 1 }}

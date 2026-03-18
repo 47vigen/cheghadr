@@ -2,12 +2,12 @@ import type { PrismaClient } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
+import { createPortfolioSnapshot } from '@/lib/portfolio'
 import {
   findBySymbol,
   parsePriceSnapshot,
   STALE_AFTER_MINUTES,
 } from '@/lib/prices'
-import { createPortfolioSnapshot } from '@/lib/portfolio'
 import { protectedProcedure, router } from '@/server/api/trpc'
 
 async function requireOwnedAsset(

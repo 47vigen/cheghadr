@@ -27,8 +27,8 @@ import {
   sortedGroupEntries,
 } from '@/lib/prices'
 import type { PriceItem } from '@/modules/API/Swagger/ecotrust/gen/models'
-import { isTelegramWebApp } from '@/utils/telegram'
 import { api } from '@/trpc/react'
+import { isTelegramWebApp } from '@/utils/telegram'
 
 interface AssetPickerProps {
   priceData: unknown
@@ -78,8 +78,7 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
   }
 
   const qty = Number(quantity)
-  const canSave =
-    !!selected && !!quantity && !Number.isNaN(qty) && qty > 0
+  const canSave = !!selected && !!quantity && !Number.isNaN(qty) && qty > 0
 
   useTelegramMainButton({
     text: tPicker('save'),
@@ -99,6 +98,7 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
             setSelected(null)
           }}
           type="search"
+          dir={locale === 'fa' ? 'rtl' : 'ltr'}
         />
       </Section>
 
@@ -133,46 +133,43 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
           ? tCat(category as Parameters<typeof tCat>[0])
           : category
         return (
-        <Section
-          key={category}
-          header={catLabel}
-        >
-          {categoryItems.map((item) => {
-            const icon = item.png ?? item.base_currency.png
-            const isSelected =
-              selected?.base_currency.symbol === item.base_currency.symbol
-            const name = getLocalizedItemName(item, locale)
-            return (
-              <Cell
-                key={item.symbol}
-                before={
-                  icon ? (
-                    <Avatar src={icon} size={40} />
-                  ) : (
-                    <Avatar
-                      size={40}
-                      acronym={item.base_currency.symbol.slice(0, 2)}
-                    />
-                  )
-                }
-                subtitle={`${formatIRT(Number(item.sell_price), locale)} ${t('tomanAbbr')}`}
-                after={
-                  isSelected ? (
-                    <Caption level="2" className="text-tgui-accent-text">
-                      {tPicker('checkmark')}
-                    </Caption>
-                  ) : undefined
-                }
-                onClick={() => {
-                  setSelected(isSelected ? null : item)
-                  setQuantity('')
-                }}
-              >
-                {name}
-              </Cell>
-            )
-          })}
-        </Section>
+          <Section key={category} header={catLabel}>
+            {categoryItems.map((item) => {
+              const icon = item.png ?? item.base_currency.png
+              const isSelected =
+                selected?.base_currency.symbol === item.base_currency.symbol
+              const name = getLocalizedItemName(item, locale)
+              return (
+                <Cell
+                  key={item.symbol}
+                  before={
+                    icon ? (
+                      <Avatar src={icon} size={40} />
+                    ) : (
+                      <Avatar
+                        size={40}
+                        acronym={item.base_currency.symbol.slice(0, 2)}
+                      />
+                    )
+                  }
+                  subtitle={`${formatIRT(Number(item.sell_price), locale)} ${t('tomanAbbr')}`}
+                  after={
+                    isSelected ? (
+                      <Caption level="2" className="text-tgui-accent-text">
+                        {tPicker('checkmark')}
+                      </Caption>
+                    ) : undefined
+                  }
+                  onClick={() => {
+                    setSelected(isSelected ? null : item)
+                    setQuantity('')
+                  }}
+                >
+                  {name}
+                </Cell>
+              )
+            })}
+          </Section>
         )
       })}
 

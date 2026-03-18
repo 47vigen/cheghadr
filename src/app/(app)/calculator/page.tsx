@@ -57,7 +57,11 @@ export default function CalculatorPage() {
           onChange={setFromSymbol}
           items={prices}
         />
-        <Cell onClick={handleSwap}>
+        <Cell
+          onClick={handleSwap}
+          className="min-h-[44px]"
+          aria-label={t('swap')}
+        >
           <IconButton size="m" mode="bezeled">
             <IconArrowsExchange size={24} />
           </IconButton>

@@ -1,10 +1,16 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
 
-import { NextIntlClientProvider } from 'next-intl'
 import WebApp from '@twa-dev/sdk'
+import { NextIntlClientProvider } from 'next-intl'
 
 import type { Locale } from '@/i18n/routing'
 
@@ -20,6 +26,17 @@ function detectLocale(): Locale {
   const tg = WebApp?.initDataUnsafe?.user?.language_code
   if (tg) return mapToLocale(tg)
   return mapToLocale(navigator.language)
+}
+
+interface LocaleContextValue {
+  locale: Locale
+  setLocale: (locale: Locale) => void
+}
+
+const LocaleContext = createContext<LocaleContextValue | null>(null)
+
+export function useLocaleContext(): LocaleContextValue | null {
+  return useContext(LocaleContext)
 }
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
@@ -54,8 +71,10 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
-      {children}
-    </NextIntlClientProvider>
+    <LocaleContext.Provider value={{ locale, setLocale }}>
+      <NextIntlClientProvider locale={locale} messages={messages}>
+        {children}
+      </NextIntlClientProvider>
+    </LocaleContext.Provider>
   )
 }

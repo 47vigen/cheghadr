@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 
+import '@telegram-apps/telegram-ui/dist/styles.css'
 import '@/styles/globals.css'
 
 import { ClientRootWrapper } from '@/components/client-root-wrapper'
+
 import { Vazirmatn } from '@/styles/fonts'
 
 export const metadata: Metadata = {
@@ -13,7 +15,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" dir="ltr" suppressHydrationWarning className={Vazirmatn.variable}>
+    <html
+      lang="en"
+      dir="ltr"
+      suppressHydrationWarning
+      className={Vazirmatn.variable}
+    >
       <body>
         <ClientRootWrapper>{children}</ClientRootWrapper>
       </body>

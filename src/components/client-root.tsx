@@ -6,6 +6,7 @@ import { Toaster } from 'sonner'
 
 import { ClientProviders } from '@/components/client-providers'
 import { LocaleProvider } from '@/components/locale-provider'
+
 import { TRPCReactProvider } from '@/trpc/react'
 
 /**

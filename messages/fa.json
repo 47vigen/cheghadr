@@ -14,6 +14,7 @@
   "assets": {
     "totalValue": "ارزش کل دارایی‌ها",
     "myAssets": "دارایی‌های من",
+    "assetsList": "لیست دارایی‌ها",
     "addAsset": "افزودن دارایی",
     "loadError": "خطا در بارگذاری",
     "retryButton": "تلاش مجدد",
@@ -64,6 +65,7 @@
     "title": "ماشین حساب",
     "from": "از",
     "to": "به",
+    "swap": "تعویض ارزها",
     "amount": "مقدار",
     "amountPlaceholder": "مقدار را وارد کنید",
     "resultTitle": "نتیجه",
@@ -71,7 +73,8 @@
   },
   "addAsset": {
     "title": "افزودن دارایی",
-    "subtitle": "دارایی مورد نظر را جستجو و انتخاب کنید"
+    "subtitle": "دارایی مورد نظر را جستجو و انتخاب کنید",
+    "back": "بازگشت"
   },
   "picker": {
     "search": "جستجو...",
@@ -88,6 +91,7 @@
     "error": "خطایی رخ داد",
     "tryAgain": "لطفاً دوباره تلاش کنید",
     "retry": "تلاش مجدد",
+    "refresh": "بروزرسانی",
     "sessionExpired": "نشست شما منقضی شده است",
     "sessionExpiredDescription": "لطفاً دوباره وارد شوید",
     "reLogin": "ورود مجدد",

@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-import { useRouter } from '@/i18n/navigation'
-
 import {
   Caption,
   LargeTitle,
@@ -15,6 +13,7 @@ import { signIn } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 
 import { env } from '@/env'
+import { useRouter } from '@/i18n/navigation'
 import { getRawInitData } from '@/utils/telegram'
 
 export default function LoginPage() {

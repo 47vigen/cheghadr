@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "@telegram-apps/telegram-ui/dist/styles.css";
 
 /*
  * Override TGUI's font-family variable to put Vazirmatn first.

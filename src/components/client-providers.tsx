@@ -1,8 +1,7 @@
 'use client'
 
-import type { PropsWithChildren } from 'react'
-
 import dynamic from 'next/dynamic'
+import type { PropsWithChildren } from 'react'
 
 const TelegramProvider = dynamic(() => import('./telegram-provider'), {
   ssr: false,

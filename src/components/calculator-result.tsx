@@ -37,7 +37,11 @@ export function CalculatorResult({
 
   const toItem =
     toSymbol === 'IRT'
-      ? { symbol: IRT_ENTRY.symbol, displayName: getLocalizedIrtName(locale), png: IRT_ENTRY.png }
+      ? {
+          symbol: IRT_ENTRY.symbol,
+          displayName: getLocalizedIrtName(locale),
+          png: IRT_ENTRY.png,
+        }
       : (() => {
           const found = findBySymbol(items, toSymbol)
           return found

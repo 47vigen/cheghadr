@@ -1,12 +1,13 @@
 'use client'
 
-import type { ReactNode } from 'react'
 import dynamic from 'next/dynamic'
+import type { ReactNode } from 'react'
 
 import { DynamicLoader } from '@/components/dynamic-loader'
 
 const ClientRoot = dynamic(
-  () => import('@/components/client-root').then((m) => ({ default: m.ClientRoot })),
+  () =>
+    import('@/components/client-root').then((m) => ({ default: m.ClientRoot })),
   { ssr: false, loading: () => <DynamicLoader /> },
 )
 

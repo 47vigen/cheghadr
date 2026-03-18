@@ -7,7 +7,6 @@ import {
   Avatar,
   Button,
   Cell,
-  IconButton,
   Input,
   Modal,
   Section,
@@ -112,23 +111,25 @@ export function AssetListItem({
               <ChangeLabel change={change} />
             </div>
             <div className="flex items-center gap-0.5">
-              <IconButton
-                size="s"
-                mode="plain"
+              <button
+                type="button"
                 onClick={() => {
                   setNewQuantity(String(quantity))
                   setEditOpen(true)
                 }}
+                aria-label={t('editTitle', { name: assetName })}
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-tgui-text hover:bg-tgui-tertiary active:opacity-80"
               >
                 <IconEdit size={16} />
-              </IconButton>
-              <IconButton
-                size="s"
-                mode="plain"
+              </button>
+              <button
+                type="button"
                 onClick={() => setDeleteOpen(true)}
+                aria-label={t('deleteTitle')}
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-tgui-destructive-text hover:bg-tgui-tertiary active:opacity-80"
               >
-                <IconTrash size={16} className="text-tgui-destructive-text" />
-              </IconButton>
+                <IconTrash size={16} />
+              </button>
             </div>
           </div>
         }
@@ -143,34 +144,26 @@ export function AssetListItem({
           <Modal.Header>{t('editTitle', { name: assetName })}</Modal.Header>
         }
       >
-        <Modal.Overlay />
-        <Section>
-          <Input
-            type="number"
-            inputMode="decimal"
-            value={newQuantity}
-            onChange={(e) => setNewQuantity(e.target.value)}
-            placeholder={t('editQuantityPlaceholder')}
-            header={t('editQuantityHeader')}
-          />
-          <Button
-            mode="filled"
-            stretched
-            onClick={handleUpdate}
-            disabled={updateMutation.isPending}
-          >
-            {updateMutation.isPending ? <Spinner size="s" /> : t('save')}
-          </Button>
-        </Section>
-        <Modal.Close />
+        <Input
+          type="number"
+          inputMode="decimal"
+          value={newQuantity}
+          header={t('editQuantityHeader')}
+          placeholder={t('editQuantityPlaceholder')}
+          onChange={(e) => setNewQuantity(e.target.value)}
+        />
+        <Button
+          stretched
+          mode="filled"
+          onClick={handleUpdate}
+          disabled={updateMutation.isPending}
+        >
+          {updateMutation.isPending ? <Spinner size="s" /> : t('save')}
+        </Button>
       </Modal>
 
-      <Modal
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-        header={<Modal.Header>{t('deleteTitle')}</Modal.Header>}
-      >
-        <Modal.Overlay />
+      <Modal open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <Modal.Header>{t('deleteTitle')}</Modal.Header>
         <Section>
           <Subheadline level="2" className="mb-4 text-center">
             {t('deleteConfirm', { name: assetName })}

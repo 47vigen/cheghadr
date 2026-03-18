@@ -14,6 +14,7 @@
   "assets": {
     "totalValue": "Total Portfolio Value",
     "myAssets": "My Assets",
+    "assetsList": "Asset list",
     "addAsset": "Add Asset",
     "loadError": "Failed to load",
     "retryButton": "Retry",
@@ -64,6 +65,7 @@
     "title": "Calculator",
     "from": "From",
     "to": "To",
+    "swap": "Swap currencies",
     "amount": "Amount",
     "amountPlaceholder": "Enter amount",
     "resultTitle": "Result",
@@ -71,7 +73,8 @@
   },
   "addAsset": {
     "title": "Add Asset",
-    "subtitle": "Search and select the desired asset"
+    "subtitle": "Search and select the desired asset",
+    "back": "Back"
   },
   "picker": {
     "search": "Search...",
@@ -88,6 +91,7 @@
     "error": "An error occurred",
     "tryAgain": "Please try again",
     "retry": "Retry",
+    "refresh": "Refresh",
     "sessionExpired": "Your session has expired",
     "sessionExpiredDescription": "Please sign in again",
     "reLogin": "Re-login",

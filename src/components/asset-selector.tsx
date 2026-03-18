@@ -16,8 +16,8 @@ import { useLocale, useTranslations } from 'next-intl'
 
 import {
   filterPriceItems,
-  getLocalizedItemName,
   getLocalizedIrtName,
+  getLocalizedItemName,
   groupByCategory,
   IRT_ENTRY,
   knownCategories,
@@ -99,12 +99,10 @@ export function AssetSelector({
           if (!v) closeModal()
           else setOpen(true)
         }}
-        header={
-          <Modal.Header>
-            {label} — {tPicker('selectAsset')}
-          </Modal.Header>
-        }
       >
+        <Modal.Header>
+          {label} — {tPicker('selectAsset')}
+        </Modal.Header>
         <List>
           <Section>
             <Input
@@ -112,6 +110,7 @@ export function AssetSelector({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               type="search"
+              dir={locale === 'fa' ? 'rtl' : 'ltr'}
             />
           </Section>
 
@@ -151,45 +150,42 @@ export function AssetSelector({
               ? tCat(category as Parameters<typeof tCat>[0])
               : category
             return (
-            <Section
-              key={category}
-              header={catLabel}
-            >
-              {categoryItems.map((item) => {
-                const icon = item.png ?? item.base_currency.png
-                const isSelected = value === item.base_currency.symbol
-                const name = getLocalizedItemName(item, locale)
-                return (
-                  <Cell
-                    key={item.symbol}
-                    before={
-                      icon ? (
-                        <Avatar src={icon} size={40} />
-                      ) : (
-                        <Avatar
-                          size={40}
-                          acronym={item.base_currency.symbol.slice(0, 2)}
-                        />
-                      )
-                    }
-                    subtitle={item.base_currency.en}
-                    after={
-                      isSelected ? (
-                        <Caption level="2" className="text-tgui-accent-text">
-                          ✓
-                        </Caption>
-                      ) : undefined
-                    }
-                    onClick={() => {
-                      onChange(item.base_currency.symbol)
-                      closeModal()
-                    }}
-                  >
-                    {name}
-                  </Cell>
-                )
-              })}
-            </Section>
+              <Section key={category} header={catLabel}>
+                {categoryItems.map((item) => {
+                  const icon = item.png ?? item.base_currency.png
+                  const isSelected = value === item.base_currency.symbol
+                  const name = getLocalizedItemName(item, locale)
+                  return (
+                    <Cell
+                      key={item.symbol}
+                      before={
+                        icon ? (
+                          <Avatar src={icon} size={40} />
+                        ) : (
+                          <Avatar
+                            size={40}
+                            acronym={item.base_currency.symbol.slice(0, 2)}
+                          />
+                        )
+                      }
+                      subtitle={item.base_currency.en}
+                      after={
+                        isSelected ? (
+                          <Caption level="2" className="text-tgui-accent-text">
+                            ✓
+                          </Caption>
+                        ) : undefined
+                      }
+                      onClick={() => {
+                        onChange(item.base_currency.symbol)
+                        closeModal()
+                      }}
+                    >
+                      {name}
+                    </Cell>
+                  )
+                })}
+              </Section>
             )
           })}
 

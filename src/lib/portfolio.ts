@@ -34,8 +34,11 @@ export async function createPortfolioSnapshot(
 
   const prices = parsePriceSnapshot(priceSnapshot.data)
 
-  const breakdown: Array<{ symbol: string; quantity: number; valueIRT: number }> =
-    []
+  const breakdown: Array<{
+    symbol: string
+    quantity: number
+    valueIRT: number
+  }> = []
   let totalIRT = 0
 
   for (const asset of userAssets) {
