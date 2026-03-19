@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import { findBySymbol, parsePriceSnapshot, sortedGroupEntries } from '@/lib/prices'
 import { protectedProcedure, router } from '@/server/api/trpc'
 
 function getComparisonDate(window: string): Date | null {
@@ -99,4 +100,60 @@ export const portfolioRouter = router({
 
       return { currentIRT, previousIRT, deltaIRT, deltaPct }
     }),
+
+  breakdown: protectedProcedure.query(async ({ ctx }) => {
+    const [latestSnap, priceSnap] = await Promise.all([
+      ctx.db.portfolioSnapshot.findFirst({
+        where: { userId: ctx.user.id },
+        orderBy: { snapshotAt: 'desc' },
+        select: { totalIRT: true, breakdown: true },
+      }),
+      ctx.db.priceSnapshot.findFirst({
+        orderBy: { snapshotAt: 'desc' },
+      }),
+    ])
+
+    if (!latestSnap) return null
+
+    const prices = parsePriceSnapshot(priceSnap?.data)
+    const totalIRT = Number(latestSnap.totalIRT)
+    if (totalIRT === 0) return null
+
+    type BreakdownItem = { symbol: string; quantity: number; valueIRT: number }
+    const items = Array.isArray(latestSnap.breakdown)
+      ? (latestSnap.breakdown as BreakdownItem[])
+      : []
+
+    const categoryMap = new Map<
+      string,
+      { valueIRT: number; assets: BreakdownItem[] }
+    >()
+
+    for (const item of items) {
+      const priceItem = findBySymbol(prices, item.symbol)
+      const category =
+        priceItem?.base_currency.category?.symbol ?? 'OTHER'
+      const existing = categoryMap.get(category) ?? {
+        valueIRT: 0,
+        assets: [],
+      }
+      existing.valueIRT += item.valueIRT
+      existing.assets.push(item)
+      categoryMap.set(category, existing)
+    }
+
+    const categories = sortedGroupEntries(categoryMap).map(
+      ([category, bucket]) => ({
+        category,
+        valueIRT: bucket.valueIRT,
+        percentage: (bucket.valueIRT / totalIRT) * 100,
+        assets: bucket.assets.map((a) => ({
+          ...a,
+          percentage: (a.valueIRT / totalIRT) * 100,
+        })),
+      }),
+    )
+
+    return { totalIRT, categories }
+  }),
 })

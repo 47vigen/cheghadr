@@ -57,6 +57,7 @@ export const assetsRouter = router({
         assetIcon: priceItem?.png ?? priceItem?.base_currency.png ?? null,
         change: priceItem?.change ?? null,
         sellPrice,
+        category: priceItem?.base_currency.category?.symbol ?? 'OTHER',
       }
     })
 
@@ -64,11 +65,16 @@ export const assetsRouter = router({
 
     const { stale } = getSnapshotStaleness(snapshot?.snapshotAt)
 
+    const usdSellPrice = getSellPriceBySymbol('USD', prices)
+    const eurSellPrice = getSellPriceBySymbol('EUR', prices)
+
     return {
       assets,
       totalIRT,
       snapshotAt: snapshot?.snapshotAt ?? null,
       stale,
+      usdSellPrice: usdSellPrice > 0 ? usdSellPrice : null,
+      eurSellPrice: eurSellPrice > 0 ? eurSellPrice : null,
     }
   }),
 

@@ -144,6 +144,15 @@
     "noTriggeredAlerts": "No triggered alerts",
     "portfolioTarget": "Total Portfolio"
   },
+  "breakdown": {
+    "title": "Portfolio Breakdown",
+    "biggestMover": "Biggest Mover",
+    "filterActive": "Filter: {category}",
+    "showAll": "Show All",
+    "ofPortfolio": "of portfolio",
+    "today": "today",
+    "noData": "Add at least one asset to see your portfolio breakdown"
+  },
   "delta": {
     "window1D": "1 Day",
     "window1W": "1 Week",
