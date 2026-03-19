@@ -33,6 +33,7 @@ interface AssetListItemProps {
   assetIcon: string | null
   change: string | null
   sellPrice: number
+  portfolioPercentage?: number | null
 }
 
 export function AssetListItem({
@@ -43,8 +44,10 @@ export function AssetListItem({
   assetName,
   assetIcon,
   change,
+  portfolioPercentage,
 }: AssetListItemProps) {
   const t = useTranslations('assets')
+  const tBreakdown = useTranslations('breakdown')
   const locale = useLocale()
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -104,6 +107,14 @@ export function AssetListItem({
                 {formatIRT(valueIRT, locale)} {t('tomanAbbr')}
               </Text>
               <ChangeLabel change={change} />
+              {portfolioPercentage != null && (
+                <Text className="text-muted-foreground text-xs tabular-nums">
+                  {new Intl.NumberFormat(locale === 'fa' ? 'fa-IR' : 'en-US', {
+                    maximumFractionDigits: 1,
+                  }).format(portfolioPercentage)}
+                  % {tBreakdown('ofPortfolio')}
+                </Text>
+              )}
             </div>
             <div className="flex items-center gap-0.5">
               <Button

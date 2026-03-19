@@ -168,3 +168,21 @@ export function getLocalizedItemName(item: PriceItem, locale: string): string {
 export function getLocalizedIrtName(locale: string): string {
   return locale === 'fa' ? IRT_ENTRY.fa : IRT_ENTRY.en
 }
+
+export function formatCompactCurrency(
+  value: number,
+  currency: 'USD' | 'EUR',
+): string {
+  const symbol = currency === 'USD' ? '$' : '€'
+
+  if (value < 1000) {
+    return `≈ ${symbol}${Math.round(value).toLocaleString('en-US')}`
+  }
+
+  const formatted = new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(value)
+
+  return `≈ ${symbol}${formatted}`
+}

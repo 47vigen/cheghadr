@@ -144,6 +144,15 @@
     "noTriggeredAlerts": "هشدار فعال‌شده‌ای ندارید",
     "portfolioTarget": "کل دارایی‌ها"
   },
+  "breakdown": {
+    "title": "ترکیب سبد",
+    "biggestMover": "بیشترین تغییر",
+    "filterActive": "فیلتر: {category}",
+    "showAll": "نمایش همه",
+    "ofPortfolio": "از سبد",
+    "today": "امروز",
+    "noData": "برای مشاهده ترکیب سبد، حداقل یک دارایی اضافه کنید"
+  },
   "delta": {
     "window1D": "۱ روز",
     "window1W": "۱ هفته",
