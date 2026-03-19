@@ -4,7 +4,6 @@ import { Text } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import type { BiggestMover } from '@/lib/portfolio-utils'
-import { formatIRT } from '@/lib/prices'
 
 type BiggestMoverCardProps = Pick<
   BiggestMover,
@@ -18,6 +17,7 @@ export function BiggestMoverCard({
   isPositive,
 }: BiggestMoverCardProps) {
   const t = useTranslations('breakdown')
+  const tAssets = useTranslations('assets')
   const locale = useLocale()
   const intlLocale = locale === 'fa' ? 'fa-IR' : 'en-US'
 
@@ -25,8 +25,11 @@ export function BiggestMoverCard({
   const bgClass = isPositive ? 'bg-success/10' : 'bg-destructive/10'
   const emoji = isPositive ? '📈' : '📉'
 
-  const sign = isPositive ? '+' : ''
-  const deltaFormatted = `${sign}${formatIRT(Math.abs(deltaIRT), locale)}`
+  // Use signDisplay: 'always' to get correct + / − signs for all cases
+  const deltaFormatted = new Intl.NumberFormat(intlLocale, {
+    signDisplay: 'always',
+    maximumFractionDigits: 0,
+  }).format(Math.round(deltaIRT))
 
   const pctFormatted = new Intl.NumberFormat(intlLocale, {
     signDisplay: 'always',
@@ -44,11 +47,14 @@ export function BiggestMoverCard({
         </span>
         <Text className="font-display font-medium text-sm">{assetName}</Text>
       </div>
-      <div className="flex flex-col items-end gap-0" dir="ltr">
+      <div dir="ltr" className="flex flex-col items-end gap-0">
         <Text
           className={`font-display font-semibold text-sm tabular-nums ${colorClass}`}
         >
-          {deltaFormatted} <span className="font-normal text-xs opacity-70">{locale === 'fa' ? 'ت' : 'T'}</span>
+          {deltaFormatted}{' '}
+          <span className="font-normal text-xs opacity-70">
+            {tAssets('tomanAbbr')}
+          </span>
         </Text>
         <div className="flex items-center gap-1.5">
           <Text className={`font-display text-xs tabular-nums ${colorClass}`}>

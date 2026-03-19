@@ -1,6 +1,7 @@
 'use client'
 
 import { Button, Text } from '@heroui/react'
+import { IconX } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { getCategoryColor } from '@/lib/category-colors'
@@ -51,7 +52,8 @@ export function CategoryFilterHeader({
         onPress={onClear}
         className="shrink-0 text-xs"
       >
-        {tBreakdown('showAll')} ←
+        {tBreakdown('showAll')}
+        <IconX size={12} />
       </Button>
     </div>
   )

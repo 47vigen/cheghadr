@@ -16,8 +16,6 @@ export const CATEGORY_COLORS: Record<string, string> = {
   OTHER: 'oklch(0.60 0.06 0)',
 }
 
-const FALLBACK_COLOR = 'oklch(0.60 0.06 0)'
-
 export function getCategoryColor(category: string): string {
-  return CATEGORY_COLORS[category] ?? FALLBACK_COLOR
+  return CATEGORY_COLORS[category] ?? CATEGORY_COLORS.OTHER ?? 'oklch(0.60 0.06 0)'
 }

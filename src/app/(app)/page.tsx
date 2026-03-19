@@ -1,7 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@heroui/react'
 import { IconPlus } from '@tabler/icons-react'
@@ -61,15 +61,17 @@ export default function AssetsPage() {
 
   const historyQuery = api.portfolio.history.useQuery(
     { days: 30 },
-    { refetchInterval: 30 * 60 * 1000 },
+    { refetchInterval: 30 * 60 * 1000, refetchOnWindowFocus: true },
   )
 
   const breakdownQuery = api.portfolio.breakdown.useQuery(undefined, {
     refetchInterval: 30 * 60 * 1000,
+    refetchOnWindowFocus: true,
   })
 
   const alertsQuery = api.alerts.list.useQuery(undefined, {
     refetchInterval: 30 * 60 * 1000,
+    refetchOnWindowFocus: true,
   })
 
   const { isRefreshing } = usePullToRefresh(async () => {
@@ -80,6 +82,15 @@ export default function AssetsPage() {
       breakdownQuery.refetch(),
     ])
   })
+
+  // Auto-clear filter when the selected category no longer has assets
+  useEffect(() => {
+    if (!selectedCategory || !data) return
+    const stillExists = data.assets.some(
+      (a) => a.category === selectedCategory,
+    )
+    if (!stillExists) setSelectedCategory(null)
+  }, [data, selectedCategory])
 
   const biggestMover = useMemo(
     () => (data ? computeBiggestMover(data.assets) : null),
@@ -135,7 +146,11 @@ export default function AssetsPage() {
                   snapshotAt={data.snapshotAt}
                   namespace="assets"
                   onRefresh={() =>
-                    void Promise.all([refetch(), historyQuery.refetch()])
+                    void Promise.all([
+                      refetch(),
+                      historyQuery.refetch(),
+                      breakdownQuery.refetch(),
+                    ])
                   }
                 />
               </div>
@@ -192,20 +207,15 @@ export default function AssetsPage() {
           </div>
         ) : (
           <div>
-            <Section
-              header={
-                selectedCategory && selectedCategoryData ? (
-                  <CategoryFilterHeader
-                    category={selectedCategory}
-                    valueIRT={selectedCategoryData.valueIRT}
-                    percentage={selectedCategoryData.percentage}
-                    onClear={() => setSelectedCategory(null)}
-                  />
-                ) : (
-                  t('assetsList')
-                )
-              }
-            >
+            <Section header={t('assetsList')}>
+              {selectedCategory && selectedCategoryData && (
+                <CategoryFilterHeader
+                  category={selectedCategory}
+                  valueIRT={selectedCategoryData.valueIRT}
+                  percentage={selectedCategoryData.percentage}
+                  onClear={() => setSelectedCategory(null)}
+                />
+              )}
               {filteredAssets.map((asset) => (
                 <AssetListItem
                   key={asset.id}

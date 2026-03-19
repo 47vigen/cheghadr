@@ -64,10 +64,10 @@ export const categoryOrder: string[] = [
 
 export const knownCategories = new Set(categoryOrder)
 
-export function sortedGroupEntries(
-  grouped: Map<string, PriceItem[]>,
-): [string, PriceItem[]][] {
-  const ordered: [string, PriceItem[]][] = []
+export function sortedGroupEntries<T>(
+  grouped: Map<string, T>,
+): [string, T][] {
+  const ordered: [string, T][] = []
   for (const cat of categoryOrder) {
     const items = grouped.get(cat)
     if (items) ordered.push([cat, items])
@@ -174,15 +174,12 @@ export function formatCompactCurrency(
   currency: 'USD' | 'EUR',
 ): string {
   const symbol = currency === 'USD' ? '$' : '€'
-
-  if (value < 1000) {
-    return `≈ ${symbol}${Math.round(value).toLocaleString('en-US')}`
-  }
-
-  const formatted = new Intl.NumberFormat('en-US', {
-    notation: 'compact',
-    maximumFractionDigits: 1,
-  }).format(value)
-
-  return `≈ ${symbol}${formatted}`
+  const num =
+    value < 1000
+      ? Math.round(value).toLocaleString('en-US')
+      : new Intl.NumberFormat('en-US', {
+          notation: 'compact',
+          maximumFractionDigits: 1,
+        }).format(value)
+  return `≈ ${symbol}${num}`
 }

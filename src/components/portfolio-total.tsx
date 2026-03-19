@@ -37,12 +37,12 @@ export function PortfolioTotal({
       </div>
       {(showUsd || showEur) && (
         <div className="flex items-baseline gap-3" dir="ltr">
-          {usdSellPrice != null && usdSellPrice > 0 && (
+          {showUsd && usdSellPrice != null && (
             <Text className="font-display text-muted-foreground text-sm tabular-nums">
               {formatCompactCurrency(totalIRT / usdSellPrice, 'USD')}
             </Text>
           )}
-          {eurSellPrice != null && eurSellPrice > 0 && (
+          {showEur && eurSellPrice != null && (
             <Text className="font-display text-muted-foreground text-sm tabular-nums">
               {formatCompactCurrency(totalIRT / eurSellPrice, 'EUR')}
             </Text>

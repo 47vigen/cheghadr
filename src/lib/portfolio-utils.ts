@@ -26,7 +26,10 @@ export function computeBiggestMover(
     const changePct = Number(asset.change)
     if (Number.isNaN(changePct) || changePct === 0) continue
 
-    const previousValue = asset.valueIRT / (1 + changePct / 100)
+    const denominator = 1 + changePct / 100
+    if (denominator <= 0 || !Number.isFinite(denominator)) continue
+
+    const previousValue = asset.valueIRT / denominator
     const deltaIRT = asset.valueIRT - previousValue
     const absDelta = Math.abs(deltaIRT)
 

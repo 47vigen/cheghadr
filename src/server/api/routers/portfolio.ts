@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { categoryOrder, findBySymbol, parsePriceSnapshot } from '@/lib/prices'
+import { findBySymbol, parsePriceSnapshot, sortedGroupEntries } from '@/lib/prices'
 import { protectedProcedure, router } from '@/server/api/trpc'
 
 function getComparisonDate(window: string): Date | null {
@@ -120,7 +120,9 @@ export const portfolioRouter = router({
     if (totalIRT === 0) return null
 
     type BreakdownItem = { symbol: string; quantity: number; valueIRT: number }
-    const items = latestSnap.breakdown as BreakdownItem[]
+    const items = Array.isArray(latestSnap.breakdown)
+      ? (latestSnap.breakdown as BreakdownItem[])
+      : []
 
     const categoryMap = new Map<
       string,
@@ -140,46 +142,18 @@ export const portfolioRouter = router({
       categoryMap.set(category, existing)
     }
 
-    const result: Array<{
-      category: string
-      valueIRT: number
-      percentage: number
-      assets: Array<{
-        symbol: string
-        quantity: number
-        valueIRT: number
-        percentage: number
-      }>
-    }> = []
-
-    for (const cat of categoryOrder) {
-      const data = categoryMap.get(cat)
-      if (!data) continue
-      result.push({
-        category: cat,
-        valueIRT: data.valueIRT,
-        percentage: (data.valueIRT / totalIRT) * 100,
-        assets: data.assets.map((a) => ({
+    const categories = sortedGroupEntries(categoryMap).map(
+      ([category, bucket]) => ({
+        category,
+        valueIRT: bucket.valueIRT,
+        percentage: (bucket.valueIRT / totalIRT) * 100,
+        assets: bucket.assets.map((a) => ({
           ...a,
           percentage: (a.valueIRT / totalIRT) * 100,
         })),
-      })
-    }
+      }),
+    )
 
-    for (const [cat, data] of categoryMap) {
-      if (!categoryOrder.includes(cat)) {
-        result.push({
-          category: cat,
-          valueIRT: data.valueIRT,
-          percentage: (data.valueIRT / totalIRT) * 100,
-          assets: data.assets.map((a) => ({
-            ...a,
-            percentage: (a.valueIRT / totalIRT) * 100,
-          })),
-        })
-      }
-    }
-
-    return { totalIRT, categories: result }
+    return { totalIRT, categories }
   }),
 })

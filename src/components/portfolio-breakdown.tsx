@@ -1,10 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-
 import { Text } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
+import {
+  Cell as PieCell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from 'recharts'
 
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 import { getCategoryColor } from '@/lib/category-colors'
@@ -33,12 +37,13 @@ function DonutTooltip({
   locale: string
 }) {
   const t = useTranslations('categories')
+  const intlLocale = locale === 'fa' ? 'fa-IR' : 'en-US'
 
   if (!active || !payload?.length) return null
   const entry = payload[0]
   if (!entry) return null
 
-  const pct = new Intl.NumberFormat(locale === 'fa' ? 'fa-IR' : 'en-US', {
+  const pct = new Intl.NumberFormat(intlLocale, {
     maximumFractionDigits: 1,
   }).format(entry.payload.percentage)
 
@@ -63,26 +68,13 @@ export function PortfolioBreakdown({
   const t = useTranslations('categories')
   const tBreakdown = useTranslations('breakdown')
   const locale = useLocale()
+  const intlLocale = locale === 'fa' ? 'fa-IR' : 'en-US'
   const { selectionChanged } = useTelegramHaptics()
-
-  const [resolvedColors, setResolvedColors] = useState<Record<string, string>>(
-    {},
-  )
-
-  useEffect(() => {
-    const colors: Record<string, string> = {}
-    for (const item of data) {
-      colors[item.category] = getCategoryColor(item.category)
-    }
-    setResolvedColors(colors)
-  }, [data])
 
   const handleCellClick = (category: string) => {
     selectionChanged()
     onCategorySelect(selectedCategory === category ? null : category)
   }
-
-  const intlLocale = locale === 'fa' ? 'fa-IR' : 'en-US'
 
   return (
     <div className="py-2">
@@ -101,15 +93,13 @@ export function PortfolioBreakdown({
               strokeWidth={0}
             >
               {data.map((entry) => {
-                const color =
-                  resolvedColors[entry.category] ??
-                  getCategoryColor(entry.category)
+                const color = getCategoryColor(entry.category)
                 const isSelected = selectedCategory === entry.category
                 const isOtherSelected =
                   selectedCategory !== null &&
                   selectedCategory !== entry.category
                 return (
-                  <Cell
+                  <PieCell
                     key={entry.category}
                     fill={color}
                     opacity={isOtherSelected ? 0.35 : 1}
@@ -146,15 +136,14 @@ export function PortfolioBreakdown({
       {/* Legend */}
       <div className="mt-1 flex flex-wrap justify-center gap-x-3 gap-y-1.5 px-2">
         {data.map((entry) => {
-          const color =
-            resolvedColors[entry.category] ?? getCategoryColor(entry.category)
+          const color = getCategoryColor(entry.category)
           const isSelected = selectedCategory === entry.category
           const isOtherSelected =
             selectedCategory !== null && selectedCategory !== entry.category
 
           const pct = new Intl.NumberFormat(intlLocale, {
-            maximumFractionDigits: 0,
-          }).format(Math.round(entry.percentage))
+            maximumFractionDigits: 1,
+          }).format(entry.percentage)
 
           return (
             <button
