@@ -82,7 +82,8 @@ export function PortfolioDelta() {
         </Text>
         <Text className={`font-display text-sm tabular-nums ${colorClass}`}>
           ({isPositive ? '+' : deltaIRT < 0 ? '-' : ''}
-          {pctFormatted}٪)
+          {pctFormatted}
+          {locale === 'fa' ? '٪' : '%'})
         </Text>
       </div>
 

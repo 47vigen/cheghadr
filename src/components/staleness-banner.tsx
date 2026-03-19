@@ -10,26 +10,29 @@ interface StalenessBannerProps {
   onRefresh?: () => void
 }
 
-function formatRelativeTime(date: Date, locale: string): string {
+function formatRelativeTime(
+  date: Date,
+  locale: string,
+  t: (
+    key: 'minutesAgo' | 'hoursAgo' | 'daysAgo',
+    values: { count: string },
+  ) => string,
+): string {
   const diffMin = Math.floor((Date.now() - date.getTime()) / 60000)
+  const intlLocale = locale === 'fa' ? 'fa-IR' : 'en-US'
+  const formatCount = (n: number) => new Intl.NumberFormat(intlLocale).format(n)
 
   if (diffMin < 60) {
-    return locale === 'fa'
-      ? `${new Intl.NumberFormat('fa-IR').format(diffMin)} دقیقه پیش`
-      : `${diffMin} min ago`
+    return t('minutesAgo', { count: formatCount(diffMin) })
   }
 
   const diffHours = Math.floor(diffMin / 60)
   if (diffHours < 24) {
-    return locale === 'fa'
-      ? `${new Intl.NumberFormat('fa-IR').format(diffHours)} ساعت پیش`
-      : `${diffHours}h ago`
+    return t('hoursAgo', { count: formatCount(diffHours) })
   }
 
   const diffDays = Math.floor(diffHours / 24)
-  return locale === 'fa'
-    ? `${new Intl.NumberFormat('fa-IR').format(diffDays)} روز پیش`
-    : `${diffDays}d ago`
+  return t('daysAgo', { count: formatCount(diffDays) })
 }
 
 export function StalenessBanner({
@@ -49,7 +52,7 @@ export function StalenessBanner({
     namespace === 'prices'
       ? resolvedDate
         ? tPrices('staleWarning', {
-            time: formatRelativeTime(resolvedDate, locale),
+            time: formatRelativeTime(resolvedDate, locale, tCommon),
           })
         : tPrices('checkLater')
       : tAssets('staleWarning')

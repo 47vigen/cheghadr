@@ -52,8 +52,10 @@ export function CategoryFilterHeader({
         onPress={onClear}
         className="shrink-0 text-xs"
       >
-        {tBreakdown('showAll')}
-        <IconX size={12} />
+        <span className="inline-flex items-center gap-1">
+          {tBreakdown('showAll')}
+          <IconX size={12} className="shrink-0" aria-hidden />
+        </span>
       </Button>
     </div>
   )

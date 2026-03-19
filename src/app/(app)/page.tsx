@@ -86,9 +86,7 @@ export default function AssetsPage() {
   // Auto-clear filter when the selected category no longer has assets
   useEffect(() => {
     if (!selectedCategory || !data) return
-    const stillExists = data.assets.some(
-      (a) => a.category === selectedCategory,
-    )
+    const stillExists = data.assets.some((a) => a.category === selectedCategory)
     if (!stillExists) setSelectedCategory(null)
   }, [data, selectedCategory])
 
@@ -193,7 +191,9 @@ export default function AssetsPage() {
               <AlertSummaryCard
                 activeCount={alertsQuery.data.filter((a) => a.isActive).length}
                 triggeredCount={
-                  alertsQuery.data.filter((a) => !a.isActive && a.triggeredAt !== null).length
+                  alertsQuery.data.filter(
+                    (a) => !a.isActive && a.triggeredAt !== null,
+                  ).length
                 }
                 onManage={() => router.push('/alerts')}
               />
@@ -244,8 +244,9 @@ export default function AssetsPage() {
             fullWidth
             size="sm"
             onPress={() => router.push('/assets/add')}
+            className="inline-flex items-center justify-center gap-2"
           >
-            <IconPlus size={18} />
+            <IconPlus size={18} className="shrink-0" aria-hidden />
             {t('addAsset')}
           </Button>
         </div>

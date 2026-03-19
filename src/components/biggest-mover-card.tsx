@@ -1,6 +1,7 @@
 'use client'
 
 import { Text } from '@heroui/react'
+import { IconTrendingDown, IconTrendingUp } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import type { BiggestMover } from '@/lib/portfolio-utils'
@@ -23,7 +24,7 @@ export function BiggestMoverCard({
 
   const colorClass = isPositive ? 'text-success' : 'text-destructive'
   const bgClass = isPositive ? 'bg-success/10' : 'bg-destructive/10'
-  const emoji = isPositive ? '📈' : '📉'
+  const TrendIcon = isPositive ? IconTrendingUp : IconTrendingDown
 
   // Use signDisplay: 'always' to get correct + / − signs for all cases
   const deltaFormatted = new Intl.NumberFormat(intlLocale, {
@@ -42,9 +43,7 @@ export function BiggestMoverCard({
       className={`flex items-center justify-between rounded-[var(--radius)] px-3 py-2.5 ${bgClass}`}
     >
       <div className="flex items-center gap-2">
-        <span className="text-base" role="img" aria-hidden>
-          {emoji}
-        </span>
+        <TrendIcon size={18} className={`shrink-0 ${colorClass}`} aria-hidden />
         <Text className="font-display font-medium text-sm">{assetName}</Text>
       </div>
       <div dir="ltr" className="flex flex-col items-end gap-0">

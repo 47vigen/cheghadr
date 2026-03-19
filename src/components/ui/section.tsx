@@ -24,7 +24,7 @@ export function Section({
       {header != null && (
         <h2
           className={clsx(
-            'section-header px-2 py-0.5',
+            'section-header mb-0.5 px-2 py-0.5',
             isHero && 'text-foreground/90',
           )}
         >
