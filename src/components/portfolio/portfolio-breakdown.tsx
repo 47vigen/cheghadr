@@ -1,6 +1,7 @@
 'use client'
 
 import { Text } from '@heroui/react'
+import { clsx } from 'clsx'
 import { useLocale, useTranslations } from 'next-intl'
 import {
   Pie,
@@ -62,12 +63,11 @@ function DonutTooltip({
 
 export function PortfolioBreakdown({
   data,
-  totalIRT,
+  totalIRT: _totalIRT,
   selectedCategory,
   onCategorySelect,
 }: PortfolioBreakdownProps) {
   const t = useTranslations('categories')
-  const tBreakdown = useTranslations('breakdown')
   const locale = useLocale()
   const intlLocale = getIntlLocale(locale)
   const { selectionChanged } = useTelegramHaptics()
@@ -79,98 +79,90 @@ export function PortfolioBreakdown({
 
   return (
     <div className="py-2">
-      <div dir="ltr" className="chart-mount relative">
-        <ResponsiveContainer width="100%" height={200}>
-          <PieChart>
-            <Pie
-              data={data}
-              dataKey="valueIRT"
-              nameKey="category"
-              cx="50%"
-              cy="50%"
-              innerRadius={55}
-              outerRadius={85}
-              paddingAngle={data.length > 1 ? 2 : 0}
-              strokeWidth={0}
-            >
-              {data.map((entry) => {
-                const color = getCategoryColor(entry.category)
-                const isSelected = selectedCategory === entry.category
-                const isOtherSelected =
-                  selectedCategory !== null &&
-                  selectedCategory !== entry.category
-                return (
-                  <PieCell
-                    key={entry.category}
-                    fill={color}
-                    opacity={isOtherSelected ? 0.35 : 1}
-                    stroke={isSelected ? 'var(--foreground)' : 'none'}
-                    strokeWidth={isSelected ? 2 : 0}
-                    style={{ cursor: 'pointer', outline: 'none' }}
-                    onClick={() => handleCellClick(entry.category)}
-                  />
-                )
-              })}
-            </Pie>
-            <Tooltip
-              content={<DonutTooltip locale={locale} />}
-              wrapperStyle={{ zIndex: 10 }}
-            />
-          </PieChart>
-        </ResponsiveContainer>
-
-        {/* Center label — absolute positioned over SVG */}
-        <div
-          className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center"
-          style={{ top: 0 }}
-          aria-hidden
-        >
-          <Text className="font-display text-muted-foreground text-xs">
-            {tBreakdown('title')}
-          </Text>
-          <Text className="font-display font-semibold text-sm tabular-nums">
-            {formatIRT(totalIRT, locale)}
-          </Text>
-        </div>
-      </div>
-
-      {/* Legend */}
-      <div className="mt-1 flex flex-wrap justify-center gap-x-3 gap-y-1.5 px-2">
-        {data.map((entry) => {
-          const color = getCategoryColor(entry.category)
-          const isSelected = selectedCategory === entry.category
-          const isOtherSelected =
-            selectedCategory !== null && selectedCategory !== entry.category
-
-          const pct = new Intl.NumberFormat(intlLocale, {
-            maximumFractionDigits: 1,
-          }).format(entry.percentage)
-
-          return (
-            <button
-              key={entry.category}
-              type="button"
-              className="flex items-center gap-1 transition-opacity"
-              style={{ opacity: isOtherSelected ? 0.4 : 1 }}
-              onClick={() => handleCellClick(entry.category)}
-            >
-              <span
-                className="inline-block h-2 w-2 shrink-0 rounded-full"
-                style={{
-                  backgroundColor: color,
-                  outline: isSelected
-                    ? `2px solid ${color}`
-                    : '2px solid transparent',
-                  outlineOffset: '1px',
-                }}
+      <div
+        className={clsx(
+          'flex items-center gap-3 px-2',
+          locale === 'fa' && 'flex-row-reverse',
+        )}
+      >
+        <div dir="ltr" className="chart-mount w-[200px] shrink-0">
+          <ResponsiveContainer width="100%" height={200}>
+            <PieChart>
+              <Pie
+                data={data}
+                dataKey="valueIRT"
+                nameKey="category"
+                cx="50%"
+                cy="50%"
+                innerRadius={48}
+                outerRadius={85}
+                paddingAngle={data.length > 1 ? 2 : 0}
+                strokeWidth={0}
+              >
+                {data.map((entry) => {
+                  const color = getCategoryColor(entry.category)
+                  const isSelected = selectedCategory === entry.category
+                  const isOtherSelected =
+                    selectedCategory !== null &&
+                    selectedCategory !== entry.category
+                  return (
+                    <PieCell
+                      key={entry.category}
+                      fill={color}
+                      opacity={isOtherSelected ? 0.35 : 1}
+                      stroke={isSelected ? 'var(--foreground)' : 'none'}
+                      strokeWidth={isSelected ? 2 : 0}
+                      style={{ cursor: 'pointer', outline: 'none' }}
+                      onClick={() => handleCellClick(entry.category)}
+                    />
+                  )
+                })}
+              </Pie>
+              <Tooltip
+                content={<DonutTooltip locale={locale} />}
+                wrapperStyle={{ zIndex: 10 }}
               />
-              <Text className="font-display text-xs tabular-nums">
-                {t(entry.category as Parameters<typeof t>[0])}{' '}
-                <span className="text-muted-foreground">{pct}%</span>
-              </Text>
-            </button>
-          )
-        })}
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          {data.map((entry) => {
+            const color = getCategoryColor(entry.category)
+            const isSelected = selectedCategory === entry.category
+            const isOtherSelected =
+              selectedCategory !== null && selectedCategory !== entry.category
+
+            const pct = new Intl.NumberFormat(intlLocale, {
+              maximumFractionDigits: 1,
+            }).format(entry.percentage)
+
+            return (
+              <button
+                key={entry.category}
+                type="button"
+                className="flex w-full items-center gap-2 text-start transition-opacity"
+                style={{ opacity: isOtherSelected ? 0.4 : 1 }}
+                onClick={() => handleCellClick(entry.category)}
+              >
+                <span
+                  className="inline-block h-2 w-2 shrink-0 rounded-full"
+                  style={{
+                    backgroundColor: color,
+                    outline: isSelected
+                      ? `2px solid ${color}`
+                      : '2px solid transparent',
+                    outlineOffset: '1px',
+                  }}
+                />
+                <Text className="font-display text-xs tabular-nums">
+                  {t(entry.category as Parameters<typeof t>[0])}{' '}
+                  <span className="text-muted-foreground">{pct}%</span>
+                </Text>
+              </button>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
