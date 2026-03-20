@@ -46,6 +46,8 @@ export function BottomNav() {
           <button
             key={id}
             type="button"
+            aria-label={t(labelKey)}
+            aria-current={isSelected ? 'page' : undefined}
             onClick={() => {
               selectionChanged()
               router.push(path)
@@ -56,8 +58,10 @@ export function BottomNav() {
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            <Icon size={20} />
-            <span className="label-compact">{t(labelKey)}</span>
+            <Icon size={20} aria-hidden />
+            <span className="label-compact" aria-hidden>
+              {t(labelKey)}
+            </span>
           </button>
         )
       })}

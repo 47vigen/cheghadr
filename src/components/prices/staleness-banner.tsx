@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { getIntlLocale } from '@/lib/prices'
 
 interface StalenessBannerProps {
-  snapshotAt: Date | null
+  snapshotAt: Date | string | null
   namespace?: 'assets' | 'prices'
   onRefresh?: () => void
 }

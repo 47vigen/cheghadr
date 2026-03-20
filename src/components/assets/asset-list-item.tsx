@@ -2,29 +2,18 @@
 
 import { useState } from 'react'
 
-import {
-  Button,
-  Input,
-  Label,
-  Modal,
-  Spinner,
-  Text,
-  TextField,
-} from '@heroui/react'
+import { Button, Text } from '@heroui/react'
 import { IconEdit, IconTrash } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { toast } from 'sonner'
 
+import { AssetDeleteModal } from '@/components/assets/asset-delete-modal'
+import { AssetEditModal } from '@/components/assets/asset-edit-modal'
 import { ChangeLabel } from '@/components/prices/change-label'
 import { AssetAvatar } from '@/components/ui/asset-avatar'
 import { Cell } from '@/components/ui/cell'
-import { Section } from '@/components/ui/section'
-
-import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 
 import type { BilingualDisplayNames } from '@/lib/prices'
 import { formatIRT, getIntlLocale, pickDisplayName } from '@/lib/prices'
-import { api } from '@/trpc/react'
 
 interface AssetListItemProps {
   id: string
@@ -55,49 +44,6 @@ export function AssetListItem({
   const assetName = pickDisplayName(displayNames, locale, symbol)
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
-  const [newQuantity, setNewQuantity] = useState(String(quantity))
-
-  const utils = api.useUtils()
-  const { notificationOccurred, impactOccurred } = useTelegramHaptics()
-
-  const updateMutation = api.assets.update.useMutation({
-    onSuccess: () => {
-      notificationOccurred('success')
-      void utils.assets.list.invalidate()
-      setEditOpen(false)
-      toast.success(t('toastUpdated'))
-    },
-    onError: (err) => {
-      notificationOccurred('error')
-      toast.error(err.message || t('toastUpdateError'))
-    },
-  })
-
-  const deleteMutation = api.assets.delete.useMutation({
-    onSuccess: () => {
-      impactOccurred('medium')
-      void utils.assets.list.invalidate()
-      setDeleteOpen(false)
-      toast.success(t('toastDeleted'))
-    },
-    onError: (err) => {
-      notificationOccurred('error')
-      toast.error(err.message || t('toastDeleteError'))
-    },
-  })
-
-  const handleUpdate = () => {
-    const qty = Number(newQuantity)
-    if (!newQuantity || Number.isNaN(qty) || qty <= 0) {
-      toast.error(t('toastInvalidQuantity'))
-      return
-    }
-    updateMutation.mutate({ id, quantity: newQuantity })
-  }
-
-  const handleDelete = () => {
-    deleteMutation.mutate({ id })
-  }
 
   return (
     <>
@@ -125,10 +71,7 @@ export function AssetListItem({
                 isIconOnly
                 variant="ghost"
                 size="sm"
-                onPress={() => {
-                  setNewQuantity(String(quantity))
-                  setEditOpen(true)
-                }}
+                onPress={() => setEditOpen(true)}
                 aria-label={t('editTitle', { name: assetName })}
               >
                 <IconEdit size={14} />
@@ -150,88 +93,19 @@ export function AssetListItem({
         {assetName}
       </Cell>
 
-      <Modal>
-        <Modal.Backdrop isOpen={editOpen} onOpenChange={setEditOpen}>
-          <Modal.Container>
-            <Modal.Dialog className="sm:max-w-[360px]">
-              <Modal.CloseTrigger />
-              <Modal.Header>
-                <Modal.Heading>
-                  {t('editTitle', { name: assetName })}
-                </Modal.Heading>
-              </Modal.Header>
-              <Modal.Body className="modal-body">
-                <TextField
-                  value={newQuantity}
-                  onChange={setNewQuantity}
-                  fullWidth
-                  name="quantity"
-                >
-                  <Label>{t('editQuantityHeader')}</Label>
-                  <Input
-                    type="number"
-                    inputMode="decimal"
-                    placeholder={t('editQuantityPlaceholder')}
-                  />
-                </TextField>
-                <Button
-                  variant="primary"
-                  fullWidth
-                  onPress={handleUpdate}
-                  isDisabled={updateMutation.isPending}
-                >
-                  {updateMutation.isPending ? (
-                    <Spinner size="sm" color="current" />
-                  ) : (
-                    t('save')
-                  )}
-                </Button>
-              </Modal.Body>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
-
-      <Modal>
-        <Modal.Backdrop isOpen={deleteOpen} onOpenChange={setDeleteOpen}>
-          <Modal.Container>
-            <Modal.Dialog className="sm:max-w-[360px]">
-              <Modal.CloseTrigger />
-              <Modal.Header>
-                <Modal.Heading>{t('deleteTitle')}</Modal.Heading>
-              </Modal.Header>
-              <Modal.Body>
-                <Section>
-                  <Text className="mb-4 text-center text-muted-foreground text-sm">
-                    {t('deleteConfirm', { name: assetName })}
-                  </Text>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="secondary"
-                      fullWidth
-                      onPress={() => setDeleteOpen(false)}
-                    >
-                      {t('cancel')}
-                    </Button>
-                    <Button
-                      variant="danger"
-                      fullWidth
-                      onPress={handleDelete}
-                      isDisabled={deleteMutation.isPending}
-                    >
-                      {deleteMutation.isPending ? (
-                        <Spinner size="sm" color="current" />
-                      ) : (
-                        t('delete')
-                      )}
-                    </Button>
-                  </div>
-                </Section>
-              </Modal.Body>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      <AssetEditModal
+        assetId={id}
+        assetName={assetName}
+        quantity={quantity}
+        isOpen={editOpen}
+        onOpenChange={setEditOpen}
+      />
+      <AssetDeleteModal
+        assetId={id}
+        assetName={assetName}
+        isOpen={deleteOpen}
+        onOpenChange={setDeleteOpen}
+      />
     </>
   )
 }

@@ -1,65 +1,32 @@
 'use client'
 
-import dynamic from 'next/dynamic'
 import { useEffect, useMemo, useState } from 'react'
 
-import { Button } from '@heroui/react'
-import {
-  IconDownload,
-  IconPencil,
-  IconPlus,
-  IconTrash,
-} from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
-import { AlertSummaryCard } from '@/components/alerts/alert-summary-card'
-import { AssetListItem } from '@/components/assets/asset-list-item'
-import { CategoryFilterHeader } from '@/components/assets/category-filter-header'
-import { EmptyState } from '@/components/assets/empty-state'
-import { DynamicLoader } from '@/components/dynamic-loader'
+import { AssetsAlertSummarySection } from '@/components/assets/assets-alert-summary-section'
+import { AssetsBiggestMoverSection } from '@/components/assets/assets-biggest-mover-section'
+import { AssetsBreakdownSection } from '@/components/assets/assets-breakdown-section'
+import { AssetsChartSection } from '@/components/assets/assets-chart-section'
+import { AssetsFab } from '@/components/assets/assets-fab'
+import { AssetsHeroSection } from '@/components/assets/assets-hero-section'
+import { AssetsListSection } from '@/components/assets/assets-list-section'
 import { PageShell } from '@/components/layout/page-shell'
-import { BiggestMoverCard } from '@/components/portfolio/biggest-mover-card'
 import { PortfolioDeleteModal } from '@/components/portfolio/portfolio-delete-modal'
-import { PortfolioDelta } from '@/components/portfolio/portfolio-delta'
 import { PortfolioFormModal } from '@/components/portfolio/portfolio-form-modal'
-import { PortfolioSelector } from '@/components/portfolio/portfolio-selector'
-import { PortfolioTotal } from '@/components/portfolio/portfolio-total'
-import { StalenessBanner } from '@/components/prices/staleness-banner'
 import { AssetsSkeleton } from '@/components/skeletons/assets-skeleton'
 import { ErrorState, RefreshIndicator } from '@/components/ui/async-states'
-import { Section } from '@/components/ui/section'
 
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
 
-import { useRouter } from '@/i18n/navigation'
 import { downloadCSV } from '@/lib/csv-download'
 import { computeBiggestMover } from '@/lib/portfolio-utils'
 import { api } from '@/trpc/react'
 
-const PortfolioChart = dynamic(
-  () =>
-    import('@/components/portfolio/portfolio-chart').then((m) => ({
-      default: m.PortfolioChart,
-    })),
-  { ssr: false, loading: () => <DynamicLoader height={140} /> },
-)
-
-const PortfolioBreakdown = dynamic(
-  () =>
-    import('@/components/portfolio/portfolio-breakdown').then((m) => ({
-      default: m.PortfolioBreakdown,
-    })),
-  { ssr: false, loading: () => <DynamicLoader height={200} /> },
-)
-
 export default function AssetsPage() {
-  const router = useRouter()
   const locale = useLocale()
   const t = useTranslations('assets')
-  const tNav = useTranslations('nav')
-  const tAlerts = useTranslations('alerts')
-  const tBreakdown = useTranslations('breakdown')
   const tExport = useTranslations('export')
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
@@ -119,14 +86,12 @@ export default function AssetsPage() {
     ])
   })
 
-  // Auto-clear filter when the selected category no longer has assets
   useEffect(() => {
     if (!selectedCategory || !data) return
     const stillExists = data.assets.some((a) => a.category === selectedCategory)
     if (!stillExists) setSelectedCategory(null)
   }, [data, selectedCategory])
 
-  // Reset portfolio selection if the selected portfolio was deleted
   useEffect(() => {
     if (!selectedPortfolioId || !portfoliosQuery.data) return
     const stillExists = portfoliosQuery.data.some(
@@ -176,8 +141,19 @@ export default function AssetsPage() {
     setSelectedCategory(null)
   }
 
-  const hasMultiplePortfolios = (portfoliosQuery.data?.length ?? 0) > 1
+  const handleRequestDeletePortfolio = () => {
+    const p = portfoliosQuery.data?.find((x) => x.id === selectedPortfolioId)
+    if (p) {
+      setPortfolioToDelete({
+        id: p.id,
+        name: p.name,
+        assetCount: p.assetCount,
+      })
+      setShowDeleteModal(true)
+    }
+  }
 
+  const hasMultiplePortfolios = (portfoliosQuery.data?.length ?? 0) > 1
   const defaultPortfolioId = portfoliosQuery.data?.[0]?.id
 
   if (isError) {
@@ -200,193 +176,67 @@ export default function AssetsPage() {
       <RefreshIndicator isRefreshing={isRefreshing} />
 
       <PageShell>
-        <div>
-          <Section
-            header={tNav('assets')}
-            variant="hero"
-            trailing={
-              <Button
-                isIconOnly
-                variant="ghost"
-                size="sm"
-                onPress={() => void handleExport()}
-                isDisabled={exportQuery.isFetching}
-                aria-label={tExport('button')}
-              >
-                <IconDownload size={18} />
-              </Button>
-            }
-          >
-            {hasMultiplePortfolios && portfoliosQuery.data && (
-              <>
-                <PortfolioSelector
-                  portfolios={portfoliosQuery.data}
-                  selectedId={selectedPortfolioId}
-                  onSelect={handlePortfolioSelect}
-                  onCreate={() => setShowCreateModal(true)}
-                />
-                {selectedPortfolioId && (
-                  <div className="mb-2 flex gap-1">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 gap-1 px-2 text-xs"
-                      onPress={() => setShowRenameModal(true)}
-                    >
-                      <IconPencil size={12} aria-hidden />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 gap-1 px-2 text-destructive text-xs"
-                      onPress={() => {
-                        const p = portfoliosQuery.data?.find(
-                          (x) => x.id === selectedPortfolioId,
-                        )
-                        if (p) {
-                          setPortfolioToDelete({
-                            id: p.id,
-                            name: p.name,
-                            assetCount: p.assetCount,
-                          })
-                          setShowDeleteModal(true)
-                        }
-                      }}
-                    >
-                      <IconTrash size={12} aria-hidden />
-                    </Button>
-                  </div>
-                )}
-              </>
-            )}
-            <PortfolioTotal
-              totalIRT={data.totalIRT}
-              usdSellPrice={data.usdSellPrice}
-              eurSellPrice={data.eurSellPrice}
-            />
-            <PortfolioDelta portfolioId={selectedPortfolioId ?? undefined} />
-            {data.stale && (
-              <div className="mt-2">
-                <StalenessBanner
-                  snapshotAt={data.snapshotAt}
-                  namespace="assets"
-                  onRefresh={() =>
-                    void Promise.all([
-                      refetch(),
-                      historyQuery.refetch(),
-                      breakdownQuery.refetch(),
-                    ])
-                  }
-                />
-              </div>
-            )}
-          </Section>
-        </div>
+        <AssetsHeroSection
+          portfolios={portfoliosQuery.data}
+          hasMultiplePortfolios={hasMultiplePortfolios}
+          selectedPortfolioId={selectedPortfolioId}
+          onPortfolioSelect={handlePortfolioSelect}
+          onCreatePortfolio={() => setShowCreateModal(true)}
+          onRenamePortfolio={() => setShowRenameModal(true)}
+          onRequestDeletePortfolio={handleRequestDeletePortfolio}
+          totalIRT={data.totalIRT}
+          usdSellPrice={data.usdSellPrice}
+          eurSellPrice={data.eurSellPrice}
+          stale={data.stale}
+          snapshotAt={data.snapshotAt}
+          onRefreshStale={() =>
+            void Promise.all([
+              refetch(),
+              historyQuery.refetch(),
+              breakdownQuery.refetch(),
+            ])
+          }
+          onExport={handleExport}
+          exportFetching={exportQuery.isFetching}
+        />
 
-        {historyQuery.data && (
-          <div>
-            <Section header={t('portfolioChart')}>
-              <PortfolioChart data={historyQuery.data} />
-            </Section>
-          </div>
-        )}
+        <AssetsChartSection historyData={historyQuery.data} />
 
-        {breakdownQuery.data && data.assets.length > 0 && (
-          <div>
-            <Section header={tBreakdown('title')}>
-              <PortfolioBreakdown
-                data={breakdownQuery.data.categories}
-                totalIRT={breakdownQuery.data.totalIRT}
-                selectedCategory={selectedCategory}
-                onCategorySelect={setSelectedCategory}
-              />
-            </Section>
-          </div>
-        )}
+        <AssetsBreakdownSection
+          breakdownData={breakdownQuery.data ?? undefined}
+          assetCount={data.assets.length}
+          selectedCategory={selectedCategory}
+          onCategorySelect={setSelectedCategory}
+        />
 
-        {biggestMover && (
-          <div>
-            <Section header={tBreakdown('biggestMover')}>
-              <BiggestMoverCard {...biggestMover} />
-            </Section>
-          </div>
-        )}
+        <AssetsBiggestMoverSection biggestMover={biggestMover} />
 
         {alertsQuery.data !== undefined && (
-          <div>
-            <Section header={tAlerts('sectionTitle')}>
-              <AlertSummaryCard
-                activeCount={alertsQuery.data.filter((a) => a.isActive).length}
-                triggeredCount={
-                  alertsQuery.data.filter(
-                    (a) => !a.isActive && a.triggeredAt !== null,
-                  ).length
-                }
-                onManage={() => router.push('/alerts')}
-              />
-            </Section>
-          </div>
+          <AssetsAlertSummarySection
+            activeCount={alertsQuery.data.filter((a) => a.isActive).length}
+            triggeredCount={
+              alertsQuery.data.filter(
+                (a) => !a.isActive && a.triggeredAt !== null,
+              ).length
+            }
+          />
         )}
 
-        {data.assets.length === 0 ? (
-          <div>
-            <EmptyState />
-          </div>
-        ) : (
-          <div>
-            <Section header={t('assetsList')}>
-              {selectedCategory && selectedCategoryData && (
-                <CategoryFilterHeader
-                  category={selectedCategory}
-                  valueIRT={selectedCategoryData.valueIRT}
-                  percentage={selectedCategoryData.percentage}
-                  onClear={() => setSelectedCategory(null)}
-                />
-              )}
-              {filteredAssets.map((asset) => (
-                <AssetListItem
-                  key={asset.id}
-                  {...asset}
-                  portfolioPercentage={
-                    selectedCategory && data.totalIRT > 0
-                      ? (asset.valueIRT / data.totalIRT) * 100
-                      : undefined
-                  }
-                />
-              ))}
-            </Section>
-          </div>
-        )}
+        <AssetsListSection
+          assets={data.assets}
+          filteredAssets={filteredAssets}
+          totalIRT={data.totalIRT}
+          selectedCategory={selectedCategory}
+          selectedCategoryData={selectedCategoryData}
+          onClearCategory={() => setSelectedCategory(null)}
+        />
       </PageShell>
 
       {data.assets.length > 0 && (
-        <>
-          <div aria-hidden className="app-main-fab-scroll-spacer" />
-          <div
-            className="fab-shadow fixed start-2 end-2 p-1.5"
-            style={{
-              bottom: 'calc(var(--bottom-above-tabbar) + var(--bottom-safe))',
-            }}
-          >
-            <Button
-              variant="primary"
-              fullWidth
-              size="sm"
-              onPress={() => {
-                const pid = selectedPortfolioId ?? defaultPortfolioId
-                if (pid) {
-                  router.push(`/assets/add?portfolioId=${pid}`)
-                } else {
-                  router.push('/assets/add')
-                }
-              }}
-              className="inline-flex items-center justify-center gap-2"
-            >
-              <IconPlus size={18} className="shrink-0" aria-hidden />
-              {t('addAsset')}
-            </Button>
-          </div>
-        </>
+        <AssetsFab
+          selectedPortfolioId={selectedPortfolioId}
+          defaultPortfolioId={defaultPortfolioId}
+        />
       )}
 
       <PortfolioFormModal

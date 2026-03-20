@@ -52,11 +52,6 @@
     "chartPeriod365": "1Y",
     "staleWarning": "Prices may not be up to date",
     "lastUpdated": "Last updated: {time}",
-    "sessionExpired": "Your session has expired",
-    "sessionExpiredDescription": "Please sign in again",
-    "reLogin": "Re-login",
-    "connectionError": "Unable to connect to the server",
-    "retryLater": "Please try again in a moment",
     "mainButtonSave": "Save",
     "mainButtonConvert": "Convert"
   },

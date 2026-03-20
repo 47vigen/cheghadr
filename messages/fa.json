@@ -52,11 +52,6 @@
     "chartPeriod365": "۱ سال",
     "staleWarning": "قیمت‌ها ممکن است به‌روز نباشد",
     "lastUpdated": "آخرین به‌روزرسانی: {time}",
-    "sessionExpired": "نشست شما منقضی شده است",
-    "sessionExpiredDescription": "لطفاً دوباره وارد شوید",
-    "reLogin": "ورود مجدد",
-    "connectionError": "مشکلی در اتصال به سرور رخ داد",
-    "retryLater": "لطفاً چند لحظه دیگر تلاش کنید",
     "mainButtonSave": "ذخیره",
     "mainButtonConvert": "تبدیل"
   },
