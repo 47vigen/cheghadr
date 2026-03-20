@@ -41,6 +41,8 @@
     --tabbar-height: 56px;
     --bottom-above-tabbar: var(--tabbar-height, 56px);
     --bottom-safe: max(16px, env(safe-area-inset-bottom));
+    /* Fixed “Add asset” ribbon (p-1.5 + sm button) — used to pad scroll above it */
+    --app-fab-stack-height: 56px;
     --app-viewport-height: 100svh;
 
     /* Compact spacing */
@@ -167,6 +169,19 @@
   .skeleton-row-stagger > *:nth-child(n + 5) {
     animation: fade-in var(--motion-duration-normal) ease-out both;
     animation-delay: 240ms;
+  }
+
+  /*
+   * Extra scroll extent so the last list rows sit above the fixed FAB.
+   * Main already pads tabbar + env(safe-area); FAB uses --bottom-safe above tabbar.
+   */
+  .app-main-fab-scroll-spacer {
+    flex-shrink: 0;
+    height: calc(
+      var(--bottom-safe) + var(--app-fab-stack-height) -
+        env(safe-area-inset-bottom)
+    );
+    pointer-events: none;
   }
 
   .modal-body {
