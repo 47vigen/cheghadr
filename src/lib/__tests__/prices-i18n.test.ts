@@ -67,6 +67,15 @@ describe('getBilingualAssetLabels', () => {
     expect(labels.fa).toBe('فقط فارسی')
     expect(labels.en).toBe('فقط فارسی')
   })
+
+  it('handles missing name and base_currency without throwing', () => {
+    const pi = {
+      symbol: 'Z-IRT',
+      name: undefined,
+      base_currency: undefined,
+    } as unknown as PriceItem
+    expect(getBilingualAssetLabels(pi, 'Z')).toEqual({ fa: 'Z', en: 'Z' })
+  })
 })
 
 describe('pickDisplayName', () => {

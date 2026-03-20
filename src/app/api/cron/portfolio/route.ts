@@ -10,6 +10,7 @@ import { hasCrossedThreshold } from '@/lib/alert-utils'
 import { NotificationQueue } from '@/lib/notifications'
 import { createPortfolioSnapshot } from '@/lib/portfolio'
 import {
+  getBaseSymbol,
   getBilingualAssetLabels,
   getSellPriceBySymbol,
   parsePriceSnapshot,
@@ -166,7 +167,7 @@ export async function GET(request: NextRequest) {
           if (value > maxValue) {
             maxValue = value
             const priceItem = prices.find(
-              (p) => p.base_currency.symbol === item.symbol,
+              (p) => getBaseSymbol(p) === item.symbol,
             )
             const labels = getBilingualAssetLabels(priceItem, item.symbol)
             topMoverName = pickDisplayName(labels, digestLocale)

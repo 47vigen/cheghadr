@@ -54,7 +54,7 @@ export const assetsRouter = router({
         ...asset,
         valueIRT: qty * sellPrice,
         displayNames: getBilingualAssetLabels(priceItem, asset.symbol),
-        assetIcon: priceItem?.png ?? priceItem?.base_currency.png ?? null,
+        assetIcon: priceItem?.png ?? priceItem?.base_currency?.png ?? null,
         change: priceItem?.change ?? null,
         sellPrice,
         category: priceItem?.base_currency.category?.symbol ?? 'OTHER',

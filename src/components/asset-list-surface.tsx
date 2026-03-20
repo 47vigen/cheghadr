@@ -10,7 +10,7 @@ import { Placeholder } from '@/components/ui/placeholder'
 import { Section } from '@/components/ui/section'
 
 import type { PriceItem } from '@/lib/prices'
-import { getLocalizedItemName } from '@/lib/prices'
+import { getBaseSymbol, getLocalizedItemName } from '@/lib/prices'
 
 interface AssetListGroup {
   category: string
@@ -41,7 +41,7 @@ export function AssetListSurface({
       {groups.map((group) => (
         <Section key={group.category} header={group.categoryLabel}>
           {group.items.map((item) => {
-            const icon = item.png ?? item.base_currency.png
+            const icon = item.png ?? item.base_currency?.png
             const name = getLocalizedItemName(item, locale)
             return (
               <Cell
@@ -49,7 +49,7 @@ export function AssetListSurface({
                 before={
                   <AssetAvatar
                     alt={name}
-                    symbol={item.base_currency.symbol}
+                    symbol={getBaseSymbol(item)}
                     src={icon}
                   />
                 }

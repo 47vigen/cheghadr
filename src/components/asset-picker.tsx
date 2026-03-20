@@ -13,6 +13,7 @@ import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 import type { PriceItem } from '@/lib/prices'
 import {
   formatIRT,
+  getBaseSymbol,
   getLocalizedItemName,
   parsePriceSnapshot,
 } from '@/lib/prices'
@@ -72,7 +73,12 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
       toast.error(t('toastInvalidQuantity'))
       return
     }
-    addMutation.mutate({ symbol: modalItem.base_currency.symbol, quantity })
+    const sym = getBaseSymbol(modalItem)
+    if (!sym) {
+      toast.error(t('toastAddError'))
+      return
+    }
+    addMutation.mutate({ symbol: sym, quantity })
   }
 
   return (
