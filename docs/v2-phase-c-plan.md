@@ -33,32 +33,38 @@ Phases A and B are complete. Here's what exists and is relevant to Phase C:
 |---|---|---|
 | **Proxy** (`src/proxy.ts`) | Redirects unauthenticated users to `/login` for all page routes; allows `/login` and `/api/*` through | C.1: Allow `/prices` and `/calculator` pages without auth |
 | **tRPC context** (`src/server/api/trpc.ts`) | `publicProcedure` (no auth), `protectedProcedure` (requires `telegramUserId`); resolves user from initData, NextAuth session, or dev bypass | C.1: No changes needed — `publicProcedure` is already available |
+| **tRPC routers** (`src/server/api/root.ts`) | `prices`, `assets`, `portfolio`, `alerts`, `user` | C.2: Add portfolio CRUD to `portfolio` router; C.3: Add `export` |
 | **`prices.latest`** | Already uses `publicProcedure` — no auth guard at tRPC level | C.1: Already guest-ready at the API layer |
-| **`assets.list`** | `protectedProcedure`; returns user's assets enriched with prices, category, USD/EUR sell prices | C.2: Must accept optional `portfolioId` filter |
-| **`assets.add`** | `protectedProcedure`; upserts on `(userId, symbol)`; triggers `createPortfolioSnapshot` | C.2: Must accept `portfolioId`; change unique constraint to `(userId, symbol, portfolioId)` |
+| **`assets.list`** | `protectedProcedure`; returns `{ assets[], totalIRT, snapshotAt, stale, usdSellPrice, eurSellPrice }`; each asset has `displayNames: BilingualDisplayNames`, `category`, `valueIRT`, `change`, `sellPrice`, `assetIcon` | C.2: Must accept optional `portfolioId` filter |
+| **`assets.add`** | `protectedProcedure`; upserts on `(userId, symbol)` via `userId_symbol` unique; triggers `createPortfolioSnapshot` | C.2: Must accept `portfolioId`; change unique constraint to `(userId, symbol, portfolioId)` |
 | **`portfolio.*`** | `history`, `delta`, `breakdown` — all `protectedProcedure`, query by `ctx.user.id` | C.2: Must accept optional `portfolioId`; add `list`, `create`, `rename`, `delete` |
+| **`user.setPreferredLocale`** | `protectedProcedure`; stores user's preferred locale (`en` \| `fa`) | C.1: Will fail for guest users — `LocaleProvider` calls this on locale change; needs graceful handling |
 | **`PortfolioSnapshot`** | `{ userId, snapshotAt, totalIRT, breakdown }` — one per user per snapshot | C.2: Add optional `portfolioId`; `null` = consolidated |
 | **`UserAsset`** | `{ userId, symbol, quantity }`; unique on `(userId, symbol)` | C.2: Add `portfolioId` FK; change unique to `(userId, symbol, portfolioId)` |
-| **Prisma schema** | `User`, `UserAsset`, `PriceSnapshot`, `PortfolioSnapshot`, `Alert` — no `Portfolio` model | C.2: Add `Portfolio` model + FKs |
+| **Prisma schema** | `User` (with `preferredLocale: PreferredLocale`), `UserAsset`, `PriceSnapshot`, `PortfolioSnapshot`, `Alert`; enums: `AlertType`, `AlertDir`, `PreferredLocale` | C.2: Add `Portfolio` model + FKs |
 | **Bottom nav** (`src/components/bottom-nav.tsx`) | 3 tabs: My Assets (`/`), Prices (`/prices`), Calculator (`/calculator`) | C.1: No structural change; tabs work for guests |
-| **Login page** (`src/app/login/page.tsx`) | Mini app auto-login via initData; standalone shows Telegram Widget | C.1: Add `callbackUrl` support for post-login redirect |
-| **My Assets page** (`src/app/(app)/page.tsx`) | Calls `assets.list`, `portfolio.history`, `portfolio.breakdown`, `alerts.list` — all protected | C.1: Show login prompt for guests instead of error; C.2: Add portfolio selector |
-| **Error boundary** (`src/app/(app)/error.tsx`) | Catches `UNAUTHORIZED` → shows "Session expired" + re-login | C.1: Guest hitting `/` should see a designed prompt, not an error |
-| **i18n** | `fa.json` + `en.json` with namespaces: `nav`, `login`, `assets`, `prices`, `calculator`, `alerts`, `breakdown`, `delta`, `categories` | C.1–C.3: Add `guest` and `portfolios` namespaces |
+| **Login page** (`src/app/login/page.tsx`) | Mini app auto-login via initData; standalone shows Telegram Widget; redirects to `/` on success | C.1: Add `callbackUrl` support for post-login redirect |
+| **My Assets page** (`src/app/(app)/page.tsx`) | Calls `assets.list`, `portfolio.history`, `portfolio.breakdown`, `alerts.list` — all protected; uses `computeBiggestMover(data.assets, locale)`; has `selectedCategory` state for breakdown drill-down; scroll spacer for FAB | C.1: Proxy redirects guests to login; C.2: Add portfolio selector |
+| **Error boundary** (`src/app/(app)/error.tsx`) | Catches `UNAUTHORIZED` → shows "Session expired" + re-login; also handles connection errors | C.1: Guest hitting `/` is redirected by proxy before reaching this |
+| **Bilingual i18n** | `LocaleProvider` detects locale from Telegram/browser, wraps app in `NextIntlClientProvider`, persists via `user.setPreferredLocale` mutation; `BilingualDisplayNames` type for asset labels; `pickDisplayName(names, locale, fallback)` for locale-aware display | C.1: Must handle locale persistence failure for guests; C.1–C.3: Add `guest`, `portfolios`, `export` namespaces |
+| **Client providers** (`src/components/client-root.tsx`) | `LocaleProvider` → `TRPCReactProvider` → `ClientProviders` (just `TelegramProvider`) → `Toaster`; **no `SessionProvider`** from NextAuth | C.1: Add `SessionProvider` for `useSession()` in `GuestLoginBanner` |
 | **Telegram SDK** (`src/utils/telegram.ts`) | `getRawInitData()`, `isTelegramWebApp()` | C.3: Need `Telegram.WebApp.openLink` for CSV download |
+| **Asset display** | `AssetListItem` uses `displayNames: BilingualDisplayNames` + `pickDisplayName(displayNames, locale, symbol)` for bilingual labels; `AssetPicker` uses `getLocalizedItemName(item, locale)` | C.2: `AssetPicker` will need to pass `portfolioId` to `assets.add` mutation |
+| **Price utilities** (`src/lib/prices.ts`) | `getBilingualAssetLabels()`, `pickDisplayName()`, `getLocalizedItemName()`, `getBaseSymbol()`, `formatCompactCurrency()`, `formatIRT()`; defensive `base_currency?.` null checks throughout | No changes needed |
 
 ### Key patterns to follow
 
 - **tRPC**: Zod input validation, `protectedProcedure` for auth, `publicProcedure` for prices
 - **Prisma**: cuid IDs, `Decimal` for monetary values, `Json` for flexible data, `onDelete: Cascade`
 - **UI**: HeroUI v3 (`Button`, `Modal`, `Text`, `Input`), `Section` wrapper, `Cell` for list rows, `PageShell` for page wrapper
-- **Numbers**: `formatIRT()` for Toman, `formatCompactCurrency()` for USD/EUR
+- **Numbers**: `formatIRT(value, locale)` for Toman, `formatCompactCurrency(value, currency)` for USD/EUR
 - **Colors**: `text-success` (green) / `text-destructive` (red) / `text-muted-foreground` (gray)
 - **State**: `api.<router>.<procedure>.useQuery()`, `useUtils()` for invalidation
-- **i18n**: `useTranslations()` hook, `fa.json` + `en.json`
+- **i18n**: `useTranslations()` hook, bilingual `BilingualDisplayNames` type, `pickDisplayName(names, locale, fallback)` for locale-aware display
 - **Navigation**: `useRouter()` and `usePathname()` from `@/i18n/navigation`
 - **Telegram**: `useTelegramBackButton()`, `useTelegramMainButton()`, `useTelegramHaptics()`
 - **Mutations**: Optimistic invalidation via `api.useUtils()` after mutations
+- **Locale persistence**: `LocaleProvider` calls `user.setPreferredLocale` — a `protectedProcedure` that silently fails for guests (uses `retry: false`)
 
 ---
 
@@ -135,6 +141,10 @@ For standalone web guests who land on `/prices` or `/calculator`:
 - The banner does **not** appear for authenticated users or in Telegram mini app mode (where auth is handled via initData)
 
 We detect the auth state client-side using a lightweight mechanism: a new `useAuthStatus()` hook that checks for the presence of `getRawInitData()` (mini app) or calls `useSession()` from NextAuth (standalone). If neither indicates auth, show the banner.
+
+**`SessionProvider` requirement:** The `useSession()` hook requires `SessionProvider` from `next-auth/react` in the React tree. Currently, the provider stack is `LocaleProvider` → `TRPCReactProvider` → `ClientProviders` (just `TelegramProvider`) — **no `SessionProvider`**. We need to add it.
+
+**`LocaleProvider` guest compatibility:** The `LocaleProvider` calls `api.user.setPreferredLocale.useMutation({ retry: false })` on every locale change. This is a `protectedProcedure` and will throw `UNAUTHORIZED` for guests. Since it already uses `retry: false`, the mutation fails silently without retrying — the guest's locale still works client-side (from Telegram `language_code` or `navigator.language`), it just doesn't persist server-side. **No change needed** — the existing `retry: false` handles this gracefully.
 
 ### AD-4: Portfolio model and migration strategy
 
@@ -412,22 +422,42 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 }
 ```
 
-### Task C.1.6 — Ensure `SessionProvider` is in the provider tree
+### Task C.1.6 — Add `SessionProvider` to the provider tree
 
-**File:** `src/components/client-providers.tsx` or `src/components/client-root.tsx` (modified)
+**File:** `src/components/client-root.tsx` (modified)
 
-The `useSession()` hook from NextAuth requires a `SessionProvider` in the React tree. Check if it's already present (it may be, since the app uses NextAuth). If not, add it:
+The `useSession()` hook from NextAuth requires a `SessionProvider` in the React tree. Currently, the provider stack is:
+
+```
+ClientRoot
+├── LocaleProvider
+│   └── TRPCReactProvider
+│       └── ClientProviders (just TelegramProvider)
+│           └── children + Toaster
+```
+
+**`SessionProvider` is NOT present.** Add it to `ClientRoot`:
 
 ```typescript
 import { SessionProvider } from 'next-auth/react'
 
-// Wrap children with SessionProvider
-<SessionProvider>
-  {children}
-</SessionProvider>
+export function ClientRoot({ children }: { children: ReactNode }) {
+  return (
+    <SessionProvider>
+      <LocaleProvider>
+        <TRPCReactProvider>
+          <ClientProviders>
+            {children}
+            <Toaster richColors position="top-center" />
+          </ClientProviders>
+        </TRPCReactProvider>
+      </LocaleProvider>
+    </SessionProvider>
+  )
+}
 ```
 
-If `SessionProvider` is already present (check `ClientProviders`), no change needed. If not, add it to `ClientRoot` or `ClientProviders` — it's lightweight and only fetches the session once.
+`SessionProvider` must be the outermost client provider since it uses React context. It's lightweight — it only fetches the session once and caches it. For guests, `useSession()` returns `{ data: null, status: 'unauthenticated' }` without errors.
 
 ### Task C.1.7 — Verify Prices and Calculator pages work unauthenticated
 
@@ -441,6 +471,8 @@ Both pages only call `api.prices.latest.useQuery()` which is already a `publicPr
 - The `TRPCReactProvider` in `ClientRoot` works without auth context (it does — the provider just creates the client; auth is per-request via headers)
 
 The calculator page uses `useTelegramHaptics()` which is a no-op outside Telegram — safe for guests.
+
+**`LocaleProvider` guest compatibility:** The `LocaleProvider` calls `api.user.setPreferredLocale` on locale change — a `protectedProcedure`. For guests, this mutation fails silently because it's configured with `retry: false`. The locale still works client-side from detection (Telegram `language_code` or `navigator.language`), it just doesn't persist server-side. **No change needed.**
 
 ### Task C.1.8 — Handle mini app guest mode (missing initData)
 
@@ -765,6 +797,15 @@ The `onDelete: Cascade` on `UserAsset` and `PortfolioSnapshot` relations means d
 
 **File:** `src/server/api/routers/assets.ts` (modified)
 
+Currently `assets.add` upserts on the Prisma-generated compound unique `userId_symbol`:
+
+```typescript
+// CURRENT — will change
+where: { userId_symbol: { userId: ctx.user.id, symbol: input.symbol } }
+```
+
+After schema migration (C.2.2), the unique constraint becomes `(userId, symbol, portfolioId)`, so the upsert key must include `portfolioId`:
+
 ```typescript
 add: protectedProcedure
   .input(
@@ -775,7 +816,6 @@ add: protectedProcedure
     }),
   )
   .mutation(async ({ ctx, input }) => {
-    // Verify the portfolio belongs to the user
     await requireOwnedPortfolio(ctx.db, input.portfolioId, ctx.user.id)
 
     const asset = await ctx.db.userAsset.upsert({
@@ -804,6 +844,8 @@ add: protectedProcedure
 ```
 
 The `portfolioId` is now required. The add asset page must know which portfolio is currently selected.
+
+**Note:** The `AssetPicker` component (`src/components/asset-picker.tsx`) calls `api.assets.add.useMutation({ symbol, quantity })`. It needs to be updated to accept and pass `portfolioId`.
 
 ### Task C.2.10 — Modify `assets.list` to accept optional `portfolioId`
 
@@ -1053,9 +1095,20 @@ The portfolio selector appears at the top of the hero section, above the total:
 
 The selector is **only shown when the user has more than 1 portfolio**. Users with a single portfolio (the default) see the same UI as before — no visual change.
 
-### Task C.2.18 — Update Add Asset page to pass `portfolioId`
+**Note:** The `computeBiggestMover(data.assets, locale)` call in the page already takes a `locale` parameter for bilingual display names. No change needed for the biggest mover computation with multi-portfolio — it operates on whatever assets are currently shown (filtered by `selectedPortfolioId` or all).
 
-**File:** `src/app/(app)/assets/add/page.tsx` (modified)
+**Note:** The FAB "Add Asset" button must pass the current `selectedPortfolioId` (or the default portfolio ID for single-portfolio users):
+
+```tsx
+<Button onPress={() => {
+  const pid = selectedPortfolioId || portfoliosQuery.data?.[0]?.id
+  router.push(`/assets/add${pid ? `?portfolioId=${pid}` : ''}`)
+}}>
+```
+
+### Task C.2.18 — Update Add Asset page and AssetPicker to pass `portfolioId`
+
+**Files:** `src/app/(app)/assets/add/page.tsx` (modified), `src/components/asset-picker.tsx` (modified)
 
 The add asset page must know which portfolio to add the asset to. Options:
 
@@ -1066,11 +1119,12 @@ The add asset page must know which portfolio to add the asset to. Options:
 Choosing **Option 1** — simple, stateless, works with back/forward navigation:
 
 ```typescript
+// src/app/(app)/assets/add/page.tsx
 const searchParams = useSearchParams()
 const portfolioId = searchParams.get('portfolioId')
 ```
 
-The "Add Asset" button on the My Assets page passes the currently selected portfolio:
+The "Add Asset" FAB on the My Assets page passes the currently selected portfolio:
 
 ```tsx
 <Button onPress={() => router.push(`/assets/add?portfolioId=${selectedPortfolioId || defaultPortfolioId}`)}>
@@ -1078,13 +1132,32 @@ The "Add Asset" button on the My Assets page passes the currently selected portf
 </Button>
 ```
 
-The `assets.add` mutation sends the `portfolioId` to the server.
+The `portfolioId` is threaded through to `AssetPicker`:
+
+```tsx
+// src/app/(app)/assets/add/page.tsx
+<AssetPicker priceData={data.data} portfolioId={portfolioId} onSaved={() => router.push('/')} />
+```
+
+And `AssetPicker` must be updated to accept and use `portfolioId`:
+
+```typescript
+// src/components/asset-picker.tsx
+interface AssetPickerProps {
+  priceData: unknown
+  portfolioId: string  // NEW — required
+  onSaved: () => void
+}
+
+// In the add mutation call:
+addMutation.mutate({ symbol, quantity, portfolioId: props.portfolioId })
+```
 
 ### Task C.2.19 — Update `assets.update` and `assets.delete` procedures
 
 **File:** `src/server/api/routers/assets.ts` (modified)
 
-The `update` and `delete` procedures don't need to know about `portfolioId` — they operate by asset `id` which is globally unique. However, after mutation, the snapshot creation must update both the specific portfolio and the consolidated view:
+The `update` and `delete` procedures don't need new input parameters — they operate by asset `id` which is globally unique. However, `requireOwnedAsset()` already returns the full asset record (including the new `portfolioId` field), so we use it to snapshot both the specific portfolio and the consolidated view:
 
 ```typescript
 update: protectedProcedure
@@ -1092,10 +1165,11 @@ update: protectedProcedure
   .mutation(async ({ ctx, input }) => {
     const asset = await requireOwnedAsset(ctx.db, input.id, ctx.user.id)
     const updated = await ctx.db.userAsset.update({
-      where: { id: input.id },
+      where: { id: input.id, userId: ctx.user.id },
       data: { quantity: input.quantity },
     })
 
+    // Snapshot both the specific portfolio and consolidated
     void createPortfolioSnapshot(ctx.db, ctx.user.id, asset.portfolioId)
     void createPortfolioSnapshot(ctx.db, ctx.user.id, null)
 
@@ -1103,7 +1177,7 @@ update: protectedProcedure
   })
 ```
 
-Same pattern for `delete`.
+Same pattern for `delete`. The current `void createPortfolioSnapshot(ctx.db, ctx.user.id)` calls become two calls: one for the specific portfolio, one for consolidated (`null`).
 
 ---
 
@@ -1304,7 +1378,7 @@ model Portfolio {
 
 ### Modified models
 
-**User** — add relation:
+**User** — add `portfolios` relation (current model already has `preferredLocale: PreferredLocale @default(fa)`):
 ```prisma
 portfolios Portfolio[]
 ```
@@ -1674,7 +1748,8 @@ pnpm check                   # typecheck + lint
 | `src/lib/portfolio.ts` | Update `createPortfolioSnapshot` for multi-portfolio support |
 | `src/app/api/cron/portfolio/route.ts` | Create per-portfolio + consolidated snapshots |
 | `src/app/(app)/page.tsx` | Add portfolio selector, portfolio switching state, export button |
-| `src/app/(app)/assets/add/page.tsx` | Read `portfolioId` from URL params, pass to mutation |
-| `src/components/client-root.tsx` or `src/components/client-providers.tsx` | Add `SessionProvider` if not already present |
+| `src/app/(app)/assets/add/page.tsx` | Read `portfolioId` from URL params, pass to `AssetPicker` |
+| `src/components/asset-picker.tsx` | Accept `portfolioId` prop, pass to `assets.add` mutation |
+| `src/components/client-root.tsx` | Add `SessionProvider` as outermost provider |
 | `messages/fa.json` | Add `guest`, `portfolios`, `export` namespaces; add `login.subtitlePortfolio` |
 | `messages/en.json` | Add `guest`, `portfolios`, `export` namespaces; add `login.subtitlePortfolio` |
