@@ -21,12 +21,18 @@ export function GuestLoginBanner() {
   // Don't show if authenticated or still loading
   if (status === 'loading' || session) return null
 
+  const handleLogin = () => {
+    const encodedPath = encodeURIComponent(pathname)
+    // biome-ignore lint/suspicious/noExplicitAny: dynamic path
+    router.push(`/login?callbackUrl=${encodedPath}` as any)
+  }
+
   return (
     <div className="sticky top-0 z-50 flex items-center justify-center bg-primary px-4 py-2.5">
       <button
         type="button"
-        className="text-primary-foreground text-sm font-medium"
-        onClick={() => router.push('/login?callbackUrl=/')}
+        className="font-medium text-primary-foreground text-sm"
+        onClick={handleLogin}
       >
         {t('ctaBanner')}
       </button>

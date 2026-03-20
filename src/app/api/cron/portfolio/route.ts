@@ -57,7 +57,8 @@ export async function GET(request: NextRequest) {
         select: { id: true },
       })
       for (const portfolio of portfolios) {
-        await createPortfolioSnapshot(db, user.id, portfolio.id)
+        const snap = await createPortfolioSnapshot(db, user.id, portfolio.id)
+        if (snap) portfolioSnapshotCount++
       }
 
       // Create consolidated snapshot (portfolioId = null)

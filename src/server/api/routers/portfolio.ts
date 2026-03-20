@@ -1,4 +1,3 @@
-import type { PrismaClient } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
@@ -9,21 +8,10 @@ import {
   parsePriceSnapshot,
   sortedGroupEntries,
 } from '@/lib/prices'
+import { requireOwnedPortfolio } from '@/server/api/helpers'
 import { protectedProcedure, router } from '@/server/api/trpc'
 
 const MAX_PORTFOLIOS = 10
-
-async function requireOwnedPortfolio(
-  db: PrismaClient,
-  id: string,
-  userId: string,
-) {
-  const portfolio = await db.portfolio.findUnique({ where: { id } })
-  if (!portfolio || portfolio.userId !== userId) {
-    throw new TRPCError({ code: 'NOT_FOUND' })
-  }
-  return portfolio
-}
 
 function getComparisonDate(window: string): Date | null {
   const now = new Date()
@@ -84,7 +72,7 @@ export const portfolioRouter = router({
       if (count >= MAX_PORTFOLIOS) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: `Maximum ${MAX_PORTFOLIOS} portfolios allowed`,
+          message: `حداکثر ${MAX_PORTFOLIOS} سبد مجاز است`,
         })
       }
 
@@ -129,7 +117,7 @@ export const portfolioRouter = router({
       if (totalPortfolios <= 1) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: 'You must have at least one portfolio',
+          message: 'حداقل یک سبد باید وجود داشته باشد',
         })
       }
 
@@ -152,6 +140,10 @@ export const portfolioRouter = router({
       const days = input?.days ?? 30
       const since = new Date()
       since.setDate(since.getDate() - days)
+
+      if (input?.portfolioId) {
+        await requireOwnedPortfolio(ctx.db, input.portfolioId, ctx.user.id)
+      }
 
       const portfolioFilter = input?.portfolioId
         ? { portfolioId: input.portfolioId }
@@ -187,6 +179,11 @@ export const portfolioRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const window = input?.window ?? '1D'
+
+      if (input?.portfolioId) {
+        await requireOwnedPortfolio(ctx.db, input.portfolioId, ctx.user.id)
+      }
+
       const portfolioFilter = input?.portfolioId
         ? { portfolioId: input.portfolioId }
         : { portfolioId: null }
@@ -237,6 +234,10 @@ export const portfolioRouter = router({
         .optional(),
     )
     .query(async ({ ctx, input }) => {
+      if (input?.portfolioId) {
+        await requireOwnedPortfolio(ctx.db, input.portfolioId, ctx.user.id)
+      }
+
       const portfolioFilter = input?.portfolioId
         ? { portfolioId: input.portfolioId }
         : { portfolioId: null }
@@ -305,6 +306,10 @@ export const portfolioRouter = router({
         .optional(),
     )
     .query(async ({ ctx, input }) => {
+      if (input?.portfolioId) {
+        await requireOwnedPortfolio(ctx.db, input.portfolioId, ctx.user.id)
+      }
+
       const portfolioFilter = input?.portfolioId
         ? { portfolioId: input.portfolioId }
         : { portfolioId: null }

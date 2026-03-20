@@ -15,8 +15,11 @@ export default function LoginPage() {
   const router = useRouter()
   const t = useTranslations('login')
   const searchParams = useSearchParams()
-  // biome-ignore lint/suspicious/noExplicitAny: callbackUrl is a dynamic string from URL params
-  const callbackUrl = (searchParams.get('callbackUrl') ?? '/') as any
+  const rawCallback = searchParams.get('callbackUrl') ?? '/'
+  // Validate callbackUrl to prevent open redirect — only allow same-origin relative paths
+  const isSafeCallback = rawCallback.startsWith('/') && !rawCallback.startsWith('//')
+  // biome-ignore lint/suspicious/noExplicitAny: typed route cast for dynamic path from URL params
+  const callbackUrl = (isSafeCallback ? rawCallback : '/') as any
   const widgetContainerRef = useRef<HTMLDivElement>(null)
   const [mode, setMode] = useState<'loading' | 'miniapp' | 'standalone'>(
     'loading',

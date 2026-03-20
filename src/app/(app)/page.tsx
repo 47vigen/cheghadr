@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic'
 import { useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@heroui/react'
-import { IconDownload, IconPlus } from '@tabler/icons-react'
+import { IconDownload, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
@@ -54,12 +54,12 @@ export default function AssetsPage() {
   const tNav = useTranslations('nav')
   const tAlerts = useTranslations('alerts')
   const tBreakdown = useTranslations('breakdown')
-  const tPortfolios = useTranslations('portfolios')
   const tExport = useTranslations('export')
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showRenameModal, setShowRenameModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [portfolioToDelete, setPortfolioToDelete] = useState<{
     id: string
@@ -92,14 +92,6 @@ export default function AssetsPage() {
     },
   )
 
-  const deltaQuery = api.portfolio.delta.useQuery(
-    selectedPortfolioId ? { portfolioId: selectedPortfolioId } : undefined,
-    {
-      refetchInterval: 30 * 60 * 1000,
-      refetchOnWindowFocus: true,
-    },
-  )
-
   const alertsQuery = api.alerts.list.useQuery(undefined, {
     refetchInterval: 30 * 60 * 1000,
     refetchOnWindowFocus: true,
@@ -116,7 +108,6 @@ export default function AssetsPage() {
       historyQuery.refetch(),
       alertsQuery.refetch(),
       breakdownQuery.refetch(),
-      deltaQuery.refetch(),
     ])
   })
 
@@ -179,10 +170,6 @@ export default function AssetsPage() {
 
   const defaultPortfolioId = portfoliosQuery.data?.[0]?.id
 
-  const portfolioToDeleteData = portfolioToDelete
-    ? portfolioToDelete
-    : null
-
   if (isError) {
     return (
       <ErrorState
@@ -221,12 +208,46 @@ export default function AssetsPage() {
             }
           >
             {hasMultiplePortfolios && portfoliosQuery.data && (
-              <PortfolioSelector
-                portfolios={portfoliosQuery.data}
-                selectedId={selectedPortfolioId}
-                onSelect={handlePortfolioSelect}
-                onCreate={() => setShowCreateModal(true)}
-              />
+              <>
+                <PortfolioSelector
+                  portfolios={portfoliosQuery.data}
+                  selectedId={selectedPortfolioId}
+                  onSelect={handlePortfolioSelect}
+                  onCreate={() => setShowCreateModal(true)}
+                />
+                {selectedPortfolioId && (
+                  <div className="mb-2 flex gap-1">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 gap-1 px-2 text-xs"
+                      onPress={() => setShowRenameModal(true)}
+                    >
+                      <IconPencil size={12} aria-hidden />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 gap-1 px-2 text-xs text-destructive"
+                      onPress={() => {
+                        const p = portfoliosQuery.data?.find(
+                          (x) => x.id === selectedPortfolioId,
+                        )
+                        if (p) {
+                          setPortfolioToDelete({
+                            id: p.id,
+                            name: p.name,
+                            assetCount: p.assetCount,
+                          })
+                          setShowDeleteModal(true)
+                        }
+                      }}
+                    >
+                      <IconTrash size={12} aria-hidden />
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
             <PortfolioTotal
               totalIRT={data.totalIRT}
@@ -244,7 +265,6 @@ export default function AssetsPage() {
                       refetch(),
                       historyQuery.refetch(),
                       breakdownQuery.refetch(),
-                      deltaQuery.refetch(),
                     ])
                   }
                 />
@@ -365,13 +385,24 @@ export default function AssetsPage() {
         mode="create"
       />
 
+      <PortfolioFormModal
+        isOpen={showRenameModal}
+        onClose={() => setShowRenameModal(false)}
+        mode="rename"
+        portfolio={
+          selectedPortfolioId
+            ? portfoliosQuery.data?.find((p) => p.id === selectedPortfolioId)
+            : undefined
+        }
+      />
+
       <PortfolioDeleteModal
         isOpen={showDeleteModal}
         onClose={() => {
           setShowDeleteModal(false)
           setPortfolioToDelete(null)
         }}
-        portfolio={portfolioToDeleteData}
+        portfolio={portfolioToDelete}
       />
     </>
   )

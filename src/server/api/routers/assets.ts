@@ -10,6 +10,7 @@ import {
   getSnapshotStaleness,
   parsePriceSnapshot,
 } from '@/lib/prices'
+import { requireOwnedPortfolio } from '@/server/api/helpers'
 import { protectedProcedure, router } from '@/server/api/trpc'
 
 async function requireOwnedAsset(
@@ -22,18 +23,6 @@ async function requireOwnedAsset(
     throw new TRPCError({ code: 'NOT_FOUND' })
   }
   return asset
-}
-
-async function requireOwnedPortfolio(
-  database: PrismaClient,
-  id: string,
-  userId: string,
-) {
-  const portfolio = await database.portfolio.findUnique({ where: { id } })
-  if (!portfolio || portfolio.userId !== userId) {
-    throw new TRPCError({ code: 'NOT_FOUND' })
-  }
-  return portfolio
 }
 
 const quantitySchema = z.string().refine(
