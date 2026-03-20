@@ -167,7 +167,7 @@ describe('appRouter — assets', () => {
     expect(result.totalIRT).toBe(0)
   })
 
-  it('add throws NOT_FOUND when portfolio is missing or not owned', async () => {
+  it('add throws NOT_FOUND when portfolio is missing', async () => {
     vi.mocked(db.portfolio.findUnique).mockResolvedValue(null)
     const caller = createCaller(db)
 
@@ -178,6 +178,22 @@ describe('appRouter — assets', () => {
         portfolioId: 'pf-1',
       }),
     ).rejects.toMatchObject({ code: 'NOT_FOUND' })
+  })
+
+  it('add throws FORBIDDEN when portfolio belongs to another user', async () => {
+    vi.mocked(db.portfolio.findUnique).mockResolvedValue({
+      id: 'pf-1',
+      userId: 'other-user',
+    } as never)
+    const caller = createCaller(db)
+
+    await expect(
+      caller.assets.add({
+        symbol: 'USD',
+        quantity: '1',
+        portfolioId: 'pf-1',
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
   })
 
   it('add upserts asset when portfolio is owned', async () => {
@@ -293,5 +309,14 @@ describe('appRouter — portfolio', () => {
     const result = await caller.portfolio.history({ days: 7 })
 
     expect(result).toEqual([{ date: day, totalIRT: 1_500_000 }])
+    expect(db.portfolioSnapshot.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          userId: 'user-1',
+          portfolioId: null,
+          snapshotAt: { gte: expect.any(Date) as Date },
+        }),
+      }),
+    )
   })
 })

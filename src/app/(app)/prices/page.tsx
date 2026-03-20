@@ -10,7 +10,7 @@ import { PriceSection } from '@/components/prices/price-section'
 import { StalenessBanner } from '@/components/prices/staleness-banner'
 import { PricesSkeleton } from '@/components/skeletons/prices-skeleton'
 import {
-  EmptyStateBase,
+  EmptyState,
   ErrorState,
   RefreshIndicator,
 } from '@/components/ui/async-states'
@@ -24,6 +24,7 @@ import {
   parsePriceSnapshot,
   sortedGroupEntries,
 } from '@/lib/prices'
+import { TRPC_REFETCH_INTERVAL_MS } from '@/trpc/constants'
 import { api } from '@/trpc/react'
 
 export default function PricesPage() {
@@ -35,7 +36,7 @@ export default function PricesPage() {
 
   const { data, isLoading, isError, error, refetch } =
     api.prices.latest.useQuery(undefined, {
-      refetchInterval: 30 * 60 * 1000,
+      refetchInterval: TRPC_REFETCH_INTERVAL_MS,
       refetchOnWindowFocus: true,
     })
 
@@ -60,7 +61,7 @@ export default function PricesPage() {
 
   if (!data) {
     return (
-      <EmptyStateBase header={t('unavailable')} description={t('checkLater')} />
+      <EmptyState header={t('unavailable')} description={t('checkLater')} />
     )
   }
 
@@ -97,11 +98,11 @@ export default function PricesPage() {
 
         {entries.length === 0 && search ? (
           <div>
-            <EmptyStateBase header={t('noResults')} />
+            <EmptyState header={t('noResults')} />
           </div>
         ) : entries.length === 0 ? (
           <div>
-            <EmptyStateBase
+            <EmptyState
               header={t('unavailable')}
               description={t('checkLater')}
             />

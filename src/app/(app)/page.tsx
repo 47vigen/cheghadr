@@ -22,6 +22,7 @@ import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
 
 import { downloadCSV } from '@/lib/csv-download'
 import { computeBiggestMover } from '@/lib/portfolio-utils'
+import { TRPC_REFETCH_INTERVAL_MS } from '@/trpc/constants'
 import { api } from '@/trpc/react'
 
 export default function AssetsPage() {
@@ -47,7 +48,7 @@ export default function AssetsPage() {
   const { data, isLoading, isError, error, refetch } = api.assets.list.useQuery(
     selectedPortfolioId ? { portfolioId: selectedPortfolioId } : undefined,
     {
-      refetchInterval: 30 * 60 * 1000,
+      refetchInterval: TRPC_REFETCH_INTERVAL_MS,
       refetchOnWindowFocus: true,
     },
   )
@@ -56,19 +57,22 @@ export default function AssetsPage() {
     selectedPortfolioId
       ? { days: 30, portfolioId: selectedPortfolioId }
       : { days: 30 },
-    { refetchInterval: 30 * 60 * 1000, refetchOnWindowFocus: true },
+    {
+      refetchInterval: TRPC_REFETCH_INTERVAL_MS,
+      refetchOnWindowFocus: true,
+    },
   )
 
   const breakdownQuery = api.portfolio.breakdown.useQuery(
     selectedPortfolioId ? { portfolioId: selectedPortfolioId } : undefined,
     {
-      refetchInterval: 30 * 60 * 1000,
+      refetchInterval: TRPC_REFETCH_INTERVAL_MS,
       refetchOnWindowFocus: true,
     },
   )
 
   const alertsQuery = api.alerts.list.useQuery(undefined, {
-    refetchInterval: 30 * 60 * 1000,
+    refetchInterval: TRPC_REFETCH_INTERVAL_MS,
     refetchOnWindowFocus: true,
   })
 
@@ -133,11 +137,7 @@ export default function AssetsPage() {
   }
 
   const handlePortfolioSelect = (id: string | null) => {
-    if (id === null) {
-      setSelectedPortfolioId(null)
-    } else {
-      setSelectedPortfolioId(id)
-    }
+    setSelectedPortfolioId(id)
     setSelectedCategory(null)
   }
 
@@ -241,13 +241,13 @@ export default function AssetsPage() {
 
       <PortfolioFormModal
         isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
+        onOpenChange={setShowCreateModal}
         mode="create"
       />
 
       <PortfolioFormModal
         isOpen={showRenameModal}
-        onClose={() => setShowRenameModal(false)}
+        onOpenChange={setShowRenameModal}
         mode="rename"
         portfolio={
           selectedPortfolioId
@@ -258,9 +258,9 @@ export default function AssetsPage() {
 
       <PortfolioDeleteModal
         isOpen={showDeleteModal}
-        onClose={() => {
-          setShowDeleteModal(false)
-          setPortfolioToDelete(null)
+        onOpenChange={(open) => {
+          setShowDeleteModal(open)
+          if (!open) setPortfolioToDelete(null)
         }}
         portfolio={portfolioToDelete}
       />

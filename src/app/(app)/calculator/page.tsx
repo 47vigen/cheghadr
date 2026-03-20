@@ -11,7 +11,7 @@ import { CalculatorResult } from '@/components/calculator/calculator-result'
 import { PageShell } from '@/components/layout/page-shell'
 import { CalculatorSkeleton } from '@/components/skeletons/calculator-skeleton'
 import {
-  EmptyStateBase,
+  EmptyState,
   ErrorState,
   RefreshIndicator,
 } from '@/components/ui/async-states'
@@ -21,6 +21,7 @@ import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 
 import { computeConversion, parsePriceSnapshot } from '@/lib/prices'
+import { TRPC_REFETCH_INTERVAL_MS } from '@/trpc/constants'
 import { api } from '@/trpc/react'
 
 export default function CalculatorPage() {
@@ -28,7 +29,7 @@ export default function CalculatorPage() {
   const tCommon = useTranslations('common')
   const { data, isLoading, isError, error, refetch } =
     api.prices.latest.useQuery(undefined, {
-      refetchInterval: 30 * 60 * 1000,
+      refetchInterval: TRPC_REFETCH_INTERVAL_MS,
       refetchOnWindowFocus: true,
     })
 
@@ -70,10 +71,7 @@ export default function CalculatorPage() {
 
   if (!data) {
     return (
-      <EmptyStateBase
-        header={t('title')}
-        description={t('resultPlaceholder')}
-      />
+      <EmptyState header={t('title')} description={t('resultPlaceholder')} />
     )
   }
 

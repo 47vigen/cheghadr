@@ -1,9 +1,6 @@
 import type { PrismaClient } from '@prisma/client'
 
-import {
-  type AlertMessageLocale,
-  priceAlertMessage,
-} from '@/lib/alerts/messages'
+import { priceAlertMessage, toAlertMessageLocale } from '@/lib/alerts/messages'
 import { hasCrossedThreshold } from '@/lib/alerts/utils'
 import { NotificationQueue } from '@/lib/notifications'
 import {
@@ -11,10 +8,6 @@ import {
   getLocalizedItemName,
   parsePriceSnapshot,
 } from '@/lib/prices'
-
-function toAlertMessageLocale(loc: 'en' | 'fa'): AlertMessageLocale {
-  return loc === 'en' ? 'en' : 'fa'
-}
 
 interface PriceSnapshotRecord {
   id: string
@@ -96,11 +89,14 @@ export async function evaluatePriceAlerts(
     }
   }
 
-  const { sent, failed } = await queue.drain()
+  const { sent, failed, succeededAlertIds } = await queue.drain()
 
-  if (triggeredIds.length > 0) {
+  const idsToDeactivate = triggeredIds.filter((id) =>
+    succeededAlertIds.includes(id),
+  )
+  if (idsToDeactivate.length > 0) {
     await db.alert.updateMany({
-      where: { id: { in: triggeredIds } },
+      where: { id: { in: idsToDeactivate } },
       data: { isActive: false, triggeredAt: new Date() },
     })
   }

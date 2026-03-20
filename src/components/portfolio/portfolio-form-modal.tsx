@@ -7,17 +7,18 @@ import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 import { api } from '@/trpc/react'
+import type { PortfolioListItem } from '@/types/api'
 
 interface PortfolioFormModalProps {
   isOpen: boolean
-  onClose: () => void
+  onOpenChange: (open: boolean) => void
   mode: 'create' | 'rename'
-  portfolio?: { id: string; name: string; emoji: string | null }
+  portfolio?: PortfolioListItem
 }
 
 export function PortfolioFormModal({
   isOpen,
-  onClose,
+  onOpenChange,
   mode,
   portfolio,
 }: PortfolioFormModalProps) {
@@ -40,7 +41,7 @@ export function PortfolioFormModal({
     onSuccess: () => {
       toast.success(t('toastCreated'))
       void utils.portfolio.list.invalidate()
-      onClose()
+      onOpenChange(false)
     },
     onError: (err) => {
       toast.error(err.message || t('toastCreateError'))
@@ -51,7 +52,7 @@ export function PortfolioFormModal({
     onSuccess: () => {
       toast.success(t('toastRenamed'))
       void utils.portfolio.list.invalidate()
-      onClose()
+      onOpenChange(false)
     },
     onError: (err) => {
       toast.error(err.message || t('toastRenameError'))
@@ -79,12 +80,7 @@ export function PortfolioFormModal({
 
   return (
     <Modal>
-      <Modal.Backdrop
-        isOpen={isOpen}
-        onOpenChange={(v: boolean) => {
-          if (!v) onClose()
-        }}
-      >
+      <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>
         <Modal.Container placement="auto" size="md">
           <Modal.Dialog
             className="sm:max-w-[360px]"
@@ -121,7 +117,11 @@ export function PortfolioFormModal({
               </TextField>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="ghost" onPress={onClose} isDisabled={isPending}>
+              <Button
+                variant="ghost"
+                onPress={() => onOpenChange(false)}
+                isDisabled={isPending}
+              >
                 {t('cancel')}
               </Button>
               <Button

@@ -15,9 +15,15 @@ export class NotificationQueue {
     this.queue.push(notification)
   }
 
-  async drain(): Promise<{ sent: number; failed: number }> {
+  async drain(): Promise<{
+    sent: number
+    failed: number
+    /** Alert IDs whose Telegram delivery succeeded (digest pseudo-ids included). */
+    succeededAlertIds: string[]
+  }> {
     let sent = 0
     let failed = 0
+    const succeededAlertIds: string[] = []
 
     for (const notification of this.queue) {
       const result = await sendBotMessageWithRetry(
@@ -27,6 +33,7 @@ export class NotificationQueue {
 
       if (result.success) {
         sent++
+        succeededAlertIds.push(notification.alertId)
       } else {
         failed++
       }
@@ -36,6 +43,6 @@ export class NotificationQueue {
     }
 
     this.queue = []
-    return { sent, failed }
+    return { sent, failed, succeededAlertIds }
   }
 }

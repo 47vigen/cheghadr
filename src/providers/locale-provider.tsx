@@ -6,6 +6,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react'
 
@@ -45,11 +46,13 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     typeof window !== 'undefined' ? detectLocale() : 'en',
   )
   const [messages, setMessages] = useState<Record<string, unknown>>({})
+  const localeChangeFromUserRef = useRef(false)
 
   const { mutate: persistPreferredLocale } =
     api.user.setPreferredLocale.useMutation({ retry: false })
 
   const setLocale = useCallback((next: Locale) => {
+    localeChangeFromUserRef.current = true
     setLocaleState(next)
   }, [])
 
@@ -68,6 +71,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   }, [locale])
 
   useEffect(() => {
+    if (!localeChangeFromUserRef.current) return
     persistPreferredLocale({ locale })
   }, [locale, persistPreferredLocale])
 

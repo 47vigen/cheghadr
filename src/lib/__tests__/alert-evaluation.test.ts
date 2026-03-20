@@ -210,4 +210,28 @@ describe('evaluatePriceAlerts', () => {
       data: { isActive: false, triggeredAt: expect.any(Date) },
     })
   })
+
+  it('does not deactivate alert when Telegram send fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ ok: false, description: 'User blocked bot' }),
+      }),
+    )
+    const db = createDbMock()
+    db.alert.findMany.mockResolvedValue([makeAlert('ABOVE', '1500000')])
+    db.alert.updateMany.mockResolvedValue({ count: 0 })
+
+    const drainPromise = evaluatePriceAlerts(
+      db,
+      makeSnapshot('1600000'),
+      makeSnapshot('1400000'),
+    )
+    await vi.runAllTimersAsync()
+    await drainPromise
+
+    expect(db.alert.updateMany).not.toHaveBeenCalled()
+  })
 })

@@ -8,6 +8,10 @@ function getDeepLink(): string {
 /** Locale for Telegram HTML notification copy (persisted on User). */
 export type AlertMessageLocale = 'en' | 'fa'
 
+export function toAlertMessageLocale(loc: 'en' | 'fa'): AlertMessageLocale {
+  return loc === 'en' ? 'en' : 'fa'
+}
+
 function formatThreshold(
   thresholdIRT: string,
   locale: AlertMessageLocale,

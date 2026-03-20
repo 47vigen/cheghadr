@@ -28,16 +28,18 @@
 
 After a thorough review of every source file in the codebase, this plan addresses the following systemic issues:
 
-| Category | Issue Count | Severity |
-|---|---|---|
-| Duplicate functions/logic | 8 | High |
-| Dead code & unused deps | 6 | Medium |
-| Structural / file placement | 7 | Medium |
-| Type safety gaps | 5 | Medium |
-| Missing test coverage | 5 areas | High |
-| i18n inconsistencies | 4 | Low |
-| Naming inconsistencies | 5 | Low |
-| Security concerns | 2 | Medium |
+
+| Category                    | Issue Count | Severity |
+| --------------------------- | ----------- | -------- |
+| Duplicate functions/logic   | 8           | High     |
+| Dead code & unused deps     | 6           | Medium   |
+| Structural / file placement | 7           | Medium   |
+| Type safety gaps            | 5           | Medium   |
+| Missing test coverage       | 5 areas     | High     |
+| i18n inconsistencies        | 4           | Low      |
+| Naming inconsistencies      | 5           | Low      |
+| Security concerns           | 2           | Medium   |
+
 
 **Guiding principles for this refactoring:**
 
@@ -184,22 +186,24 @@ src/
 
 ### 2.3 Key Changes Explained
 
-| Change | Rationale |
-|---|---|
-| Group components by domain (`assets/`, `portfolio/`, `prices/`, `layout/`) | Flat folder with 30+ files is hard to navigate. Domain grouping makes ownership clear. |
-| Move providers to `src/providers/` | Providers are not UI components — they are app infrastructure. Separating them prevents confusion. |
-| Move `use-asset-search-groups.ts` to `hooks/` | Hooks should live in `hooks/`, not `components/`. |
-| Split `lib/prices.ts` (220 lines) into sub-modules | The file mixes parsing, formatting, i18n, staleness, and category logic. Each concern gets its own module. |
-| Group `lib/alert-*.ts` into `lib/alerts/` | Three related files scattered at the lib root — they belong together. |
-| Extract cron business logic to `server/cron/` | Route handlers (`app/api/cron/`) should be thin wrappers. Business logic belongs in `server/cron/`. |
-| Remove `src/modules/API/` deep nesting | Only the generated types from `Swagger/ecotrust/gen/models/` are used. Flatten or alias properly. |
-| Create `types/api.ts` for tRPC-derived types | Components currently re-define types that could be inferred from tRPC output. |
+
+| Change                                                                     | Rationale                                                                                                  |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Group components by domain (`assets/`, `portfolio/`, `prices/`, `layout/`) | Flat folder with 30+ files is hard to navigate. Domain grouping makes ownership clear.                     |
+| Move providers to `src/providers/`                                         | Providers are not UI components — they are app infrastructure. Separating them prevents confusion.         |
+| Move `use-asset-search-groups.ts` to `hooks/`                              | Hooks should live in `hooks/`, not `components/`.                                                          |
+| Split `lib/prices.ts` (220 lines) into sub-modules                         | The file mixes parsing, formatting, i18n, staleness, and category logic. Each concern gets its own module. |
+| Group `lib/alert-*.ts` into `lib/alerts/`                                  | Three related files scattered at the lib root — they belong together.                                      |
+| Extract cron business logic to `server/cron/`                              | Route handlers (`app/api/cron/`) should be thin wrappers. Business logic belongs in `server/cron/`.        |
+| Remove `src/modules/API/` deep nesting                                     | Only the generated types from `Swagger/ecotrust/gen/models/` are used. Flatten or alias properly.          |
+| Create `types/api.ts` for tRPC-derived types                               | Components currently re-define types that could be inferred from tRPC output.                              |
+
 
 ### 2.4 Remove `src/modules/API/Swagger` Deep Nesting
 
 The current path `src/modules/API/Swagger/ecotrust/gen/models/` is 6 levels deep. Only the type files are used (imported by `lib/prices.ts`). The Kubb config, JSON schemas, and `index.ts` barrel files are artifacts.
 
-**Proposal**: Move used types to `src/types/ecotrust.ts` (a single barrel file) or keep the generated folder but flatten to `src/generated/ecotrust/`. Update the `@Swagger/*` tsconfig path alias or remove it (it's currently unused — code uses `@/modules/API/...` instead).
+**Proposal**: Move used types to `src/types/ecotrust.ts` (a single barrel file) or keep the generated folder but flatten to `src/generated/ecotrust/`. Update the `@Swagger/`* tsconfig path alias or remove it (it's currently unused — code uses `@/modules/API/...` instead).
 
 ---
 
@@ -413,13 +417,15 @@ model Alert {
 
 ### 4.1 Consolidate Ownership Helpers (DRY Violation)
 
-**Problem**: Three nearly identical `requireOwned*` functions exist in three separate files:
+**Problem**: Three nearly identical `requireOwned`* functions exist in three separate files:
 
-| Function | File |
-|---|---|
-| `requireOwnedPortfolio` | `server/api/helpers.ts` |
-| `requireOwnedAsset` | `server/api/routers/assets.ts` (local) |
-| `requireOwnedAlert` | `server/api/routers/alerts.ts` (local) |
+
+| Function                | File                                   |
+| ----------------------- | -------------------------------------- |
+| `requireOwnedPortfolio` | `server/api/helpers.ts`                |
+| `requireOwnedAsset`     | `server/api/routers/assets.ts` (local) |
+| `requireOwnedAlert`     | `server/api/routers/alerts.ts` (local) |
+
 
 All follow the same pattern: find by ID → check userId → throw NOT_FOUND.
 
@@ -530,6 +536,7 @@ export async function GET(request: NextRequest) {
 ### 4.4 Extract Cron Business Logic from Route Handlers
 
 **Problem**: `app/api/cron/portfolio/route.ts` is 235 lines of business logic crammed into a route handler. It handles:
+
 - Portfolio snapshot creation for all users
 - Portfolio alert evaluation
 - Daily digest messages
@@ -565,6 +572,7 @@ This makes the cron logic unit-testable without HTTP overhead.
 ### 4.5 Extract `toAlertMessageLocale` (DRY Violation)
 
 **Problem**: `toAlertMessageLocale` is duplicated in:
+
 - `lib/alert-evaluation.ts` (line 15)
 - `app/api/cron/portfolio/route.ts` (line 21)
 
@@ -651,6 +659,7 @@ export async function requireOwned(...) {
 ### 5.1 Break Up the Assets Page (410 Lines)
 
 **Problem**: `app/(app)/page.tsx` is the largest component in the codebase at 410 lines. It handles:
+
 - Portfolio selector + CRUD modals
 - Asset list with category filtering
 - Portfolio chart, breakdown, delta
@@ -683,11 +692,13 @@ Each section receives data via props from the page-level queries. The page becom
 
 **Problem**: Components re-define types that already exist as tRPC output types:
 
-| Component | Local Type | Should Derive From |
-|---|---|---|
-| `PortfolioSelector` | `Portfolio { id, name, emoji, assetCount }` | `RouterOutputs['portfolio']['list'][number]` |
-| `PortfolioFormModal` | `{ id: string; name: string; emoji: string \| null }` | Same |
-| `AssetListItem` | `AssetListItemProps` | `RouterOutputs['assets']['list']['assets'][number]` |
+
+| Component            | Local Type                                           | Should Derive From                                  |
+| -------------------- | ---------------------------------------------------- | --------------------------------------------------- |
+| `PortfolioSelector`  | `Portfolio { id, name, emoji, assetCount }`          | `RouterOutputs['portfolio']['list'][number]`        |
+| `PortfolioFormModal` | `{ id: string; name: string; emoji: string | null }` | Same                                                |
+| `AssetListItem`      | `AssetListItemProps`                                 | `RouterOutputs['assets']['list']['assets'][number]` |
+
 
 **Solution**: Create `types/api.ts`:
 
@@ -708,6 +719,7 @@ Components import from `types/api.ts` instead of defining their own interfaces.
 ### 5.4 Consolidate `AssetListGroup` Interface (DRY Violation)
 
 **Problem**: `AssetListGroup` is defined identically in:
+
 - `components/asset-search-panel.tsx` (line 12)
 - `components/asset-list-surface.tsx` (line 15)
 
@@ -795,27 +807,33 @@ export function AssetDeleteModal({ asset, isOpen, onClose }: Props) { ... }
 ### 6.3 Unify `EmptyState` vs `EmptyStateBase`
 
 **Problem**: Two empty state components exist with unclear usage guidelines:
+
 - `EmptyState` (in `components/empty-state.tsx`) — assets-specific, with icon and action button
 - `EmptyStateBase` (in `components/ui/async-states.tsx`) — generic, used by prices, calculator, add-asset
 
 **Solution**: Rename for clarity:
 
-| Current | Proposed | Purpose |
-|---|---|---|
-| `EmptyState` | `AssetsEmptyState` | Assets-specific (move to `components/assets/`) |
-| `EmptyStateBase` | `EmptyState` | The generic reusable component |
+
+| Current          | Proposed           | Purpose                                        |
+| ---------------- | ------------------ | ---------------------------------------------- |
+| `EmptyState`     | `AssetsEmptyState` | Assets-specific (move to `components/assets/`) |
+| `EmptyStateBase` | `EmptyState`       | The generic reusable component                 |
+
 
 ### 6.4 Consistent Prop Naming
 
 **Problem**: Event handler props use inconsistent names:
 
-| Component | Current | Convention |
-|---|---|---|
-| `AssetSearchPanel` | `onSearchChange` | `onSearch` |
-| `AssetSelector` | `onChange` | `onSelect` |
-| `PortfolioFormModal` | `onClose` | `onClose` (OK) |
+
+| Component            | Current          | Convention     |
+| -------------------- | ---------------- | -------------- |
+| `AssetSearchPanel`   | `onSearchChange` | `onSearch`     |
+| `AssetSelector`      | `onChange`       | `onSelect`     |
+| `PortfolioFormModal` | `onClose`        | `onClose` (OK) |
+
 
 **Solution**: Standardize:
+
 - Selection events: `onSelect`
 - Change events: `onChange`
 - Close/dismiss events: `onClose`
@@ -833,12 +851,14 @@ export function AssetDeleteModal({ asset, isOpen, onClose }: Props) { ... }
 
 ### 7.1 Eliminate `any` Usage
 
-| File | Current | Fix |
-|---|---|---|
-| `components/guest-login-banner.tsx:27` | `router.push(... as any)` | Use proper typed route: `router.push({ pathname: '/login', query: { callbackUrl: encodedPath } })` |
-| `app/login/page.tsx:22` | `... as any` | Same pattern — cast to typed route |
-| `components/asset-picker.tsx` | `priceData: unknown` | Type as `PriceItem[]` or `PricesResponse` |
-| `server/api/trpc.ts:28` | `session as Record<string, unknown>` | Extend NextAuth types (see 7.2) |
+
+| File                                   | Current                              | Fix                                                                                                |
+| -------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| `components/guest-login-banner.tsx:27` | `router.push(... as any)`            | Use proper typed route: `router.push({ pathname: '/login', query: { callbackUrl: encodedPath } })` |
+| `app/login/page.tsx:22`                | `... as any`                         | Same pattern — cast to typed route                                                                 |
+| `components/asset-picker.tsx`          | `priceData: unknown`                 | Type as `PriceItem[]` or `PricesResponse`                                                          |
+| `server/api/trpc.ts:28`                | `session as Record<string, unknown>` | Extend NextAuth types (see 7.2)                                                                    |
+
 
 ### 7.2 Extend NextAuth Types
 
@@ -863,11 +883,14 @@ declare module 'next-auth/jwt' {
 ```
 
 Then in `trpc.ts`, replace:
+
 ```typescript
 const sessionAny = session as Record<string, unknown>
 const rawId = sessionAny?.telegramUserId
 ```
+
 With:
+
 ```typescript
 const rawId = session?.telegramUserId
 ```
@@ -900,12 +923,14 @@ Use in routers instead of inline `type BreakdownItem = { ... }` casts (currently
 
 **Problem**: `assets` and `common` namespaces both define the same keys:
 
-| Key | In `assets` | In `common` |
-|---|---|---|
-| `sessionExpired` | ✅ | ✅ |
-| `sessionExpiredDescription` | ✅ | ✅ |
-| `reLogin` | ✅ | ✅ |
-| `connectionError` | ✅ | ✅ |
+
+| Key                         | In `assets` | In `common` |
+| --------------------------- | ----------- | ----------- |
+| `sessionExpired`            | ✅           | ✅           |
+| `sessionExpiredDescription` | ✅           | ✅           |
+| `reLogin`                   | ✅           | ✅           |
+| `connectionError`           | ✅           | ✅           |
+
 
 **Solution**: Remove from `assets`, keep only in `common`. Components that currently use `t('sessionExpired')` from the `assets` namespace should use `tCommon('sessionExpired')` instead.
 
@@ -914,6 +939,7 @@ Use in routers instead of inline `type BreakdownItem = { ... }` casts (currently
 **Problem**: `nav.alerts` exists in both `en.json` and `fa.json`, but there's no Alerts tab in `BottomNav`. The alerts page is accessed via the summary card on the assets page.
 
 **Solution**: Either:
+
 - **Option A**: Remove `nav.alerts` from both message files.
 - **Option B**: Add an Alerts tab to `BottomNav` (if planned).
 
@@ -922,6 +948,7 @@ Recommend **Option A** unless an alerts tab is on the roadmap.
 ### 8.3 Parameterize Chart Period Keys
 
 **Problem**: Separate keys for each chart period:
+
 ```json
 "chartPeriod7": "7D",
 "chartPeriod30": "30D",
@@ -930,6 +957,7 @@ Recommend **Option A** unless an alerts tab is on the roadmap.
 ```
 
 **Solution**: Use ICU message format with parameter:
+
 ```json
 "chartPeriod": "{period}"
 ```
@@ -945,6 +973,7 @@ Establish and document a convention:
 ```
 
 Examples:
+
 - `assets.toastUpdated` → `assets.toast.updated`
 - `assets.toastUpdateError` → `assets.toast.updateError`
 - `assets.editTitle` → `assets.edit.title`
@@ -958,19 +987,21 @@ This groups related keys and makes the structure predictable. Apply across all n
 
 ### 9.1 Current Coverage Assessment
 
-| Area | Has Tests? | Quality |
-|---|---|---|
-| `lib/prices.ts` | ✅ | Good — covers parsing, formatting, edge cases |
-| `lib/portfolio.ts` | ✅ | Good — covers snapshot creation logic |
-| `lib/portfolio-utils.ts` | ✅ | Good — covers biggest mover calculation |
-| `lib/alert-evaluation.ts` | ✅ | Good — covers threshold crossing |
-| `lib/alert-messages.ts` | ✅ | Good — covers localized messages |
-| `lib/notifications.ts` | ✅ | Good — covers queue drain |
-| `server/auth/telegram.ts` | ✅ | Good — covers HMAC validation |
-| tRPC routers | ❌ | No tests |
-| Components | ❌ | No tests |
-| Cron routes | ❌ | No tests |
-| E2E flows | ❌ | No tests |
+
+| Area                      | Has Tests? | Quality                                       |
+| ------------------------- | ---------- | --------------------------------------------- |
+| `lib/prices.ts`           | ✅          | Good — covers parsing, formatting, edge cases |
+| `lib/portfolio.ts`        | ✅          | Good — covers snapshot creation logic         |
+| `lib/portfolio-utils.ts`  | ✅          | Good — covers biggest mover calculation       |
+| `lib/alert-evaluation.ts` | ✅          | Good — covers threshold crossing              |
+| `lib/alert-messages.ts`   | ✅          | Good — covers localized messages              |
+| `lib/notifications.ts`    | ✅          | Good — covers queue drain                     |
+| `server/auth/telegram.ts` | ✅          | Good — covers HMAC validation                 |
+| tRPC routers              | ❌          | No tests                                      |
+| Components                | ❌          | No tests                                      |
+| Cron routes               | ❌          | No tests                                      |
+| E2E flows                 | ❌          | No tests                                      |
+
 
 ### 9.2 Priority Test Additions
 
@@ -988,6 +1019,7 @@ src/server/api/routers/__tests__/
 ```
 
 Each test should use a Prisma mock or test database to verify:
+
 - Input validation (invalid inputs are rejected)
 - Authorization (ownership checks work)
 - Business logic (correct data is returned/mutated)
@@ -1048,17 +1080,20 @@ src/lib/__tests__/
 
 Several CSS classes in `globals.css` use `@apply` extensively and could be replaced with utility classes:
 
-| Class | Current | Proposed |
-|---|---|---|
-| `.section-header` | Custom font-family, size, tracking | Tailwind `font-display text-sm tracking-wide font-medium uppercase` |
-| `.label-compact` | Similar pattern | Tailwind `font-display text-[10px] tracking-wider font-medium uppercase` |
-| `.modal-body` | `@apply flex flex-col gap-4 p-4` | Inline in component JSX |
+
+| Class             | Current                            | Proposed                                                                 |
+| ----------------- | ---------------------------------- | ------------------------------------------------------------------------ |
+| `.section-header` | Custom font-family, size, tracking | Tailwind `font-display text-sm tracking-wide font-medium uppercase`      |
+| `.label-compact`  | Similar pattern                    | Tailwind `font-display text-[10px] tracking-wider font-medium uppercase` |
+| `.modal-body`     | `@apply flex flex-col gap-4 p-4`   | Inline in component JSX                                                  |
+
 
 Keep custom CSS only for things Tailwind cannot express (CSS variables, complex keyframes).
 
 ### 10.2 Verify Unused CSS Classes
 
 Audit these potentially unused classes:
+
 - `.error-text` — verify usage; remove if dead
 - Focus ring styles — ensure `focus:ring-primary` maps to theme correctly
 
@@ -1088,25 +1123,29 @@ Create a comment block at the top of `elegant.css` documenting the variable cont
 
 ### 11.1 Dead Code to Remove
 
-| Item | File | Status |
-|---|---|---|
-| `useTelegramMainButton` hook | `hooks/use-telegram-main-button.ts` | Never imported. Remove or wire into `AssetPicker`. |
-| `createCaller` export | `server/api/root.ts` | Never imported. Remove. |
-| `@tanstack/react-query-devtools` | `package.json` + commented import in `trpc/react.tsx` | Either enable in dev or remove the dependency. |
-| `@Swagger/*` path alias | `tsconfig.json` | Never used (code uses `@/modules/API/...`). Remove. |
-| `eslint.config.mjs` | Root | Project uses Biome, not ESLint. Remove if not needed. |
+
+| Item                             | File                                                  | Status                                                |
+| -------------------------------- | ----------------------------------------------------- | ----------------------------------------------------- |
+| `useTelegramMainButton` hook     | `hooks/use-telegram-main-button.ts`                   | Never imported. Remove or wire into `AssetPicker`.    |
+| `createCaller` export            | `server/api/root.ts`                                  | Never imported. Remove.                               |
+| `@tanstack/react-query-devtools` | `package.json` + commented import in `trpc/react.tsx` | Either enable in dev or remove the dependency.        |
+| `@Swagger/*` path alias          | `tsconfig.json`                                       | Never used (code uses `@/modules/API/...`). Remove.   |
+| `eslint.config.mjs`              | Root                                                  | Project uses Biome, not ESLint. Remove if not needed. |
+
 
 ### 11.2 Potentially Unused Dependencies
 
 Run `pnpm why <pkg>` to verify:
 
-| Package | Used? | Action |
-|---|---|---|
-| `lodash-es` | No direct imports in `src/` | Remove if not a transitive requirement |
-| `date-fns` + `date-fns-jalali` | No direct imports in `src/` | Remove if only in `optimizePackageImports` |
-| `tailwind-variants` | No direct imports in `src/` | Likely used by HeroUI internally — keep |
-| `ua-parser-js` | Used in `use-platform.ts` | Keep |
-| `@twa-dev/sdk` | Used in `csv-download.ts`, `use-telegram-main-button.ts` | Keep |
+
+| Package                        | Used?                                                    | Action                                     |
+| ------------------------------ | -------------------------------------------------------- | ------------------------------------------ |
+| `lodash-es`                    | No direct imports in `src/`                              | Remove if not a transitive requirement     |
+| `date-fns` + `date-fns-jalali` | No direct imports in `src/`                              | Remove if only in `optimizePackageImports` |
+| `tailwind-variants`            | No direct imports in `src/`                              | Likely used by HeroUI internally — keep    |
+| `ua-parser-js`                 | Used in `use-platform.ts`                                | Keep                                       |
+| `@twa-dev/sdk`                 | Used in `csv-download.ts`, `use-telegram-main-button.ts` | Keep                                       |
+
 
 ### 11.3 Remove `eslint.config.mjs`
 
@@ -1153,39 +1192,41 @@ As noted in 4.8, ownership violations should return `FORBIDDEN` (not `NOT_FOUND`
 
 ### Phase B: Structure (Medium Risk)
 
-7. **Move providers** — Create `src/providers/`, move all 5 provider files. Update imports.
-8. **Reorganize components** — Create domain sub-folders (`assets/`, `portfolio/`, `prices/`, `layout/`, `calculator/`). Move files. Update imports.
-9. **Split `lib/prices.ts`** — Extract into sub-modules. Keep `index.ts` barrel for backward compat during migration.
-10. **Group `lib/alert-*.ts`** — Move into `lib/alerts/` directory.
+1. **Move providers** — Create `src/providers/`, move all 5 provider files. Update imports.
+2. **Reorganize components** — Create domain sub-folders (`assets/`, `portfolio/`, `prices/`, `layout/`, `calculator/`). Move files. Update imports.
+3. **Split `lib/prices.ts`** — Extract into sub-modules. Keep `index.ts` barrel for backward compat during migration.
+4. **Group `lib/alert-*.ts`** — Move into `lib/alerts/` directory.
 
 ### Phase C: Components (Medium Risk)
 
-11. **Extract modals from `AssetListItem`** — Create `AssetEditModal` and `AssetDeleteModal`.
-12. **Break up Assets page** — Extract section components from the 410-line page.
-13. **Add accessibility** — `aria-label`, `aria-current` to `BottomNav` and other components.
-14. **Fix i18n duplicates** — Remove duplicate keys from `assets` namespace.
+1. **Extract modals from `AssetListItem`** — Create `AssetEditModal` and `AssetDeleteModal`.
+2. **Break up Assets page** — Extract section components from the 410-line page.
+3. **Add accessibility** — `aria-label`, `aria-current` to `BottomNav` and other components.
+4. **Fix i18n duplicates** — Remove duplicate keys from `assets` namespace.
 
 ### Phase D: Testing (Low Risk)
 
-15. **Add tRPC router tests** — Cover all routers with integration tests.
-16. **Add cron logic tests** — After extracting to `server/cron/`.
-17. **Add missing lib tests** — `csv-download.test.ts`, `category-colors.test.ts`.
+1. **Add tRPC router tests** — Cover all routers with integration tests.
+2. **Add cron logic tests** — After extracting to `server/cron/`.
+3. **Add missing lib tests** — `csv-download.test.ts`, `category-colors.test.ts`.
 
 ### Phase E: Polish (Low Risk)
 
-18. **Narrow query persistence** — Only persist non-sensitive queries. Align `query-client.ts` dehydrate options with `persister.ts`.
-19. **CSS cleanup** — Convert applicable custom CSS to Tailwind utilities.
-20. **Documentation** — Update README, AGENTS.md with new structure.
+1. **Narrow query persistence** — Only persist non-sensitive queries. Align `query-client.ts` dehydrate options with `persister.ts`.
+2. **CSS cleanup** — Convert applicable custom CSS to Tailwind utilities.
+3. **Documentation** — Update README, AGENTS.md with new structure.
 
 ### Risk Assessment
 
-| Phase | Risk | Files Changed | Breaking? |
-|---|---|---|---|
-| A: Foundation | Low | ~15 | DB migration required |
-| B: Structure | Medium | ~40 (mostly import updates) | No behavior change |
-| C: Components | Medium | ~15 | No behavior change |
-| D: Testing | Low | New files only | No behavior change |
-| E: Polish | Low | ~10 | No behavior change |
+
+| Phase         | Risk   | Files Changed               | Breaking?             |
+| ------------- | ------ | --------------------------- | --------------------- |
+| A: Foundation | Low    | ~15                         | DB migration required |
+| B: Structure  | Medium | ~40 (mostly import updates) | No behavior change    |
+| C: Components | Medium | ~15                         | No behavior change    |
+| D: Testing    | Low    | New files only              | No behavior change    |
+| E: Polish     | Low    | ~10                         | No behavior change    |
+
 
 ---
 
@@ -1193,91 +1234,101 @@ As noted in 4.8, ownership violations should return `FORBIDDEN` (not `NOT_FOUND`
 
 ### Files to Delete
 
-| File | Reason |
-|---|---|
-| `src/hooks/use-telegram-main-button.ts` | Unused hook (or wire into AssetPicker first) |
-| `src/components/ui/list-row-skeleton.tsx` | Merge into `skeleton-primitives.tsx` |
-| `eslint.config.mjs` | Project uses Biome, not ESLint |
+
+| File                                      | Reason                                       |
+| ----------------------------------------- | -------------------------------------------- |
+| `src/hooks/use-telegram-main-button.ts`   | Unused hook (or wire into AssetPicker first) |
+| `src/components/ui/list-row-skeleton.tsx` | Merge into `skeleton-primitives.tsx`         |
+| `eslint.config.mjs`                       | Project uses Biome, not ESLint               |
+
 
 ### Files to Move
 
-| From | To | Reason |
-|---|---|---|
-| `src/components/client-root.tsx` | `src/providers/client-root.tsx` | Not a UI component |
-| `src/components/client-root-wrapper.tsx` | `src/providers/client-root-wrapper.tsx` | Not a UI component |
-| `src/components/client-providers.tsx` | `src/providers/client-providers.tsx` | Not a UI component |
-| `src/components/locale-provider.tsx` | `src/providers/locale-provider.tsx` | Not a UI component |
-| `src/components/telegram-provider.tsx` | `src/providers/telegram-provider.tsx` | Not a UI component |
-| `src/components/use-asset-search-groups.ts` | `src/hooks/use-asset-search-groups.ts` | Hook in wrong directory |
-| `src/components/portfolio-*.tsx` | `src/components/portfolio/*.tsx` | Domain grouping |
-| `src/components/asset-*.tsx` | `src/components/assets/*.tsx` | Domain grouping |
-| `src/components/price-*.tsx` | `src/components/prices/*.tsx` | Domain grouping |
-| `src/components/staleness-banner.tsx` | `src/components/prices/staleness-banner.tsx` | Domain grouping |
-| `src/components/change-label.tsx` | `src/components/prices/change-label.tsx` | Domain grouping |
-| `src/components/bottom-nav.tsx` | `src/components/layout/bottom-nav.tsx` | Layout component |
-| `src/components/empty-state.tsx` | `src/components/assets/assets-empty-state.tsx` | Domain-specific |
-| `src/components/guest-login-banner.tsx` | `src/components/layout/guest-login-banner.tsx` | Layout component |
-| `src/components/ui/page-shell.tsx` | `src/components/layout/page-shell.tsx` | Layout component |
-| `src/components/category-filter-header.tsx` | `src/components/assets/category-filter-header.tsx` | Domain grouping |
-| `src/components/biggest-mover-card.tsx` | `src/components/portfolio/biggest-mover-card.tsx` | Domain grouping |
-| `src/components/calculator-result.tsx` | `src/components/calculator/calculator-result.tsx` | Domain grouping |
-| `src/components/dev-locale-switcher.tsx` | `src/components/layout/dev-locale-switcher.tsx` | Layout/dev tooling |
+
+| From                                        | To                                                 | Reason                  |
+| ------------------------------------------- | -------------------------------------------------- | ----------------------- |
+| `src/components/client-root.tsx`            | `src/providers/client-root.tsx`                    | Not a UI component      |
+| `src/components/client-root-wrapper.tsx`    | `src/providers/client-root-wrapper.tsx`            | Not a UI component      |
+| `src/components/client-providers.tsx`       | `src/providers/client-providers.tsx`               | Not a UI component      |
+| `src/components/locale-provider.tsx`        | `src/providers/locale-provider.tsx`                | Not a UI component      |
+| `src/components/telegram-provider.tsx`      | `src/providers/telegram-provider.tsx`              | Not a UI component      |
+| `src/components/use-asset-search-groups.ts` | `src/hooks/use-asset-search-groups.ts`             | Hook in wrong directory |
+| `src/components/portfolio-*.tsx`            | `src/components/portfolio/*.tsx`                   | Domain grouping         |
+| `src/components/asset-*.tsx`                | `src/components/assets/*.tsx`                      | Domain grouping         |
+| `src/components/price-*.tsx`                | `src/components/prices/*.tsx`                      | Domain grouping         |
+| `src/components/staleness-banner.tsx`       | `src/components/prices/staleness-banner.tsx`       | Domain grouping         |
+| `src/components/change-label.tsx`           | `src/components/prices/change-label.tsx`           | Domain grouping         |
+| `src/components/bottom-nav.tsx`             | `src/components/layout/bottom-nav.tsx`             | Layout component        |
+| `src/components/empty-state.tsx`            | `src/components/assets/assets-empty-state.tsx`     | Domain-specific         |
+| `src/components/guest-login-banner.tsx`     | `src/components/layout/guest-login-banner.tsx`     | Layout component        |
+| `src/components/ui/page-shell.tsx`          | `src/components/layout/page-shell.tsx`             | Layout component        |
+| `src/components/category-filter-header.tsx` | `src/components/assets/category-filter-header.tsx` | Domain grouping         |
+| `src/components/biggest-mover-card.tsx`     | `src/components/portfolio/biggest-mover-card.tsx`  | Domain grouping         |
+| `src/components/calculator-result.tsx`      | `src/components/calculator/calculator-result.tsx`  | Domain grouping         |
+| `src/components/dev-locale-switcher.tsx`    | `src/components/layout/dev-locale-switcher.tsx`    | Layout/dev tooling      |
+
 
 ### Files to Create
 
-| File | Purpose |
-|---|---|
-| `src/server/cron/auth.ts` | Shared cron auth helper |
-| `src/server/cron/price-snapshot.ts` | Extracted price cron logic |
-| `src/server/cron/portfolio-snapshot.ts` | Extracted portfolio cron logic |
-| `src/types/api.ts` | tRPC-derived types for components |
-| `src/types/next-auth.d.ts` | NextAuth session type extension |
-| `src/types/schemas.ts` | Zod schemas for JSON fields |
-| `src/lib/prices/index.ts` | Barrel file for split prices module |
-| `src/lib/prices/format.ts` | Price formatting functions |
-| `src/lib/prices/parse.ts` | Price parsing functions |
-| `src/lib/prices/categories.ts` | Category logic |
-| `src/lib/prices/i18n.ts` | Bilingual name helpers |
-| `src/lib/prices/staleness.ts` | Staleness check |
-| `src/components/assets/asset-edit-modal.tsx` | Extracted from AssetListItem |
-| `src/components/assets/asset-delete-modal.tsx` | Extracted from AssetListItem |
+
+| File                                           | Purpose                             |
+| ---------------------------------------------- | ----------------------------------- |
+| `src/server/cron/auth.ts`                      | Shared cron auth helper             |
+| `src/server/cron/price-snapshot.ts`            | Extracted price cron logic          |
+| `src/server/cron/portfolio-snapshot.ts`        | Extracted portfolio cron logic      |
+| `src/types/api.ts`                             | tRPC-derived types for components   |
+| `src/types/next-auth.d.ts`                     | NextAuth session type extension     |
+| `src/types/schemas.ts`                         | Zod schemas for JSON fields         |
+| `src/lib/prices/index.ts`                      | Barrel file for split prices module |
+| `src/lib/prices/format.ts`                     | Price formatting functions          |
+| `src/lib/prices/parse.ts`                      | Price parsing functions             |
+| `src/lib/prices/categories.ts`                 | Category logic                      |
+| `src/lib/prices/i18n.ts`                       | Bilingual name helpers              |
+| `src/lib/prices/staleness.ts`                  | Staleness check                     |
+| `src/components/assets/asset-edit-modal.tsx`   | Extracted from AssetListItem        |
+| `src/components/assets/asset-delete-modal.tsx` | Extracted from AssetListItem        |
+
 
 ### Files to Modify (Major)
 
-| File | Changes |
-|---|---|
-| `prisma/schema.prisma` | Add `updatedAt`, explicit datasource URL, composite index, rename `portfolioSnaps` → `portfolioSnapshots` |
-| `src/server/api/helpers.ts` | Consolidate all ownership helpers + shared validation schemas |
-| `src/server/api/routers/assets.ts` | Remove local `requireOwnedAsset`, `quantitySchema` |
-| `src/server/api/routers/alerts.ts` | Remove local `requireOwnedAlert`, `thresholdSchema`; move settings to user router |
-| `src/server/api/routers/user.ts` | Add settings + toggleDigest from alerts router |
-| `src/server/api/root.ts` | Remove unused `createCaller` |
-| `src/server/api/trpc.ts` | Replace `session as Record<string, unknown>` with typed NextAuth session |
-| `src/proxy.ts` | Add `!process.env.VERCEL` guard for dev bypass (Security 12.1) |
-| `src/app/api/cron/prices/route.ts` | Use `verifyCronAuth`, delegate to `server/cron/` |
-| `src/app/api/cron/portfolio/route.ts` | Use `verifyCronAuth`, delegate to `server/cron/` |
-| `src/components/asset-list-item.tsx` | Extract edit + delete modals |
-| `src/app/(app)/page.tsx` | Extract section components |
-| `src/components/bottom-nav.tsx` | Add accessibility attributes |
-| `src/trpc/query-client.ts` | Narrow `shouldDehydrateQuery` in dehydrate options |
-| `src/trpc/persister.ts` | Align persistence config with narrowed dehydration |
-| `tsconfig.json` | Remove unused `@Swagger/*` path alias |
-| `biome.json` | Remove `@Swagger/**` from import groups |
-| `messages/en.json` | Remove duplicate keys from `assets` |
-| `messages/fa.json` | Remove duplicate keys from `assets` |
+
+| File                                  | Changes                                                                                                   |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `prisma/schema.prisma`                | Add `updatedAt`, explicit datasource URL, composite index, rename `portfolioSnaps` → `portfolioSnapshots` |
+| `src/server/api/helpers.ts`           | Consolidate all ownership helpers + shared validation schemas                                             |
+| `src/server/api/routers/assets.ts`    | Remove local `requireOwnedAsset`, `quantitySchema`                                                        |
+| `src/server/api/routers/alerts.ts`    | Remove local `requireOwnedAlert`, `thresholdSchema`; move settings to user router                         |
+| `src/server/api/routers/user.ts`      | Add settings + toggleDigest from alerts router                                                            |
+| `src/server/api/root.ts`              | Remove unused `createCaller`                                                                              |
+| `src/server/api/trpc.ts`              | Replace `session as Record<string, unknown>` with typed NextAuth session                                  |
+| `src/proxy.ts`                        | Add `!process.env.VERCEL` guard for dev bypass (Security 12.1)                                            |
+| `src/app/api/cron/prices/route.ts`    | Use `verifyCronAuth`, delegate to `server/cron/`                                                          |
+| `src/app/api/cron/portfolio/route.ts` | Use `verifyCronAuth`, delegate to `server/cron/`                                                          |
+| `src/components/asset-list-item.tsx`  | Extract edit + delete modals                                                                              |
+| `src/app/(app)/page.tsx`              | Extract section components                                                                                |
+| `src/components/bottom-nav.tsx`       | Add accessibility attributes                                                                              |
+| `src/trpc/query-client.ts`            | Narrow `shouldDehydrateQuery` in dehydrate options                                                        |
+| `src/trpc/persister.ts`               | Align persistence config with narrowed dehydration                                                        |
+| `tsconfig.json`                       | Remove unused `@Swagger/*` path alias                                                                     |
+| `biome.json`                          | Remove `@Swagger/`** from import groups                                                                   |
+| `messages/en.json`                    | Remove duplicate keys from `assets`                                                                       |
+| `messages/fa.json`                    | Remove duplicate keys from `assets`                                                                       |
+
 
 ### Files Not Changed (Reviewed, No Issues Found)
 
-| File | Notes |
-|---|---|
-| `src/utils/telegram.ts` | Clean helpers (`getRawInitData`, `isTelegramWebApp`); well-placed |
-| `src/utils/theme.ts` | Theme logic (`normalizeTheme`, `applyTheme`); well-structured |
-| `src/trpc/storage.ts` | `localStorageAsync` wrapper; simple, correct |
-| `src/lib/telegram-bot.ts` | Bot message sender with retry; well-tested |
-| `src/styles/fonts.ts` | Font declarations; clean |
-| `src/styles/themes/elegant.css` | Theme variables; consistent light/dark |
-| `scripts/migrate-default-portfolios.ts` | One-time migration script; no refactor needed |
-| `prisma/seed.ts` | Dev seed script; no refactor needed |
+
+| File                                    | Notes                                                             |
+| --------------------------------------- | ----------------------------------------------------------------- |
+| `src/utils/telegram.ts`                 | Clean helpers (`getRawInitData`, `isTelegramWebApp`); well-placed |
+| `src/utils/theme.ts`                    | Theme logic (`normalizeTheme`, `applyTheme`); well-structured     |
+| `src/trpc/storage.ts`                   | `localStorageAsync` wrapper; simple, correct                      |
+| `src/lib/telegram-bot.ts`               | Bot message sender with retry; well-tested                        |
+| `src/styles/fonts.ts`                   | Font declarations; clean                                          |
+| `src/styles/themes/elegant.css`         | Theme variables; consistent light/dark                            |
+| `scripts/migrate-default-portfolios.ts` | One-time migration script; no refactor needed                     |
+| `prisma/seed.ts`                        | Dev seed script; no refactor needed                               |
+
 
 ---
 

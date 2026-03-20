@@ -11,8 +11,11 @@ async function requireOwnedRecord<T extends OwnedRecord>(
   userId: string,
 ): Promise<T> {
   const record = await findUnique()
-  if (!record || record.userId !== userId) {
+  if (!record) {
     throw new TRPCError({ code: 'NOT_FOUND' })
+  }
+  if (record.userId !== userId) {
+    throw new TRPCError({ code: 'FORBIDDEN' })
   }
   return record
 }
@@ -60,12 +63,27 @@ export function requireOwnedAlert(
   )
 }
 
+/** Validates optional portfolio ownership and returns Prisma filter for consolidated vs single portfolio. */
+export async function resolveOwnedPortfolioFilter(
+  db: PrismaClient,
+  userId: string,
+  portfolioId?: string,
+): Promise<{ portfolioId: string } | { portfolioId: null }> {
+  if (portfolioId) {
+    await requireOwnedPortfolio(db, portfolioId, userId)
+    return { portfolioId }
+  }
+  return { portfolioId: null }
+}
+
 /** After mutating assets, refresh per-portfolio and consolidated snapshots. */
 export function refreshPortfolioSnapshotsAfterAssetChange(
   db: PrismaClient,
   userId: string,
   portfolioId: string,
 ) {
-  void createPortfolioSnapshot(db, userId, portfolioId)
-  void createPortfolioSnapshot(db, userId, null)
+  const logSnapshotError = (err: unknown) =>
+    console.error('[SNAPSHOT] Refresh failed', err)
+  void createPortfolioSnapshot(db, userId, portfolioId).catch(logSnapshotError)
+  void createPortfolioSnapshot(db, userId, null).catch(logSnapshotError)
 }

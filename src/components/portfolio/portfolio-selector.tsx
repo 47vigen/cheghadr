@@ -2,15 +2,10 @@
 
 import { useTranslations } from 'next-intl'
 
-interface Portfolio {
-  id: string
-  name: string
-  emoji: string | null
-  assetCount: number
-}
+import type { PortfolioListItem } from '@/types/api'
 
 interface PortfolioSelectorProps {
-  portfolios: Portfolio[]
+  portfolios: PortfolioListItem[]
   selectedId: string | null
   onSelect: (portfolioId: string | null) => void
   onCreate: () => void

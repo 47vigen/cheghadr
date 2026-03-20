@@ -1,5 +1,6 @@
 'use client'
 
+import type { Route } from 'next'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
@@ -19,8 +20,7 @@ export default function LoginPage() {
   // Validate callbackUrl to prevent open redirect — only allow same-origin relative paths
   const isSafeCallback =
     rawCallback.startsWith('/') && !rawCallback.startsWith('//')
-  // biome-ignore lint/suspicious/noExplicitAny: typed route cast for dynamic path from URL params
-  const callbackUrl = (isSafeCallback ? rawCallback : '/') as any
+  const callbackUrl = (isSafeCallback ? rawCallback : '/') as Route
   const widgetContainerRef = useRef<HTMLDivElement>(null)
   const [mode, setMode] = useState<'loading' | 'miniapp' | 'standalone'>(
     'loading',

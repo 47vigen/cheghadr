@@ -2,6 +2,14 @@
  * Elegant theme for Cheghadr (HeroUI v3)
  * Sharp minimal variant: tighter radius, clear contrast
  * Primary: Black (light) / White (dark)
+ *
+ * Theme variable contract (light + dark must define the same set):
+ * Colors: --background, --foreground, --surface, --surface-elevated,
+ *         --border, --accent, --accent-foreground, --muted, --muted-foreground,
+ *         --destructive, --warning
+ * Cards: --card, --card-elevated (surface aliases where used)
+ * Layout: --tabbar-height, --section-label-size, --section-label-tracking,
+ *          --bottom-above-tabbar (see globals.css for app shell)
  */
 @layer base {
   :root,

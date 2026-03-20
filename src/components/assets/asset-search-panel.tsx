@@ -4,16 +4,13 @@ import type { ReactNode } from 'react'
 
 import { Input, TextField } from '@heroui/react'
 
-import { AssetListSurface } from '@/components/assets/asset-list-surface'
+import {
+  type AssetListGroup,
+  AssetListSurface,
+} from '@/components/assets/asset-list-surface'
 import { Section } from '@/components/ui/section'
 
 import type { PriceItem } from '@/lib/prices'
-
-interface AssetListGroup {
-  category: string
-  categoryLabel: string
-  items: PriceItem[]
-}
 
 interface AssetSearchPanelProps {
   search: string

@@ -37,19 +37,19 @@ export function ErrorState({
   )
 }
 
-interface EmptyStateBaseProps {
+interface EmptyStateProps {
   header: string
   description?: string
   action?: ReactNode
   icon?: ReactNode
 }
 
-export function EmptyStateBase({
+export function EmptyState({
   header,
   description,
   action,
   icon,
-}: EmptyStateBaseProps) {
+}: EmptyStateProps) {
   return (
     <Placeholder
       variant="empty"

@@ -12,7 +12,7 @@ import { Section } from '@/components/ui/section'
 import type { PriceItem } from '@/lib/prices'
 import { getBaseSymbol, getLocalizedItemName } from '@/lib/prices'
 
-interface AssetListGroup {
+export interface AssetListGroup {
   category: string
   categoryLabel: string
   items: PriceItem[]

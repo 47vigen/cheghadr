@@ -5,16 +5,17 @@ import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 import { api } from '@/trpc/react'
+import type { PortfolioListItem } from '@/types/api'
 
 interface PortfolioDeleteModalProps {
   isOpen: boolean
-  onClose: () => void
-  portfolio: { id: string; name: string; assetCount: number } | null
+  onOpenChange: (open: boolean) => void
+  portfolio: Pick<PortfolioListItem, 'id' | 'name' | 'assetCount'> | null
 }
 
 export function PortfolioDeleteModal({
   isOpen,
-  onClose,
+  onOpenChange,
   portfolio,
 }: PortfolioDeleteModalProps) {
   const t = useTranslations('portfolios')
@@ -30,7 +31,7 @@ export function PortfolioDeleteModal({
       void utils.portfolio.history.invalidate()
       void utils.portfolio.breakdown.invalidate()
       void utils.portfolio.delta.invalidate()
-      onClose()
+      onOpenChange(false)
     },
     onError: (err) => {
       toast.error(err.message || t('toastDeleteError'))
@@ -41,12 +42,7 @@ export function PortfolioDeleteModal({
 
   return (
     <Modal>
-      <Modal.Backdrop
-        isOpen={isOpen}
-        onOpenChange={(v: boolean) => {
-          if (!v) onClose()
-        }}
-      >
+      <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>
         <Modal.Container placement="auto" size="md">
           <Modal.Dialog
             className="sm:max-w-[360px]"
@@ -67,7 +63,7 @@ export function PortfolioDeleteModal({
             <Modal.Footer>
               <Button
                 variant="ghost"
-                onPress={onClose}
+                onPress={() => onOpenChange(false)}
                 isDisabled={deleteMutation.isPending}
               >
                 {t('cancel')}

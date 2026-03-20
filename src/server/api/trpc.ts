@@ -1,6 +1,7 @@
 import { initTRPC, TRPCError } from '@trpc/server'
 import SuperJSON from 'superjson'
 
+import { isDevTelegramBypassAllowed } from '@/lib/dev-bypass'
 import { auth } from '@/server/auth/config'
 import { validateInitData } from '@/server/auth/telegram'
 import { db } from '@/server/db'
@@ -34,13 +35,8 @@ export async function createTRPCContext(opts: { headers: Headers }) {
     }
   }
 
-  const isDevBypassAllowed =
-    process.env.NODE_ENV === 'development' &&
-    !process.env.VERCEL &&
-    Boolean(process.env.DEV_TELEGRAM_USER_ID)
-
   const devTelegramUserId = process.env.DEV_TELEGRAM_USER_ID
-  if (!telegramUserId && isDevBypassAllowed && devTelegramUserId) {
+  if (!telegramUserId && isDevTelegramBypassAllowed() && devTelegramUserId) {
     telegramUserId = BigInt(devTelegramUserId)
   }
 

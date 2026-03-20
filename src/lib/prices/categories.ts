@@ -38,7 +38,7 @@ export function sortedGroupEntries<T>(grouped: Map<string, T>): [string, T][] {
     if (items) ordered.push([cat, items])
   }
   for (const [cat, items] of grouped) {
-    if (!categoryOrder.includes(cat)) ordered.push([cat, items])
+    if (!knownCategories.has(cat)) ordered.push([cat, items])
   }
   return ordered
 }

@@ -33,6 +33,7 @@ describe('NotificationQueue', () => {
 
     expect(result.sent).toBe(2)
     expect(result.failed).toBe(0)
+    expect(result.succeededAlertIds).toEqual(['a1', 'a2'])
   })
 
   it('counts failures when send fails', async () => {
@@ -54,6 +55,7 @@ describe('NotificationQueue', () => {
 
     expect(result.sent).toBe(0)
     expect(result.failed).toBe(1)
+    expect(result.succeededAlertIds).toEqual([])
   })
 
   it('returns zero counts for empty queue', async () => {
@@ -65,6 +67,7 @@ describe('NotificationQueue', () => {
 
     expect(result.sent).toBe(0)
     expect(result.failed).toBe(0)
+    expect(result.succeededAlertIds).toEqual([])
   })
 
   it('clears queue after drain', async () => {

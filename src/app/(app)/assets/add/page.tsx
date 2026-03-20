@@ -9,7 +9,7 @@ import { useTranslations } from 'next-intl'
 import { AssetPicker } from '@/components/assets/asset-picker'
 import { PageShell } from '@/components/layout/page-shell'
 import { AddAssetSkeleton } from '@/components/skeletons/add-asset-skeleton'
-import { EmptyStateBase, ErrorState } from '@/components/ui/async-states'
+import { EmptyState, ErrorState } from '@/components/ui/async-states'
 import { Cell } from '@/components/ui/cell'
 import { Section } from '@/components/ui/section'
 
@@ -54,7 +54,7 @@ export default function AddAssetPage() {
   }
 
   if (!data) {
-    return <EmptyStateBase header={t('title')} description={t('subtitle')} />
+    return <EmptyState header={t('title')} description={t('subtitle')} />
   }
 
   return (

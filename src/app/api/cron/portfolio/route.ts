@@ -1,221 +1,25 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-import {
-  type AlertMessageLocale,
-  dailyDigestMessage,
-  portfolioAlertMessage,
-} from '@/lib/alerts/messages'
-import { hasCrossedThreshold } from '@/lib/alerts/utils'
-import { NotificationQueue } from '@/lib/notifications'
-import { createPortfolioSnapshot } from '@/lib/portfolio'
-import {
-  getBaseSymbol,
-  getBilingualAssetLabels,
-  getSellPriceBySymbol,
-  parsePriceSnapshot,
-  pickDisplayName,
-} from '@/lib/prices'
 import { verifyCronAuth } from '@/server/cron/auth'
+import { runPortfolioCron } from '@/server/cron/portfolio-snapshot'
 import { db } from '@/server/db'
-
-function toAlertMessageLocale(loc: 'en' | 'fa'): AlertMessageLocale {
-  return loc === 'en' ? 'en' : 'fa'
-}
-
-const YESTERDAY_CUTOFF_MS = 23 * 60 * 60 * 1000
 
 export async function GET(request: NextRequest) {
   const auth = verifyCronAuth(request)
   if (!auth.authorized) return auth.response
 
   try {
-    // Create portfolio snapshots for all active users
-    const activeUsers = await db.user.findMany({
-      where: { assets: { some: {} } },
-      select: {
-        id: true,
-        telegramUserId: true,
-        dailyDigestEnabled: true,
-        preferredLocale: true,
-      },
-    })
-
-    let portfolioSnapshotCount = 0
-    for (const user of activeUsers) {
-      // Create per-portfolio snapshots
-      const portfolios = await db.portfolio.findMany({
-        where: { userId: user.id },
-        select: { id: true },
-      })
-      for (const portfolio of portfolios) {
-        const snap = await createPortfolioSnapshot(db, user.id, portfolio.id)
-        if (snap) portfolioSnapshotCount++
-      }
-
-      // Create consolidated snapshot (portfolioId = null)
-      const snap = await createPortfolioSnapshot(db, user.id, null)
-      if (snap) portfolioSnapshotCount++
-    }
-
-    // Evaluate PORTFOLIO alerts
-    const queue = new NotificationQueue()
-    const triggeredAlertIds: string[] = []
-
-    const portfolioAlerts = await db.alert.findMany({
-      where: { type: 'PORTFOLIO', isActive: true },
-      include: {
-        user: {
-          select: {
-            telegramUserId: true,
-            id: true,
-            preferredLocale: true,
-          },
-        },
-      },
-    })
-
-    for (const alert of portfolioAlerts) {
-      const [currentSnap, previousSnap] = await Promise.all([
-        db.portfolioSnapshot.findFirst({
-          where: { userId: alert.userId, portfolioId: null },
-          orderBy: { snapshotAt: 'desc' },
-          select: { id: true, totalIRT: true, snapshotAt: true },
-        }),
-        db.portfolioSnapshot.findFirst({
-          where: {
-            userId: alert.userId,
-            portfolioId: null,
-            snapshotAt: { lt: new Date(Date.now() - YESTERDAY_CUTOFF_MS) },
-          },
-          orderBy: { snapshotAt: 'desc' },
-          select: { id: true, totalIRT: true },
-        }),
-      ])
-
-      if (!currentSnap || !previousSnap) continue
-
-      const currentIRT = Number(currentSnap.totalIRT)
-      const previousIRT = Number(previousSnap.totalIRT)
-      const threshold = Number(alert.thresholdIRT)
-
-      const triggered = hasCrossedThreshold(
-        previousIRT,
-        currentIRT,
-        alert.direction,
-        threshold,
-      )
-
-      if (triggered) {
-        const text = portfolioAlertMessage(
-          alert.direction,
-          alert.thresholdIRT.toString(),
-          toAlertMessageLocale(alert.user.preferredLocale),
-        )
-        queue.enqueue({
-          telegramUserId: alert.user.telegramUserId,
-          text,
-          alertId: alert.id,
-        })
-        triggeredAlertIds.push(alert.id)
-      }
-    }
-
-    // Send daily digests for opted-in users
-    const digestUsers = activeUsers.filter((u) => u.dailyDigestEnabled)
-    const latestPriceSnap = await db.priceSnapshot.findFirst({
-      orderBy: { snapshotAt: 'desc' },
-    })
-
-    for (const user of digestUsers) {
-      const digestLocale = toAlertMessageLocale(user.preferredLocale)
-      const [todaySnap, yesterdaySnap] = await Promise.all([
-        db.portfolioSnapshot.findFirst({
-          where: { userId: user.id, portfolioId: null },
-          orderBy: { snapshotAt: 'desc' },
-          select: { totalIRT: true, breakdown: true },
-        }),
-        db.portfolioSnapshot.findFirst({
-          where: {
-            userId: user.id,
-            portfolioId: null,
-            snapshotAt: { lt: new Date(Date.now() - YESTERDAY_CUTOFF_MS) },
-          },
-          orderBy: { snapshotAt: 'desc' },
-          select: { totalIRT: true },
-        }),
-      ])
-
-      if (!todaySnap || !yesterdaySnap) continue
-
-      const currentIRT = Number(todaySnap.totalIRT)
-      const previousIRT = Number(yesterdaySnap.totalIRT)
-      const deltaPct =
-        previousIRT !== 0
-          ? (((currentIRT - previousIRT) / previousIRT) * 100).toFixed(2)
-          : '0.00'
-
-      // Find biggest mover
-      let topMoverName = ''
-      if (latestPriceSnap && Array.isArray(todaySnap.breakdown)) {
-        const prices = parsePriceSnapshot(latestPriceSnap.data)
-        type BreakdownItem = {
-          symbol: string
-          quantity: number
-          valueIRT: number
-        }
-        const breakdown = todaySnap.breakdown as BreakdownItem[]
-        let maxValue = 0
-        for (const item of breakdown) {
-          const price = getSellPriceBySymbol(item.symbol, prices)
-          const value = item.quantity * price
-          if (value > maxValue) {
-            maxValue = value
-            const priceItem = prices.find(
-              (p) => getBaseSymbol(p) === item.symbol,
-            )
-            const labels = getBilingualAssetLabels(priceItem, item.symbol)
-            topMoverName = pickDisplayName(labels, digestLocale)
-          }
-        }
-      }
-
-      const text = dailyDigestMessage(deltaPct, topMoverName, digestLocale)
-      queue.enqueue({
-        telegramUserId: user.telegramUserId,
-        text,
-        alertId: `digest-${user.id}`,
-      })
-    }
-
-    const { sent, failed } = await queue.drain()
-
-    if (triggeredAlertIds.length > 0) {
-      await db.alert.updateMany({
-        where: { id: { in: triggeredAlertIds } },
-        data: { isActive: false, triggeredAt: new Date() },
-      })
-    }
-
-    // Prune portfolio snapshots older than 365 days
-    const yearAgo = new Date()
-    yearAgo.setDate(yearAgo.getDate() - 365)
-    const { count: prunedPortfolio } = await db.portfolioSnapshot.deleteMany({
-      where: { snapshotAt: { lt: yearAgo } },
-    })
-
-    console.log(
-      `[CRON:PORTFOLIO] Snapshots: ${portfolioSnapshotCount}, Portfolio alerts triggered: ${triggeredAlertIds.length}, Digests sent: ${digestUsers.length}, Sent: ${sent}, Failed: ${failed}`,
-    )
+    const result = await runPortfolioCron(db)
 
     return NextResponse.json({
       success: true,
-      portfolioSnapshotCount,
-      portfolioAlertsTriggered: triggeredAlertIds.length,
-      digestsSent: digestUsers.length,
-      messageSent: sent,
-      messageFailed: failed,
-      prunedPortfolio,
+      portfolioSnapshotCount: result.portfolioSnapshotCount,
+      portfolioAlertsTriggered: result.portfolioAlertsTriggered,
+      digestsSent: result.digestsSent,
+      messageSent: result.messageSent,
+      messageFailed: result.messageFailed,
+      prunedPortfolio: result.prunedPortfolio,
     })
   } catch (error) {
     console.error('[CRON:PORTFOLIO] Portfolio cron failed:', error)

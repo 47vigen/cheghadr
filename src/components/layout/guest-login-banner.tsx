@@ -1,5 +1,7 @@
 'use client'
 
+import type { Route } from 'next'
+
 import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 
@@ -23,8 +25,7 @@ export function GuestLoginBanner() {
 
   const handleLogin = () => {
     const encodedPath = encodeURIComponent(pathname)
-    // biome-ignore lint/suspicious/noExplicitAny: dynamic path
-    router.push(`/login?callbackUrl=${encodedPath}` as any)
+    router.push(`/login?callbackUrl=${encodedPath}` as Route)
   }
 
   return (

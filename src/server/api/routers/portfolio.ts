@@ -8,8 +8,13 @@ import {
   parsePriceSnapshot,
   sortedGroupEntries,
 } from '@/lib/prices'
-import { requireOwnedPortfolio } from '@/server/api/helpers'
+import {
+  requireOwnedPortfolio,
+  resolveOwnedPortfolioFilter,
+} from '@/server/api/helpers'
 import { protectedProcedure, router } from '@/server/api/trpc'
+import type { BreakdownItem } from '@/types/schemas'
+import { parseBreakdownJson } from '@/types/schemas'
 
 const MAX_PORTFOLIOS = 10
 
@@ -141,13 +146,11 @@ export const portfolioRouter = router({
       const since = new Date()
       since.setDate(since.getDate() - days)
 
-      if (input?.portfolioId) {
-        await requireOwnedPortfolio(ctx.db, input.portfolioId, ctx.user.id)
-      }
-
-      const portfolioFilter = input?.portfolioId
-        ? { portfolioId: input.portfolioId }
-        : { portfolioId: null }
+      const portfolioFilter = await resolveOwnedPortfolioFilter(
+        ctx.db,
+        ctx.user.id,
+        input?.portfolioId,
+      )
 
       const snapshots = await ctx.db.portfolioSnapshot.findMany({
         where: {
@@ -180,13 +183,11 @@ export const portfolioRouter = router({
     .query(async ({ ctx, input }) => {
       const window = input?.window ?? '1D'
 
-      if (input?.portfolioId) {
-        await requireOwnedPortfolio(ctx.db, input.portfolioId, ctx.user.id)
-      }
-
-      const portfolioFilter = input?.portfolioId
-        ? { portfolioId: input.portfolioId }
-        : { portfolioId: null }
+      const portfolioFilter = await resolveOwnedPortfolioFilter(
+        ctx.db,
+        ctx.user.id,
+        input?.portfolioId,
+      )
 
       const current = await ctx.db.portfolioSnapshot.findFirst({
         where: { userId: ctx.user.id, ...portfolioFilter },
@@ -233,13 +234,11 @@ export const portfolioRouter = router({
         .optional(),
     )
     .query(async ({ ctx, input }) => {
-      if (input?.portfolioId) {
-        await requireOwnedPortfolio(ctx.db, input.portfolioId, ctx.user.id)
-      }
-
-      const portfolioFilter = input?.portfolioId
-        ? { portfolioId: input.portfolioId }
-        : { portfolioId: null }
+      const portfolioFilter = await resolveOwnedPortfolioFilter(
+        ctx.db,
+        ctx.user.id,
+        input?.portfolioId,
+      )
 
       const [latestSnap, priceSnap] = await Promise.all([
         ctx.db.portfolioSnapshot.findFirst({
@@ -258,14 +257,7 @@ export const portfolioRouter = router({
       const totalIRT = Number(latestSnap.totalIRT)
       if (totalIRT === 0) return null
 
-      type BreakdownItem = {
-        symbol: string
-        quantity: number
-        valueIRT: number
-      }
-      const items = Array.isArray(latestSnap.breakdown)
-        ? (latestSnap.breakdown as BreakdownItem[])
-        : []
+      const items: BreakdownItem[] = parseBreakdownJson(latestSnap.breakdown)
 
       const categoryMap = new Map<
         string,
@@ -308,13 +300,11 @@ export const portfolioRouter = router({
         .optional(),
     )
     .query(async ({ ctx, input }) => {
-      if (input?.portfolioId) {
-        await requireOwnedPortfolio(ctx.db, input.portfolioId, ctx.user.id)
-      }
-
-      const portfolioFilter = input?.portfolioId
-        ? { portfolioId: input.portfolioId }
-        : { portfolioId: null }
+      const portfolioFilter = await resolveOwnedPortfolioFilter(
+        ctx.db,
+        ctx.user.id,
+        input?.portfolioId,
+      )
 
       const [snapshots, priceSnap] = await Promise.all([
         ctx.db.portfolioSnapshot.findMany({

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import { isDevTelegramBypassAllowed } from '@/lib/dev-bypass'
 import { auth } from '@/server/auth/config'
 
 // proxy.ts runs on Node.js runtime (unlike the old middleware.ts which ran on
@@ -15,12 +16,7 @@ export default auth((req) => {
 
   if (isLoginPage || isApiRoute || isGuestPage) return NextResponse.next()
 
-  const isDevBypassAllowed =
-    process.env.NODE_ENV === 'development' &&
-    !process.env.VERCEL &&
-    Boolean(process.env.DEV_TELEGRAM_USER_ID)
-
-  if (isDevBypassAllowed) {
+  if (isDevTelegramBypassAllowed()) {
     return NextResponse.next()
   }
 

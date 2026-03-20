@@ -4,16 +4,16 @@ import { Button } from '@heroui/react'
 import { IconWallet } from '@tabler/icons-react'
 import { useTranslations } from 'next-intl'
 
-import { EmptyStateBase } from '@/components/ui/async-states'
+import { EmptyState } from '@/components/ui/async-states'
 
 import { useRouter } from '@/i18n/navigation'
 
-export function EmptyState() {
+export function AssetsEmptyState() {
   const router = useRouter()
   const t = useTranslations('assets')
 
   return (
-    <EmptyStateBase
+    <EmptyState
       header={t('emptyTitle')}
       description={t('emptyDescription')}
       action={
