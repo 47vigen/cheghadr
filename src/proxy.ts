@@ -15,10 +15,12 @@ export default auth((req) => {
 
   if (isLoginPage || isApiRoute || isGuestPage) return NextResponse.next()
 
-  if (
+  const isDevBypassAllowed =
     process.env.NODE_ENV === 'development' &&
-    process.env.DEV_TELEGRAM_USER_ID
-  ) {
+    !process.env.VERCEL &&
+    Boolean(process.env.DEV_TELEGRAM_USER_ID)
+
+  if (isDevBypassAllowed) {
     return NextResponse.next()
   }
 

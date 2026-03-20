@@ -1,8 +1,5 @@
-import type { PrismaClient } from '@prisma/client'
-import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
-import { createPortfolioSnapshot } from '@/lib/portfolio'
 import {
   findBySymbol,
   getBilingualAssetLabels,
@@ -10,28 +7,15 @@ import {
   getSnapshotStaleness,
   parsePriceSnapshot,
 } from '@/lib/prices'
-import { requireOwnedPortfolio } from '@/server/api/helpers'
+import {
+  positiveDecimalStringSchema,
+  refreshPortfolioSnapshotsAfterAssetChange,
+  requireOwnedAsset,
+  requireOwnedPortfolio,
+} from '@/server/api/helpers'
 import { protectedProcedure, router } from '@/server/api/trpc'
 
-async function requireOwnedAsset(
-  database: PrismaClient,
-  id: string,
-  userId: string,
-) {
-  const asset = await database.userAsset.findUnique({ where: { id } })
-  if (!asset || asset.userId !== userId) {
-    throw new TRPCError({ code: 'NOT_FOUND' })
-  }
-  return asset
-}
-
-const quantitySchema = z.string().refine(
-  (v) => {
-    const n = Number(v)
-    return !Number.isNaN(n) && n > 0
-  },
-  { message: 'مقدار باید عددی مثبت باشد' },
-)
+const quantitySchema = positiveDecimalStringSchema('مقدار باید عددی مثبت باشد')
 
 export const assetsRouter = router({
   list: protectedProcedure
@@ -119,8 +103,11 @@ export const assetsRouter = router({
         },
       })
 
-      void createPortfolioSnapshot(ctx.db, ctx.user.id, input.portfolioId)
-      void createPortfolioSnapshot(ctx.db, ctx.user.id, null)
+      refreshPortfolioSnapshotsAfterAssetChange(
+        ctx.db,
+        ctx.user.id,
+        input.portfolioId,
+      )
 
       return asset
     }),
@@ -139,8 +126,11 @@ export const assetsRouter = router({
         data: { quantity: input.quantity },
       })
 
-      void createPortfolioSnapshot(ctx.db, ctx.user.id, asset.portfolioId)
-      void createPortfolioSnapshot(ctx.db, ctx.user.id, null)
+      refreshPortfolioSnapshotsAfterAssetChange(
+        ctx.db,
+        ctx.user.id,
+        asset.portfolioId,
+      )
 
       return updated
     }),
@@ -153,7 +143,10 @@ export const assetsRouter = router({
         where: { id: input.id, userId: ctx.user.id },
       })
 
-      void createPortfolioSnapshot(ctx.db, ctx.user.id, asset.portfolioId)
-      void createPortfolioSnapshot(ctx.db, ctx.user.id, null)
+      refreshPortfolioSnapshotsAfterAssetChange(
+        ctx.db,
+        ctx.user.id,
+        asset.portfolioId,
+      )
     }),
 })

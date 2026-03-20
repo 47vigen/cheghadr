@@ -159,8 +159,6 @@
               ":BLANK_LINE:",
               ":URL:",
               ":BLANK_LINE:",
-              "@Swagger/**",
-              ":BLANK_LINE:",
               "@/components/**",
               ":BLANK_LINE:",
               ":ALIAS:",

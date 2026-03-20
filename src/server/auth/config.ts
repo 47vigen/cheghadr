@@ -84,7 +84,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     session({ session, token }) {
       return {
         ...session,
-        telegramUserId: token.telegramUserId as string | undefined,
+        telegramUserId: token.telegramUserId,
       }
     },
   },

@@ -32,7 +32,7 @@ export default function AlertsPage() {
     refetch,
   } = api.alerts.list.useQuery()
 
-  const { data: settingsData } = api.alerts.settings.useQuery()
+  const { data: settingsData } = api.user.getSettings.useQuery()
 
   useEffect(() => {
     if (settingsData && digestEnabled === null) {
@@ -40,7 +40,7 @@ export default function AlertsPage() {
     }
   }, [settingsData, digestEnabled])
 
-  const toggleDigestMutation = api.alerts.toggleDigest.useMutation({
+  const toggleDigestMutation = api.user.toggleDailyDigest.useMutation({
     onSuccess: (user) => {
       notificationOccurred('success')
       setDigestEnabled(user.dailyDigestEnabled)

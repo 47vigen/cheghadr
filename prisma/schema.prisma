@@ -1,5 +1,7 @@
 // This is your Prisma schema file
 // Learn more: https://pris.ly/d/prisma-schema
+//
+// Prisma 7: DATABASE_URL / DIRECT_URL live in prisma.config.ts (not here).
 
 generator client {
   provider = "prisma-client-js"
@@ -25,15 +27,16 @@ enum PreferredLocale {
 }
 
 model User {
-  id                 String              @id @default(cuid())
-  telegramUserId     BigInt              @unique
-  dailyDigestEnabled Boolean             @default(false)
-  preferredLocale    PreferredLocale     @default(fa)
-  createdAt          DateTime            @default(now())
-  assets             UserAsset[]
-  portfolioSnaps     PortfolioSnapshot[]
-  alerts             Alert[]
-  portfolios         Portfolio[]
+  id                   String              @id @default(cuid())
+  telegramUserId       BigInt              @unique
+  dailyDigestEnabled   Boolean             @default(false)
+  preferredLocale      PreferredLocale     @default(fa)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  assets               UserAsset[]
+  portfolioSnapshots   PortfolioSnapshot[]
+  alerts               Alert[]
+  portfolios           Portfolio[]
 }
 
 model Portfolio {
@@ -85,6 +88,7 @@ model PortfolioSnapshot {
 
   @@index([userId, snapshotAt(sort: Desc)])
   @@index([portfolioId, snapshotAt(sort: Desc)])
+  @@index([userId, portfolioId, snapshotAt(sort: Desc)])
 }
 
 model Alert {

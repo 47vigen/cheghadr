@@ -22,10 +22,7 @@ const nextConfig: NextConfig = {
     cssChunking: true,
     optimizeServerReact: true,
     optimizePackageImports: [
-      'date-fns',
-      'lodash-es',
       '@base-ui/react',
-      'date-fns-jalali',
       '@tabler/icons-react',
       '@heroui/react',
       'recharts',

@@ -11,4 +11,20 @@ export const userRouter = router({
         data: { preferredLocale: input.locale },
       })
     }),
+
+  getSettings: protectedProcedure.query(({ ctx }) => {
+    return ctx.db.user.findUniqueOrThrow({
+      where: { id: ctx.user.id },
+      select: { dailyDigestEnabled: true },
+    })
+  }),
+
+  toggleDailyDigest: protectedProcedure
+    .input(z.object({ enabled: z.boolean() }))
+    .mutation(({ ctx, input }) => {
+      return ctx.db.user.update({
+        where: { id: ctx.user.id },
+        data: { dailyDigestEnabled: input.enabled },
+      })
+    }),
 })

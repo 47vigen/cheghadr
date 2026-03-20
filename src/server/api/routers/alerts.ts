@@ -1,32 +1,17 @@
-import type { PrismaClient } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
 import { MAX_ACTIVE_ALERTS } from '@/lib/alert-utils'
 import { findBySymbol, parsePriceSnapshot } from '@/lib/prices'
+import {
+  positiveDecimalStringSchema,
+  requireOwnedAlert,
+} from '@/server/api/helpers'
 import { protectedProcedure, router } from '@/server/api/trpc'
 
-async function requireOwnedAlert(
-  database: PrismaClient,
-  id: string,
-  userId: string,
-) {
-  const alert = await database.alert.findUnique({ where: { id } })
-  if (!alert || alert.userId !== userId) {
-    throw new TRPCError({ code: 'NOT_FOUND' })
-  }
-  return alert
-}
-
-const thresholdSchema = z
-  .string()
-  .refine(
-    (v) => {
-      const n = Number(v)
-      return !Number.isNaN(n) && n > 0
-    },
-    { message: 'آستانه باید عددی مثبت باشد' },
-  )
+const thresholdSchema = positiveDecimalStringSchema(
+  'آستانه باید عددی مثبت باشد',
+)
 
 export const alertsRouter = router({
   list: protectedProcedure.query(({ ctx }) => {
@@ -125,22 +110,6 @@ export const alertsRouter = router({
       await requireOwnedAlert(ctx.db, input.id, ctx.user.id)
       await ctx.db.alert.delete({
         where: { id: input.id },
-      })
-    }),
-
-  settings: protectedProcedure.query(({ ctx }) => {
-    return ctx.db.user.findUniqueOrThrow({
-      where: { id: ctx.user.id },
-      select: { dailyDigestEnabled: true },
-    })
-  }),
-
-  toggleDigest: protectedProcedure
-    .input(z.object({ enabled: z.boolean() }))
-    .mutation(({ ctx, input }) => {
-      return ctx.db.user.update({
-        where: { id: ctx.user.id },
-        data: { dailyDigestEnabled: input.enabled },
       })
     }),
 })

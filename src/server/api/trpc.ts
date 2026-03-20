@@ -25,8 +25,7 @@ export async function createTRPCContext(opts: { headers: Headers }) {
   if (!telegramUserId) {
     try {
       const session = await auth()
-      const sessionAny = session as Record<string, unknown> | null
-      const rawId = sessionAny?.telegramUserId
+      const rawId = session?.telegramUserId
       if (rawId && typeof rawId === 'string' && /^\d+$/.test(rawId)) {
         telegramUserId = BigInt(rawId)
       }
@@ -35,13 +34,14 @@ export async function createTRPCContext(opts: { headers: Headers }) {
     }
   }
 
-  // Path 3: Dev bypass — use env user when no session/initData
-  if (
-    !telegramUserId &&
+  const isDevBypassAllowed =
     process.env.NODE_ENV === 'development' &&
-    process.env.DEV_TELEGRAM_USER_ID
-  ) {
-    telegramUserId = BigInt(process.env.DEV_TELEGRAM_USER_ID)
+    !process.env.VERCEL &&
+    Boolean(process.env.DEV_TELEGRAM_USER_ID)
+
+  const devTelegramUserId = process.env.DEV_TELEGRAM_USER_ID
+  if (!telegramUserId && isDevBypassAllowed && devTelegramUserId) {
+    telegramUserId = BigInt(devTelegramUserId)
   }
 
   return { db, telegramUserId }
@@ -53,7 +53,7 @@ const t = initTRPC.context<TRPCContext>().create({
   transformer: SuperJSON,
 })
 
-export const { createCallerFactory, router } = t
+export const { router } = t
 
 export const publicProcedure = t.procedure
 

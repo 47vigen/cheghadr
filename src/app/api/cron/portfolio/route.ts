@@ -16,6 +16,7 @@ import {
   parsePriceSnapshot,
   pickDisplayName,
 } from '@/lib/prices'
+import { verifyCronAuth } from '@/server/cron/auth'
 import { db } from '@/server/db'
 
 function toAlertMessageLocale(loc: 'en' | 'fa'): AlertMessageLocale {
@@ -25,17 +26,8 @@ function toAlertMessageLocale(loc: 'en' | 'fa'): AlertMessageLocale {
 const YESTERDAY_CUTOFF_MS = 23 * 60 * 60 * 1000
 
 export async function GET(request: NextRequest) {
-  // Explicit guard: prevents "Bearer undefined" bypass when secret is unset
-  const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) {
-    console.error('[CRON:PORTFOLIO] CRON_SECRET is not configured')
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const auth = verifyCronAuth(request)
+  if (!auth.authorized) return auth.response
 
   try {
     // Create portfolio snapshots for all active users
