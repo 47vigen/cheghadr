@@ -1,6 +1,7 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
+import { useEffect } from 'react'
 
 import { Button } from '@heroui/react'
 import { IconArrowLeft } from '@tabler/icons-react'
@@ -35,11 +36,72 @@ export default function AddAssetPage() {
     enabled: !portfolioId,
   })
 
-  const resolvedPortfolioId =
-    portfolioId || (portfoliosQuery.data?.[0]?.id ?? '')
+  const ensureDefaultMut = api.portfolio.ensureDefault.useMutation()
+  const {
+    mutate: ensureDefault,
+    reset: resetEnsureDefault,
+    isPending: ensureDefaultPending,
+    isSuccess: ensureDefaultSuccess,
+    isError: ensureDefaultError,
+    data: ensuredPortfolio,
+    error: ensureDefaultErr,
+  } = ensureDefaultMut
 
-  if (isLoading || (!portfolioId && portfoliosQuery.isLoading)) {
+  const listLen = portfoliosQuery.data?.length ?? 0
+
+  useEffect(() => {
+    if (portfolioId) return
+    if (!portfoliosQuery.isSuccess) return
+    if (listLen > 0) return
+    if (ensureDefaultPending || ensureDefaultSuccess) return
+    ensureDefault()
+  }, [
+    portfolioId,
+    portfoliosQuery.isSuccess,
+    listLen,
+    ensureDefaultPending,
+    ensureDefaultSuccess,
+    ensureDefault,
+  ])
+
+  const resolvedPortfolioId =
+    portfolioId || portfoliosQuery.data?.[0]?.id || ensuredPortfolio?.id || ''
+
+  const showPortfolioSkeleton =
+    !portfolioId &&
+    (portfoliosQuery.isLoading ||
+      (portfoliosQuery.isSuccess &&
+        listLen === 0 &&
+        !ensureDefaultSuccess &&
+        !ensureDefaultError))
+
+  if (isLoading || showPortfolioSkeleton) {
     return <AddAssetSkeleton />
+  }
+
+  if (!portfolioId && portfoliosQuery.isError) {
+    return (
+      <ErrorState
+        header={t('title')}
+        description={portfoliosQuery.error?.message || t('subtitle')}
+        retryLabel={t('back')}
+        onRetry={() => void portfoliosQuery.refetch()}
+      />
+    )
+  }
+
+  if (ensureDefaultError) {
+    return (
+      <ErrorState
+        header={t('title')}
+        description={ensureDefaultErr?.message || t('subtitle')}
+        retryLabel={t('back')}
+        onRetry={() => {
+          resetEnsureDefault()
+          ensureDefault()
+        }}
+      />
+    )
   }
 
   if (isError) {

@@ -62,6 +62,25 @@ export const portfolioRouter = router({
     }))
   }),
 
+  /** Ensures the user has at least one portfolio (creates "سبد اصلی" if none). */
+  ensureDefault: protectedProcedure.mutation(async ({ ctx }) => {
+    const existing = await ctx.db.portfolio.findFirst({
+      where: { userId: ctx.user.id },
+      orderBy: { createdAt: 'asc' },
+      select: { id: true },
+    })
+    if (existing) return { id: existing.id }
+
+    const created = await ctx.db.portfolio.create({
+      data: {
+        userId: ctx.user.id,
+        name: 'سبد اصلی',
+      },
+      select: { id: true },
+    })
+    return { id: created.id }
+  }),
+
   create: protectedProcedure
     .input(
       z.object({

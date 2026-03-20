@@ -84,6 +84,10 @@ export function AssetPicker({
       toast.error(t('toastAddError'))
       return
     }
+    if (!portfolioId) {
+      toast.error(t('toastAddError'))
+      return
+    }
     addMutation.mutate({ symbol: sym, quantity, portfolioId })
   }
 

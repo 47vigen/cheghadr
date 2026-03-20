@@ -41,6 +41,7 @@ function createMockDb() {
     },
     portfolio: {
       findMany: vi.fn().mockResolvedValue([]),
+      findFirst: vi.fn(),
       findUnique: vi.fn(),
       count: vi.fn(),
       create: vi.fn(),
@@ -143,6 +144,73 @@ describe('appRouter — user', () => {
       where: { id: 'user-1' },
       data: { preferredLocale: 'fa' },
     })
+  })
+})
+
+describe('appRouter — portfolio ensureDefault', () => {
+  let db: PrismaClient
+
+  beforeEach(() => {
+    db = createMockDb()
+  })
+
+  it('returns first portfolio id when one exists', async () => {
+    vi.mocked(db.portfolio.findFirst).mockResolvedValue({
+      id: 'pf-existing',
+    } as never)
+    const caller = createCaller(db)
+
+    const result = await caller.portfolio.ensureDefault()
+
+    expect(result).toEqual({ id: 'pf-existing' })
+    expect(db.portfolio.create).not.toHaveBeenCalled()
+  })
+
+  it('creates default portfolio when none exist', async () => {
+    vi.mocked(db.portfolio.findFirst).mockResolvedValue(null)
+    vi.mocked(db.portfolio.create).mockResolvedValue({ id: 'pf-new' } as never)
+    const caller = createCaller(db)
+
+    const result = await caller.portfolio.ensureDefault()
+
+    expect(result).toEqual({ id: 'pf-new' })
+    expect(db.portfolio.create).toHaveBeenCalledWith({
+      data: {
+        userId: 'user-1',
+        name: 'سبد اصلی',
+      },
+      select: { id: true },
+    })
+  })
+
+  it('add asset succeeds with portfolio id from ensureDefault', async () => {
+    vi.mocked(db.priceSnapshot.findFirst).mockResolvedValue({
+      snapshotAt: new Date(),
+      data: { data: [] },
+    } as never)
+    vi.mocked(db.portfolio.findFirst).mockResolvedValue(null)
+    vi.mocked(db.portfolio.create).mockResolvedValue({ id: 'pf-new' } as never)
+    vi.mocked(db.portfolio.findUnique).mockResolvedValue({
+      id: 'pf-new',
+      userId: 'user-1',
+    } as never)
+    vi.mocked(db.userAsset.upsert).mockResolvedValue({
+      id: 'asset-1',
+      symbol: 'USD',
+      quantity: '1',
+      portfolioId: 'pf-new',
+    } as never)
+    const caller = createCaller(db)
+
+    const { id } = await caller.portfolio.ensureDefault()
+    const added = await caller.assets.add({
+      symbol: 'USD',
+      quantity: '1',
+      portfolioId: id,
+    })
+
+    expect(added.symbol).toBe('USD')
+    expect(db.userAsset.upsert).toHaveBeenCalled()
   })
 })
 
