@@ -6,6 +6,7 @@ import { IconCalculator, IconChartLine, IconCoins } from '@tabler/icons-react'
 import { useTranslations } from 'next-intl'
 
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
+
 import { usePathname, useRouter } from '@/i18n/navigation'
 
 type AppRoute = '/' | '/prices' | '/calculator'

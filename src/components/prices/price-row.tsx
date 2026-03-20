@@ -3,7 +3,7 @@
 import { Text } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
 
-import { ChangeLabel } from '@/components/change-label'
+import { ChangeLabel } from '@/components/prices/change-label'
 import { AssetAvatar } from '@/components/ui/asset-avatar'
 import { Cell } from '@/components/ui/cell'
 

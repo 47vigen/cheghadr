@@ -9,13 +9,14 @@ import { toast } from 'sonner'
 
 import { AlertListItem } from '@/components/alerts/alert-list-item'
 import { CreateAlertForm } from '@/components/alerts/create-alert-form'
+import { PageShell } from '@/components/layout/page-shell'
 import { AlertsSkeleton } from '@/components/skeletons/alerts-skeleton'
 import { ErrorState } from '@/components/ui/async-states'
-import { PageShell } from '@/components/ui/page-shell'
 import { Placeholder } from '@/components/ui/placeholder'
 import { Section } from '@/components/ui/section'
 
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
+
 import { api } from '@/trpc/react'
 
 export default function AlertsPage() {

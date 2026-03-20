@@ -5,11 +5,12 @@ import { useState } from 'react'
 import { Modal } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
 
-import { AssetSearchPanel } from '@/components/asset-search-panel'
+import { AssetSearchPanel } from '@/components/assets/asset-search-panel'
 import { AssetAvatar } from '@/components/ui/asset-avatar'
 import { Cell } from '@/components/ui/cell'
 import { Section } from '@/components/ui/section'
-import { useAssetSearchGroups } from '@/components/use-asset-search-groups'
+
+import { useAssetSearchGroups } from '@/hooks/use-asset-search-groups'
 
 import type { PriceItem } from '@/lib/prices'
 import {

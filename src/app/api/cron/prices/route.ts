@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-import { evaluatePriceAlerts } from '@/lib/alert-evaluation'
+import { evaluatePriceAlerts } from '@/lib/alerts/evaluation'
 import { verifyCronAuth } from '@/server/cron/auth'
 import { db } from '@/server/db'
 

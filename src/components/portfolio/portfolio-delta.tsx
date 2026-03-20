@@ -6,6 +6,7 @@ import { Button, Text } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
+
 import { formatIRT, getIntlLocale } from '@/lib/prices'
 import { api } from '@/trpc/react'
 

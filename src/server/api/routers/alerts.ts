@@ -1,7 +1,7 @@
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
-import { MAX_ACTIVE_ALERTS } from '@/lib/alert-utils'
+import { MAX_ACTIVE_ALERTS } from '@/lib/alerts/utils'
 import { findBySymbol, parsePriceSnapshot } from '@/lib/prices'
 import {
   positiveDecimalStringSchema,

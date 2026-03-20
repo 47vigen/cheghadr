@@ -5,18 +5,19 @@ import { useState } from 'react'
 import { Input, TextField } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
 
-import { PriceSection } from '@/components/price-section'
+import { PageShell } from '@/components/layout/page-shell'
+import { PriceSection } from '@/components/prices/price-section'
+import { StalenessBanner } from '@/components/prices/staleness-banner'
 import { PricesSkeleton } from '@/components/skeletons/prices-skeleton'
-import { StalenessBanner } from '@/components/staleness-banner'
 import {
   EmptyStateBase,
   ErrorState,
   RefreshIndicator,
 } from '@/components/ui/async-states'
-import { PageShell } from '@/components/ui/page-shell'
 import { Section } from '@/components/ui/section'
 
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
+
 import {
   filterPriceItems,
   groupByCategory,

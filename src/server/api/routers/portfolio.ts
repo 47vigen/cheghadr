@@ -219,8 +219,7 @@ export const portfolioRouter = router({
       const currentIRT = Number(current.totalIRT)
       const previousIRT = Number(previous.totalIRT)
       const deltaIRT = currentIRT - previousIRT
-      const deltaPct =
-        previousIRT !== 0 ? (deltaIRT / previousIRT) * 100 : 0
+      const deltaPct = previousIRT !== 0 ? (deltaIRT / previousIRT) * 100 : 0
 
       return { currentIRT, previousIRT, deltaIRT, deltaPct }
     }),
@@ -259,7 +258,11 @@ export const portfolioRouter = router({
       const totalIRT = Number(latestSnap.totalIRT)
       if (totalIRT === 0) return null
 
-      type BreakdownItem = { symbol: string; quantity: number; valueIRT: number }
+      type BreakdownItem = {
+        symbol: string
+        quantity: number
+        valueIRT: number
+      }
       const items = Array.isArray(latestSnap.breakdown)
         ? (latestSnap.breakdown as BreakdownItem[])
         : []
@@ -271,8 +274,7 @@ export const portfolioRouter = router({
 
       for (const item of items) {
         const priceItem = findBySymbol(prices, item.symbol)
-        const category =
-          priceItem?.base_currency.category?.symbol ?? 'OTHER'
+        const category = priceItem?.base_currency.category?.symbol ?? 'OTHER'
         const existing = categoryMap.get(category) ?? {
           valueIRT: 0,
           assets: [],

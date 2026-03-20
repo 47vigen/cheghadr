@@ -11,6 +11,7 @@ import {
 } from 'recharts'
 
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
+
 import { getCategoryColor } from '@/lib/category-colors'
 import { formatIRT, getIntlLocale } from '@/lib/prices'
 

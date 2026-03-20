@@ -3,8 +3,8 @@ import type { PrismaClient } from '@prisma/client'
 import {
   type AlertMessageLocale,
   priceAlertMessage,
-} from '@/lib/alert-messages'
-import { hasCrossedThreshold } from '@/lib/alert-utils'
+} from '@/lib/alerts/messages'
+import { hasCrossedThreshold } from '@/lib/alerts/utils'
 import { NotificationQueue } from '@/lib/notifications'
 import {
   findBySymbol,

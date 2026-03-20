@@ -1,7 +1,7 @@
 import type { PrismaClient } from '@prisma/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { evaluatePriceAlerts } from '@/lib/alert-evaluation'
+import { evaluatePriceAlerts } from '@/lib/alerts/evaluation'
 
 function createDbMock() {
   const db = {

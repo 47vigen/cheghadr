@@ -7,10 +7,11 @@ import { IconBriefcase } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
-import { AssetSelector } from '@/components/asset-selector'
+import { AssetSelector } from '@/components/assets/asset-selector'
 
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
-import { MAX_ACTIVE_ALERTS } from '@/lib/alert-utils'
+
+import { MAX_ACTIVE_ALERTS } from '@/lib/alerts/utils'
 import {
   formatIRT,
   getSellPriceBySymbol,

@@ -5,8 +5,8 @@ import type { ReactNode } from 'react'
 import { SessionProvider } from 'next-auth/react'
 import { Toaster } from 'sonner'
 
-import { ClientProviders } from '@/components/client-providers'
-import { LocaleProvider } from '@/components/locale-provider'
+import { ClientProviders } from '@/providers/client-providers'
+import { LocaleProvider } from '@/providers/locale-provider'
 
 import { TRPCReactProvider } from '@/trpc/react'
 

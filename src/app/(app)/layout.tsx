@@ -2,9 +2,9 @@
 
 import type { ReactNode } from 'react'
 
-import { BottomNav } from '@/components/bottom-nav'
-import { DevLocaleSwitcher } from '@/components/dev-locale-switcher'
-import { GuestLoginBanner } from '@/components/guest-login-banner'
+import { BottomNav } from '@/components/layout/bottom-nav'
+import { DevLocaleSwitcher } from '@/components/layout/dev-locale-switcher'
+import { GuestLoginBanner } from '@/components/layout/guest-login-banner'
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (

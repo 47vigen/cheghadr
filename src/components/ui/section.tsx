@@ -27,10 +27,7 @@ export function Section({
         <div className="mb-0.5 flex items-center justify-between px-2 py-0.5">
           {header != null && (
             <h2
-              className={clsx(
-                'section-header',
-                isHero && 'text-foreground/90',
-              )}
+              className={clsx('section-header', isHero && 'text-foreground/90')}
             >
               {header}
             </h2>

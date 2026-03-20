@@ -7,6 +7,7 @@ import WebApp from '@twa-dev/sdk'
 
 import { usePlatform } from '@/hooks/use-platform'
 import { useViewportHeight } from '@/hooks/use-viewport-height'
+
 import { getRawInitData } from '@/utils/telegram'
 import { applyTheme, resolveRuntimeTheme } from '@/utils/theme'
 

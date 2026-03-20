@@ -15,12 +15,13 @@ import { IconEdit, IconTrash } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
-import { ChangeLabel } from '@/components/change-label'
+import { ChangeLabel } from '@/components/prices/change-label'
 import { AssetAvatar } from '@/components/ui/asset-avatar'
 import { Cell } from '@/components/ui/cell'
 import { Section } from '@/components/ui/section'
 
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
+
 import type { BilingualDisplayNames } from '@/lib/prices'
 import { formatIRT, getIntlLocale, pickDisplayName } from '@/lib/prices'
 import { api } from '@/trpc/react'

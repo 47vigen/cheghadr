@@ -4,28 +4,34 @@ import dynamic from 'next/dynamic'
 import { useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@heroui/react'
-import { IconDownload, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react'
+import {
+  IconDownload,
+  IconPencil,
+  IconPlus,
+  IconTrash,
+} from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 import { AlertSummaryCard } from '@/components/alerts/alert-summary-card'
-import { AssetListItem } from '@/components/asset-list-item'
-import { BiggestMoverCard } from '@/components/biggest-mover-card'
-import { CategoryFilterHeader } from '@/components/category-filter-header'
+import { AssetListItem } from '@/components/assets/asset-list-item'
+import { CategoryFilterHeader } from '@/components/assets/category-filter-header'
+import { EmptyState } from '@/components/assets/empty-state'
 import { DynamicLoader } from '@/components/dynamic-loader'
-import { EmptyState } from '@/components/empty-state'
-import { PortfolioDeleteModal } from '@/components/portfolio-delete-modal'
-import { PortfolioFormModal } from '@/components/portfolio-form-modal'
-import { PortfolioSelector } from '@/components/portfolio-selector'
-import { PortfolioDelta } from '@/components/portfolio-delta'
-import { PortfolioTotal } from '@/components/portfolio-total'
+import { PageShell } from '@/components/layout/page-shell'
+import { BiggestMoverCard } from '@/components/portfolio/biggest-mover-card'
+import { PortfolioDeleteModal } from '@/components/portfolio/portfolio-delete-modal'
+import { PortfolioDelta } from '@/components/portfolio/portfolio-delta'
+import { PortfolioFormModal } from '@/components/portfolio/portfolio-form-modal'
+import { PortfolioSelector } from '@/components/portfolio/portfolio-selector'
+import { PortfolioTotal } from '@/components/portfolio/portfolio-total'
+import { StalenessBanner } from '@/components/prices/staleness-banner'
 import { AssetsSkeleton } from '@/components/skeletons/assets-skeleton'
-import { StalenessBanner } from '@/components/staleness-banner'
 import { ErrorState, RefreshIndicator } from '@/components/ui/async-states'
-import { PageShell } from '@/components/ui/page-shell'
 import { Section } from '@/components/ui/section'
 
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
+
 import { useRouter } from '@/i18n/navigation'
 import { downloadCSV } from '@/lib/csv-download'
 import { computeBiggestMover } from '@/lib/portfolio-utils'
@@ -33,7 +39,7 @@ import { api } from '@/trpc/react'
 
 const PortfolioChart = dynamic(
   () =>
-    import('@/components/portfolio-chart').then((m) => ({
+    import('@/components/portfolio/portfolio-chart').then((m) => ({
       default: m.PortfolioChart,
     })),
   { ssr: false, loading: () => <DynamicLoader height={140} /> },
@@ -41,7 +47,7 @@ const PortfolioChart = dynamic(
 
 const PortfolioBreakdown = dynamic(
   () =>
-    import('@/components/portfolio-breakdown').then((m) => ({
+    import('@/components/portfolio/portfolio-breakdown').then((m) => ({
       default: m.PortfolioBreakdown,
     })),
   { ssr: false, loading: () => <DynamicLoader height={200} /> },
@@ -57,7 +63,9 @@ export default function AssetsPage() {
   const tExport = useTranslations('export')
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null)
+  const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(
+    null,
+  )
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showRenameModal, setShowRenameModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -121,7 +129,9 @@ export default function AssetsPage() {
   // Reset portfolio selection if the selected portfolio was deleted
   useEffect(() => {
     if (!selectedPortfolioId || !portfoliosQuery.data) return
-    const stillExists = portfoliosQuery.data.some((p) => p.id === selectedPortfolioId)
+    const stillExists = portfoliosQuery.data.some(
+      (p) => p.id === selectedPortfolioId,
+    )
     if (!stillExists) setSelectedPortfolioId(null)
   }, [portfoliosQuery.data, selectedPortfolioId])
 
@@ -148,7 +158,8 @@ export default function AssetsPage() {
   const handleExport = async () => {
     const result = await exportQuery.refetch()
     if (result.data && result.data.rowCount > 0) {
-      const dateStr = new Date().toISOString().split('T')[0]?.replace(/-/g, '') ?? ''
+      const dateStr =
+        new Date().toISOString().split('T')[0]?.replace(/-/g, '') ?? ''
       downloadCSV(result.data.csv, `cheghadr-export-${dateStr}.csv`)
       toast.success(tExport('success', { count: result.data.rowCount }))
     } else {
@@ -165,8 +176,7 @@ export default function AssetsPage() {
     setSelectedCategory(null)
   }
 
-  const hasMultiplePortfolios =
-    (portfoliosQuery.data?.length ?? 0) > 1
+  const hasMultiplePortfolios = (portfoliosQuery.data?.length ?? 0) > 1
 
   const defaultPortfolioId = portfoliosQuery.data?.[0]?.id
 
@@ -228,7 +238,7 @@ export default function AssetsPage() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-6 gap-1 px-2 text-xs text-destructive"
+                      className="h-6 gap-1 px-2 text-destructive text-xs"
                       onPress={() => {
                         const p = portfoliosQuery.data?.find(
                           (x) => x.id === selectedPortfolioId,

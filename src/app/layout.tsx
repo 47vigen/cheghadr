@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 
 import '@/styles/globals.css'
 
-import { ClientRootWrapper } from '@/components/client-root-wrapper'
+import { ClientRootWrapper } from '@/providers/client-root-wrapper'
 
 import { JetBrainsMono, Vazirmatn } from '@/styles/fonts'
 

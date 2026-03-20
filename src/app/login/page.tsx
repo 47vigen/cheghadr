@@ -1,10 +1,10 @@
 'use client'
 
+import { useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
 import { Spinner, Text } from '@heroui/react'
 import { signIn } from 'next-auth/react'
-import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
 import { env } from '@/env'
@@ -17,7 +17,8 @@ export default function LoginPage() {
   const searchParams = useSearchParams()
   const rawCallback = searchParams.get('callbackUrl') ?? '/'
   // Validate callbackUrl to prevent open redirect — only allow same-origin relative paths
-  const isSafeCallback = rawCallback.startsWith('/') && !rawCallback.startsWith('//')
+  const isSafeCallback =
+    rawCallback.startsWith('/') && !rawCallback.startsWith('//')
   // biome-ignore lint/suspicious/noExplicitAny: typed route cast for dynamic path from URL params
   const callbackUrl = (isSafeCallback ? rawCallback : '/') as any
   const widgetContainerRef = useRef<HTMLDivElement>(null)

@@ -161,6 +161,8 @@
               ":BLANK_LINE:",
               "@/components/**",
               ":BLANK_LINE:",
+              ["@/hooks/**", "@/providers/**"],
+              ":BLANK_LINE:",
               ":ALIAS:",
               ":BLANK_LINE:",
               ["@App/**", "@Panel/**", "@Dashboard/**"],

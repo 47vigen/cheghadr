@@ -99,8 +99,8 @@ Single `src/app/layout.tsx` with `html`/`body`, no `[locale]` segment:
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 
-import { LocaleProvider } from '@/components/locale-provider'
-import { ClientProviders } from '@/components/client-providers'
+import { LocaleProvider } from '@/providers/locale-provider'
+import { ClientProviders } from '@/providers/client-providers'
 import { TRPCReactProvider } from '@/trpc/react'
 import { Vazirmatn } from '@/styles/fonts'
 import '@/styles/globals.css'

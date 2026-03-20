@@ -2,7 +2,7 @@
 
 import { Button } from '@heroui/react'
 
-import { useLocaleContext } from '@/components/locale-provider'
+import { useLocaleContext } from '@/providers/locale-provider'
 
 import { isTelegramWebApp } from '@/utils/telegram'
 

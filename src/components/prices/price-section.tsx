@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl'
 
-import { PriceRow } from '@/components/price-row'
+import { PriceRow } from '@/components/prices/price-row'
 import { Section } from '@/components/ui/section'
 
 import type { PriceItem } from '@/lib/prices'

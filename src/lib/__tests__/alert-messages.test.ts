@@ -4,7 +4,7 @@ import {
   dailyDigestMessage,
   portfolioAlertMessage,
   priceAlertMessage,
-} from '@/lib/alert-messages'
+} from '@/lib/alerts/messages'
 
 describe('priceAlertMessage', () => {
   it('builds Persian HTML', () => {

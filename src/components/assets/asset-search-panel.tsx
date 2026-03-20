@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 
 import { Input, TextField } from '@heroui/react'
 
-import { AssetListSurface } from '@/components/asset-list-surface'
+import { AssetListSurface } from '@/components/assets/asset-list-surface'
 import { Section } from '@/components/ui/section'
 
 import type { PriceItem } from '@/lib/prices'

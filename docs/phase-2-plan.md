@@ -199,7 +199,7 @@ Create the `(app)` route group with a layout containing the bottom tab bar.
 
 ```typescript
 import type { ReactNode } from 'react'
-import { BottomNav } from '@/components/bottom-nav'
+import { BottomNav } from '@/components/layout/bottom-nav'
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (

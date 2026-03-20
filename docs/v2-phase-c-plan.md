@@ -406,7 +406,7 @@ export function GuestLoginBanner() {
 **File:** `src/app/(app)/layout.tsx` (modified)
 
 ```typescript
-import { GuestLoginBanner } from '@/components/guest-login-banner'
+import { GuestLoginBanner } from '@/components/layout/guest-login-banner'
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (

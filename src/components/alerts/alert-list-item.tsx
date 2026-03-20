@@ -12,6 +12,7 @@ import { Cell } from '@/components/ui/cell'
 import { Section } from '@/components/ui/section'
 
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
+
 import { formatIRT, getIntlLocale } from '@/lib/prices'
 import { api } from '@/trpc/react'
 

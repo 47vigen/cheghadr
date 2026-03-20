@@ -31,7 +31,9 @@ describe('sendBotMessageWithRetry', () => {
   it('returns success on successful send', async () => {
     vi.stubGlobal(
       'fetch',
-      makeFetchMock([{ ok: true, json: { ok: true, result: { message_id: 42 } } }]),
+      makeFetchMock([
+        { ok: true, json: { ok: true, result: { message_id: 42 } } },
+      ]),
     )
 
     const promise = sendBotMessageWithRetry(BigInt(123456789), 'Hello')
@@ -59,7 +61,9 @@ describe('sendBotMessageWithRetry', () => {
   })
 
   it('returns failure after two failed attempts', async () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    const consoleSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined)
     vi.stubGlobal(
       'fetch',
       makeFetchMock([

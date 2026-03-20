@@ -6,10 +6,11 @@ import { Button, Input, Label, Modal, Spinner, TextField } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
-import { AssetSearchPanel } from '@/components/asset-search-panel'
-import { useAssetSearchGroups } from '@/components/use-asset-search-groups'
+import { AssetSearchPanel } from '@/components/assets/asset-search-panel'
 
+import { useAssetSearchGroups } from '@/hooks/use-asset-search-groups'
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
+
 import type { PriceItem } from '@/lib/prices'
 import {
   formatIRT,
@@ -25,7 +26,11 @@ interface AssetPickerProps {
   onSaved: () => void
 }
 
-export function AssetPicker({ priceData, portfolioId, onSaved }: AssetPickerProps) {
+export function AssetPicker({
+  priceData,
+  portfolioId,
+  onSaved,
+}: AssetPickerProps) {
   const t = useTranslations('assets')
   const tPicker = useTranslations('picker')
   const locale = useLocale()

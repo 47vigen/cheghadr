@@ -6,19 +6,20 @@ import { Button, Input, Label, TextField } from '@heroui/react'
 import { IconArrowsExchange } from '@tabler/icons-react'
 import { useTranslations } from 'next-intl'
 
-import { AssetSelector } from '@/components/asset-selector'
-import { CalculatorResult } from '@/components/calculator-result'
+import { AssetSelector } from '@/components/assets/asset-selector'
+import { CalculatorResult } from '@/components/calculator/calculator-result'
+import { PageShell } from '@/components/layout/page-shell'
 import { CalculatorSkeleton } from '@/components/skeletons/calculator-skeleton'
 import {
   EmptyStateBase,
   ErrorState,
   RefreshIndicator,
 } from '@/components/ui/async-states'
-import { PageShell } from '@/components/ui/page-shell'
 import { Section } from '@/components/ui/section'
 
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
+
 import { computeConversion, parsePriceSnapshot } from '@/lib/prices'
 import { api } from '@/trpc/react'
 

@@ -5,8 +5,8 @@ import {
   type AlertMessageLocale,
   dailyDigestMessage,
   portfolioAlertMessage,
-} from '@/lib/alert-messages'
-import { hasCrossedThreshold } from '@/lib/alert-utils'
+} from '@/lib/alerts/messages'
+import { hasCrossedThreshold } from '@/lib/alerts/utils'
 import { NotificationQueue } from '@/lib/notifications'
 import { createPortfolioSnapshot } from '@/lib/portfolio'
 import {

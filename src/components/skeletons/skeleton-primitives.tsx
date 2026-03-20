@@ -2,8 +2,8 @@ import type { ReactNode } from 'react'
 
 import { Skeleton } from '@heroui/react'
 
+import { PageShell } from '@/components/layout/page-shell'
 import { ListRowSkeleton } from '@/components/ui/list-row-skeleton'
-import { PageShell } from '@/components/ui/page-shell'
 
 interface ListRowsSkeletonProps {
   count: number

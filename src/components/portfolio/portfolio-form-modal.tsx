@@ -117,19 +117,11 @@ export function PortfolioFormModal({
                 maxLength={4}
               >
                 <Label>{t('emoji')}</Label>
-                <Input
-                  type="text"
-                  placeholder="💼"
-                  dir="ltr"
-                />
+                <Input type="text" placeholder="💼" dir="ltr" />
               </TextField>
             </Modal.Body>
             <Modal.Footer>
-              <Button
-                variant="ghost"
-                onPress={onClose}
-                isDisabled={isPending}
-              >
+              <Button variant="ghost" onPress={onClose} isDisabled={isPending}>
                 {t('cancel')}
               </Button>
               <Button
@@ -137,11 +129,7 @@ export function PortfolioFormModal({
                 onPress={handleSave}
                 isDisabled={!name.trim() || isPending}
               >
-                {isPending ? (
-                  <Spinner size="sm" color="current" />
-                ) : (
-                  t('save')
-                )}
+                {isPending ? <Spinner size="sm" color="current" /> : t('save')}
               </Button>
             </Modal.Footer>
           </Modal.Dialog>

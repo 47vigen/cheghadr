@@ -1,18 +1,20 @@
 'use client'
 
+import { useSearchParams } from 'next/navigation'
+
 import { Button } from '@heroui/react'
 import { IconArrowLeft } from '@tabler/icons-react'
-import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
-import { AssetPicker } from '@/components/asset-picker'
+import { AssetPicker } from '@/components/assets/asset-picker'
+import { PageShell } from '@/components/layout/page-shell'
 import { AddAssetSkeleton } from '@/components/skeletons/add-asset-skeleton'
 import { EmptyStateBase, ErrorState } from '@/components/ui/async-states'
 import { Cell } from '@/components/ui/cell'
-import { PageShell } from '@/components/ui/page-shell'
 import { Section } from '@/components/ui/section'
 
 import { useTelegramBackButton } from '@/hooks/use-telegram-back-button'
+
 import { useRouter } from '@/i18n/navigation'
 import { api } from '@/trpc/react'
 import { isTelegramWebApp } from '@/utils/telegram'
