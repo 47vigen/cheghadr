@@ -51,7 +51,7 @@ export function AssetListItem({
   const tBreakdown = useTranslations('breakdown')
   const locale = useLocale()
   const intlLocale = getIntlLocale(locale)
-  const assetName = pickDisplayName(displayNames, locale)
+  const assetName = pickDisplayName(displayNames, locale, symbol)
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [newQuantity, setNewQuantity] = useState(String(quantity))

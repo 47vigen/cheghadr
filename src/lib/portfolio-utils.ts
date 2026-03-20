@@ -3,7 +3,7 @@ import { pickDisplayName } from '@/lib/prices'
 
 interface AssetWithChange {
   symbol: string
-  displayNames: BilingualDisplayNames
+  displayNames?: BilingualDisplayNames | null
   valueIRT: number
   change: string | null
 }
@@ -43,7 +43,7 @@ export function computeBiggestMover(
       maxAbsDelta = absDelta
       biggest = {
         symbol: asset.symbol,
-        assetName: pickDisplayName(asset.displayNames, locale),
+        assetName: pickDisplayName(asset.displayNames, locale, asset.symbol),
         deltaIRT,
         changePct,
         isPositive: deltaIRT > 0,

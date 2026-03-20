@@ -64,6 +64,12 @@ describe('computeBiggestMover', () => {
     expect(result?.assetName).toBe('طلای ۱۸')
   })
 
+  it('uses symbol when displayNames is missing', () => {
+    const assets = [{ symbol: 'GOLD', valueIRT: 10_000_000, change: '2.5' }]
+    const result = computeBiggestMover(assets, 'en')
+    expect(result?.assetName).toBe('GOLD')
+  })
+
   it('returns the single asset with negative change above threshold', () => {
     const assets = [makeAsset('BTC', 10_000_000, '-3.0')]
     const result = computeBiggestMover(assets, 'en')

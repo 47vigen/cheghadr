@@ -84,6 +84,12 @@ describe('pickDisplayName', () => {
     expect(pickDisplayName(n, 'fa')).toBe('الف')
     expect(pickDisplayName(n, 'en')).toBe('A')
   })
+
+  it('uses fallback when names missing or empty branch', () => {
+    expect(pickDisplayName(undefined, 'en', 'SYM')).toBe('SYM')
+    expect(pickDisplayName(null, 'fa', 'X')).toBe('X')
+    expect(pickDisplayName({ fa: '', en: '' }, 'en', 'DEF')).toBe('DEF')
+  })
 })
 
 describe('getLocalizedItemName', () => {
