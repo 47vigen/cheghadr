@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { createPortfolioSnapshot } from '@/lib/portfolio'
 import {
   findBySymbol,
+  getBilingualAssetLabels,
   getSellPriceBySymbol,
   getSnapshotStaleness,
   parsePriceSnapshot,
@@ -52,8 +53,7 @@ export const assetsRouter = router({
       return {
         ...asset,
         valueIRT: qty * sellPrice,
-        assetName: priceItem?.name.fa ?? asset.symbol,
-        assetNameEn: priceItem?.name.en ?? asset.symbol,
+        displayNames: getBilingualAssetLabels(priceItem, asset.symbol),
         assetIcon: priceItem?.png ?? priceItem?.base_currency.png ?? null,
         change: priceItem?.change ?? null,
         sellPrice,

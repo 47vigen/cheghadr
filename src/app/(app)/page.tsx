@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@heroui/react'
 import { IconPlus } from '@tabler/icons-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 import { AlertSummaryCard } from '@/components/alerts/alert-summary-card'
 import { AssetListItem } from '@/components/asset-list-item'
@@ -44,6 +44,7 @@ const PortfolioBreakdown = dynamic(
 
 export default function AssetsPage() {
   const router = useRouter()
+  const locale = useLocale()
   const t = useTranslations('assets')
   const tNav = useTranslations('nav')
   const tAlerts = useTranslations('alerts')
@@ -91,8 +92,8 @@ export default function AssetsPage() {
   }, [data, selectedCategory])
 
   const biggestMover = useMemo(
-    () => (data ? computeBiggestMover(data.assets) : null),
-    [data],
+    () => (data ? computeBiggestMover(data.assets, locale) : null),
+    [data, locale],
   )
 
   const filteredAssets = useMemo(() => {

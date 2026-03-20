@@ -1,12 +1,25 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-import { dailyDigestMessage, portfolioAlertMessage } from '@/lib/alert-messages'
+import {
+  type AlertMessageLocale,
+  dailyDigestMessage,
+  portfolioAlertMessage,
+} from '@/lib/alert-messages'
 import { hasCrossedThreshold } from '@/lib/alert-utils'
 import { NotificationQueue } from '@/lib/notifications'
 import { createPortfolioSnapshot } from '@/lib/portfolio'
-import { getSellPriceBySymbol, parsePriceSnapshot } from '@/lib/prices'
+import {
+  getBilingualAssetLabels,
+  getSellPriceBySymbol,
+  parsePriceSnapshot,
+  pickDisplayName,
+} from '@/lib/prices'
 import { db } from '@/server/db'
+
+function toAlertMessageLocale(loc: 'en' | 'fa'): AlertMessageLocale {
+  return loc === 'en' ? 'en' : 'fa'
+}
 
 const YESTERDAY_CUTOFF_MS = 23 * 60 * 60 * 1000
 
@@ -27,7 +40,12 @@ export async function GET(request: NextRequest) {
     // Create portfolio snapshots for all active users
     const activeUsers = await db.user.findMany({
       where: { assets: { some: {} } },
-      select: { id: true, telegramUserId: true, dailyDigestEnabled: true },
+      select: {
+        id: true,
+        telegramUserId: true,
+        dailyDigestEnabled: true,
+        preferredLocale: true,
+      },
     })
 
     let portfolioSnapshotCount = 0
@@ -42,7 +60,15 @@ export async function GET(request: NextRequest) {
 
     const portfolioAlerts = await db.alert.findMany({
       where: { type: 'PORTFOLIO', isActive: true },
-      include: { user: { select: { telegramUserId: true, id: true } } },
+      include: {
+        user: {
+          select: {
+            telegramUserId: true,
+            id: true,
+            preferredLocale: true,
+          },
+        },
+      },
     })
 
     for (const alert of portfolioAlerts) {
@@ -79,6 +105,7 @@ export async function GET(request: NextRequest) {
         const text = portfolioAlertMessage(
           alert.direction,
           alert.thresholdIRT.toString(),
+          toAlertMessageLocale(alert.user.preferredLocale),
         )
         queue.enqueue({
           telegramUserId: alert.user.telegramUserId,
@@ -96,6 +123,7 @@ export async function GET(request: NextRequest) {
     })
 
     for (const user of digestUsers) {
+      const digestLocale = toAlertMessageLocale(user.preferredLocale)
       const [todaySnap, yesterdaySnap] = await Promise.all([
         db.portfolioSnapshot.findFirst({
           where: { userId: user.id },
@@ -125,7 +153,11 @@ export async function GET(request: NextRequest) {
       let topMoverName = ''
       if (latestPriceSnap && Array.isArray(todaySnap.breakdown)) {
         const prices = parsePriceSnapshot(latestPriceSnap.data)
-        type BreakdownItem = { symbol: string; quantity: number; valueIRT: number }
+        type BreakdownItem = {
+          symbol: string
+          quantity: number
+          valueIRT: number
+        }
         const breakdown = todaySnap.breakdown as BreakdownItem[]
         let maxValue = 0
         for (const item of breakdown) {
@@ -136,12 +168,13 @@ export async function GET(request: NextRequest) {
             const priceItem = prices.find(
               (p) => p.base_currency.symbol === item.symbol,
             )
-            topMoverName = priceItem?.name.fa ?? item.symbol
+            const labels = getBilingualAssetLabels(priceItem, item.symbol)
+            topMoverName = pickDisplayName(labels, digestLocale)
           }
         }
       }
 
-      const text = dailyDigestMessage(deltaPct, topMoverName)
+      const text = dailyDigestMessage(deltaPct, topMoverName, digestLocale)
       queue.enqueue({
         telegramUserId: user.telegramUserId,
         text,

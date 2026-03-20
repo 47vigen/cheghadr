@@ -16,13 +16,13 @@ import { TRPCReactProvider } from '@/trpc/react'
  */
 export function ClientRoot({ children }: { children: ReactNode }) {
   return (
-    <LocaleProvider>
-      <TRPCReactProvider>
+    <TRPCReactProvider>
+      <LocaleProvider>
         <ClientProviders>
           {children}
           <Toaster richColors position="top-center" />
         </ClientProviders>
-      </TRPCReactProvider>
-    </LocaleProvider>
+      </LocaleProvider>
+    </TRPCReactProvider>
   )
 }

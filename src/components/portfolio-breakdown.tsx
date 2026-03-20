@@ -3,8 +3,8 @@
 import { Text } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
 import {
-  Cell as PieCell,
   Pie,
+  Cell as PieCell,
   PieChart,
   ResponsiveContainer,
   Tooltip,
@@ -12,7 +12,7 @@ import {
 
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 import { getCategoryColor } from '@/lib/category-colors'
-import { formatIRT } from '@/lib/prices'
+import { formatIRT, getIntlLocale } from '@/lib/prices'
 
 interface BreakdownCategory {
   category: string
@@ -37,7 +37,7 @@ function DonutTooltip({
   locale: string
 }) {
   const t = useTranslations('categories')
-  const intlLocale = locale === 'fa' ? 'fa-IR' : 'en-US'
+  const intlLocale = getIntlLocale(locale)
 
   if (!active || !payload?.length) return null
   const entry = payload[0]
@@ -68,7 +68,7 @@ export function PortfolioBreakdown({
   const t = useTranslations('categories')
   const tBreakdown = useTranslations('breakdown')
   const locale = useLocale()
-  const intlLocale = locale === 'fa' ? 'fa-IR' : 'en-US'
+  const intlLocale = getIntlLocale(locale)
   const { selectionChanged } = useTelegramHaptics()
 
   const handleCellClick = (category: string) => {

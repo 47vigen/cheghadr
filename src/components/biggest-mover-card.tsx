@@ -5,6 +5,7 @@ import { IconTrendingDown, IconTrendingUp } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import type { BiggestMover } from '@/lib/portfolio-utils'
+import { getIntlLocale } from '@/lib/prices'
 
 type BiggestMoverCardProps = Pick<
   BiggestMover,
@@ -20,7 +21,7 @@ export function BiggestMoverCard({
   const t = useTranslations('breakdown')
   const tAssets = useTranslations('assets')
   const locale = useLocale()
-  const intlLocale = locale === 'fa' ? 'fa-IR' : 'en-US'
+  const intlLocale = getIntlLocale(locale)
 
   const colorClass = isPositive ? 'text-success' : 'text-destructive'
   const bgClass = isPositive ? 'bg-success/10' : 'bg-destructive/10'

@@ -21,7 +21,8 @@ import { Cell } from '@/components/ui/cell'
 import { Section } from '@/components/ui/section'
 
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
-import { formatIRT } from '@/lib/prices'
+import type { BilingualDisplayNames } from '@/lib/prices'
+import { formatIRT, getIntlLocale, pickDisplayName } from '@/lib/prices'
 import { api } from '@/trpc/react'
 
 interface AssetListItemProps {
@@ -29,7 +30,7 @@ interface AssetListItemProps {
   symbol: string
   quantity: { toString(): string }
   valueIRT: number
-  assetName: string
+  displayNames: BilingualDisplayNames
   assetIcon: string | null
   change: string | null
   sellPrice: number
@@ -41,7 +42,7 @@ export function AssetListItem({
   symbol,
   quantity,
   valueIRT,
-  assetName,
+  displayNames,
   assetIcon,
   change,
   portfolioPercentage,
@@ -49,6 +50,8 @@ export function AssetListItem({
   const t = useTranslations('assets')
   const tBreakdown = useTranslations('breakdown')
   const locale = useLocale()
+  const intlLocale = getIntlLocale(locale)
+  const assetName = pickDisplayName(displayNames, locale)
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [newQuantity, setNewQuantity] = useState(String(quantity))
@@ -99,7 +102,7 @@ export function AssetListItem({
     <>
       <Cell
         before={<AssetAvatar alt={assetName} symbol={symbol} src={assetIcon} />}
-        subtitle={`${new Intl.NumberFormat(locale === 'fa' ? 'fa-IR' : 'en-US').format(Number(quantity))} ${t('units')}`}
+        subtitle={`${new Intl.NumberFormat(intlLocale).format(Number(quantity))} ${t('units')}`}
         after={
           <div className="flex items-center gap-1.5">
             <div className="flex flex-col items-end gap-0.5">
@@ -109,7 +112,7 @@ export function AssetListItem({
               <ChangeLabel change={change} />
               {portfolioPercentage != null && (
                 <Text className="text-muted-foreground text-xs tabular-nums">
-                  {new Intl.NumberFormat(locale === 'fa' ? 'fa-IR' : 'en-US', {
+                  {new Intl.NumberFormat(intlLocale, {
                     maximumFractionDigits: 1,
                   }).format(portfolioPercentage)}
                   % {tBreakdown('ofPortfolio')}

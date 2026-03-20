@@ -6,7 +6,7 @@ import { Button, Text } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
-import { formatIRT } from '@/lib/prices'
+import { formatIRT, getIntlLocale } from '@/lib/prices'
 import { api } from '@/trpc/react'
 
 type DeltaWindow = '1D' | '1W' | '1M' | 'ALL'
@@ -51,13 +51,10 @@ export function PortfolioDelta() {
 
   const sign = deltaIRT > 0 ? '+' : deltaIRT < 0 ? '-' : ''
 
-  const pctFormatted = new Intl.NumberFormat(
-    locale === 'fa' ? 'fa-IR' : 'en-US',
-    {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    },
-  ).format(Math.abs(deltaPct))
+  const pctFormatted = new Intl.NumberFormat(getIntlLocale(locale), {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Math.abs(deltaPct))
 
   const windowLabels: Record<DeltaWindow, string> = {
     '1D': t('window1D'),

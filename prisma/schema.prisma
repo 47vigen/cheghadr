@@ -19,10 +19,16 @@ enum AlertDir {
   BELOW
 }
 
+enum PreferredLocale {
+  en
+  fa
+}
+
 model User {
   id                 String              @id @default(cuid())
   telegramUserId     BigInt              @unique
   dailyDigestEnabled Boolean             @default(false)
+  preferredLocale    PreferredLocale     @default(fa)
   createdAt          DateTime            @default(now())
   assets             UserAsset[]
   portfolioSnaps     PortfolioSnapshot[]

@@ -10,6 +10,7 @@ import type { PriceItem } from '@/lib/prices'
 import {
   findBySymbol,
   formatIRT,
+  getIntlLocale,
   getLocalizedIrtName,
   getLocalizedItemName,
   IRT_ENTRY,
@@ -28,7 +29,7 @@ export function CalculatorResult({
 }: CalculatorResultProps) {
   const t = useTranslations('calculator')
   const locale = useLocale()
-  const intlLocale = locale === 'fa' ? 'fa-IR' : 'en-US'
+  const intlLocale = getIntlLocale(locale)
 
   if (!result) {
     return (

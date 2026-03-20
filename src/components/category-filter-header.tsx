@@ -5,7 +5,7 @@ import { IconX } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { getCategoryColor } from '@/lib/category-colors'
-import { formatIRT } from '@/lib/prices'
+import { formatIRT, getIntlLocale } from '@/lib/prices'
 
 interface CategoryFilterHeaderProps {
   category: string
@@ -23,7 +23,7 @@ export function CategoryFilterHeader({
   const t = useTranslations('categories')
   const tBreakdown = useTranslations('breakdown')
   const locale = useLocale()
-  const intlLocale = locale === 'fa' ? 'fa-IR' : 'en-US'
+  const intlLocale = getIntlLocale(locale)
   const color = getCategoryColor(category)
 
   const pct = new Intl.NumberFormat(intlLocale, {

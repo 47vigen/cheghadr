@@ -12,7 +12,7 @@ import { Cell } from '@/components/ui/cell'
 import { Section } from '@/components/ui/section'
 
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
-import { formatIRT } from '@/lib/prices'
+import { formatIRT, getIntlLocale } from '@/lib/prices'
 import { api } from '@/trpc/react'
 
 interface AlertListItemProps {
@@ -65,7 +65,7 @@ export function AlertListItem({ alert }: AlertListItemProps) {
 
   const subtitle = alert.triggeredAt
     ? t('triggeredAt', {
-        time: new Intl.DateTimeFormat(locale === 'fa' ? 'fa-IR' : 'en-US', {
+        time: new Intl.DateTimeFormat(getIntlLocale(locale), {
           month: 'short',
           day: 'numeric',
           hour: '2-digit',

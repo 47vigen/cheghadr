@@ -1,9 +1,20 @@
 import type { PrismaClient } from '@prisma/client'
 
-import { priceAlertMessage } from '@/lib/alert-messages'
+import {
+  type AlertMessageLocale,
+  priceAlertMessage,
+} from '@/lib/alert-messages'
 import { hasCrossedThreshold } from '@/lib/alert-utils'
 import { NotificationQueue } from '@/lib/notifications'
-import { findBySymbol, parsePriceSnapshot } from '@/lib/prices'
+import {
+  findBySymbol,
+  getLocalizedItemName,
+  parsePriceSnapshot,
+} from '@/lib/prices'
+
+function toAlertMessageLocale(loc: 'en' | 'fa'): AlertMessageLocale {
+  return loc === 'en' ? 'en' : 'fa'
+}
 
 interface PriceSnapshotRecord {
   id: string
@@ -25,7 +36,9 @@ export async function evaluatePriceAlerts(
 
   const activeAlerts = await db.alert.findMany({
     where: { type: 'PRICE', isActive: true },
-    include: { user: { select: { telegramUserId: true } } },
+    include: {
+      user: { select: { telegramUserId: true, preferredLocale: true } },
+    },
   })
 
   if (activeAlerts.length === 0) {
@@ -64,12 +77,13 @@ export async function evaluatePriceAlerts(
     )
 
     if (triggered) {
-      const assetName =
-        currentItem.name.fa || currentItem.base_currency.fa || alert.symbol
+      const msgLocale = toAlertMessageLocale(alert.user.preferredLocale)
+      const assetName = getLocalizedItemName(currentItem, msgLocale)
       const text = priceAlertMessage(
         assetName,
         alert.direction,
         alert.thresholdIRT.toString(),
+        msgLocale,
       )
 
       queue.enqueue({

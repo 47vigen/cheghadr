@@ -14,14 +14,14 @@ import {
 
 import { Placeholder } from '@/components/ui/placeholder'
 
-import { formatIRT } from '@/lib/prices'
+import { formatIRT, getIntlLocale } from '@/lib/prices'
 
 interface PortfolioChartProps {
   data: Array<{ date: Date; totalIRT: number }>
 }
 
 function formatChartDate(date: Date, locale: string): string {
-  return new Intl.DateTimeFormat(locale === 'fa' ? 'fa-IR' : 'en-US', {
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
     month: 'short',
     day: 'numeric',
   }).format(date)

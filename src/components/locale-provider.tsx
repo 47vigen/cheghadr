@@ -13,6 +13,7 @@ import WebApp from '@twa-dev/sdk'
 import { NextIntlClientProvider } from 'next-intl'
 
 import type { Locale } from '@/i18n/routing'
+import { api } from '@/trpc/react'
 
 function mapToLocale(code: string | undefined): Locale {
   if (!code) return 'en'
@@ -40,10 +41,17 @@ export function useLocaleContext(): LocaleContextValue | null {
 }
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useState<Locale>(() =>
+  const [locale, setLocaleState] = useState<Locale>(() =>
     typeof window !== 'undefined' ? detectLocale() : 'en',
   )
   const [messages, setMessages] = useState<Record<string, unknown>>({})
+
+  const { mutate: persistPreferredLocale } =
+    api.user.setPreferredLocale.useMutation({ retry: false })
+
+  const setLocale = useCallback((next: Locale) => {
+    setLocaleState(next)
+  }, [])
 
   const loadMessages = useCallback(async (l: Locale) => {
     const m = await import(`../../messages/${l}.json`)
@@ -58,6 +66,10 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     document.documentElement.lang = locale
     document.documentElement.dir = locale === 'fa' ? 'rtl' : 'ltr'
   }, [locale])
+
+  useEffect(() => {
+    persistPreferredLocale({ locale })
+  }, [locale, persistPreferredLocale])
 
   return (
     <LocaleContext.Provider value={{ locale, setLocale }}>

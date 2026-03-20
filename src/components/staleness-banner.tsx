@@ -4,6 +4,8 @@ import { Button, Text } from '@heroui/react'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 
+import { getIntlLocale } from '@/lib/prices'
+
 interface StalenessBannerProps {
   snapshotAt: Date | null
   namespace?: 'assets' | 'prices'
@@ -19,7 +21,7 @@ function formatRelativeTime(
   ) => string,
 ): string {
   const diffMin = Math.floor((Date.now() - date.getTime()) / 60000)
-  const intlLocale = locale === 'fa' ? 'fa-IR' : 'en-US'
+  const intlLocale = getIntlLocale(locale)
   const formatCount = (n: number) => new Intl.NumberFormat(intlLocale).format(n)
 
   if (diffMin < 60) {

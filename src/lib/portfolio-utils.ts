@@ -1,6 +1,9 @@
+import type { BilingualDisplayNames } from '@/lib/prices'
+import { pickDisplayName } from '@/lib/prices'
+
 interface AssetWithChange {
   symbol: string
-  assetName: string
+  displayNames: BilingualDisplayNames
   valueIRT: number
   change: string | null
 }
@@ -17,6 +20,7 @@ const MIN_DELTA_IRT = 1000
 
 export function computeBiggestMover(
   assets: AssetWithChange[],
+  locale: string,
 ): BiggestMover | null {
   let biggest: BiggestMover | null = null
   let maxAbsDelta = 0
@@ -39,7 +43,7 @@ export function computeBiggestMover(
       maxAbsDelta = absDelta
       biggest = {
         symbol: asset.symbol,
-        assetName: asset.assetName,
+        assetName: pickDisplayName(asset.displayNames, locale),
         deltaIRT,
         changePct,
         isPositive: deltaIRT > 0,

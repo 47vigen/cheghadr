@@ -25,7 +25,13 @@ function makeSnapshot(sellPrice: string) {
     data: {
       data: [
         {
-          base_currency: { symbol: 'USD', category: null, png: null, fa: 'دلار', en: 'USD' },
+          base_currency: {
+            symbol: 'USD',
+            category: null,
+            png: null,
+            fa: 'دلار',
+            en: 'USD',
+          },
           name: { fa: 'دلار', en: 'US Dollar' },
           sell_price: sellPrice,
           change: '0',
@@ -51,7 +57,10 @@ function makeAlert(
     isActive: true,
     triggeredAt: null,
     createdAt: new Date(),
-    user: { telegramUserId: BigInt(123456789) },
+    user: {
+      telegramUserId: BigInt(123456789),
+      preferredLocale: 'fa' as const,
+    },
     ...overrides,
   }
 }

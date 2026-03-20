@@ -64,9 +64,7 @@ export const categoryOrder: string[] = [
 
 export const knownCategories = new Set(categoryOrder)
 
-export function sortedGroupEntries<T>(
-  grouped: Map<string, T>,
-): [string, T][] {
+export function sortedGroupEntries<T>(grouped: Map<string, T>): [string, T][] {
   const ordered: [string, T][] = []
   for (const cat of categoryOrder) {
     const items = grouped.get(cat)
@@ -78,12 +76,13 @@ export function sortedGroupEntries<T>(
   return ordered
 }
 
-function toIntlLocale(locale: string): string {
+/** Maps app locale (`en` | `fa`) to BCP 47 tag for `Intl` formatters. */
+export function getIntlLocale(locale: string): string {
   return locale === 'fa' ? 'fa-IR' : 'en-US'
 }
 
 export function formatIRT(value: number, locale = 'fa'): string {
-  return new Intl.NumberFormat(toIntlLocale(locale)).format(Math.round(value))
+  return new Intl.NumberFormat(getIntlLocale(locale)).format(Math.round(value))
 }
 
 export function formatChange(
@@ -96,7 +95,7 @@ export function formatChange(
   if (!change) return null
   const n = Number(change)
   if (Number.isNaN(n)) return null
-  const formatted = new Intl.NumberFormat(toIntlLocale(locale), {
+  const formatted = new Intl.NumberFormat(getIntlLocale(locale), {
     signDisplay: 'always',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -155,13 +154,36 @@ export const IRT_ENTRY = {
   png: null as string | null,
 }
 
+export type BilingualDisplayNames = { fa: string; en: string }
+
+export function getBilingualAssetLabels(
+  priceItem: PriceItem | undefined,
+  symbol: string,
+): BilingualDisplayNames {
+  if (!priceItem) {
+    return { fa: symbol, en: symbol }
+  }
+  const fa = priceItem.name.fa || priceItem.base_currency.fa || symbol
+  const en =
+    priceItem.name.en ||
+    priceItem.base_currency.en ||
+    priceItem.name.fa ||
+    priceItem.base_currency.fa ||
+    symbol
+  return { fa, en }
+}
+
+export function pickDisplayName(
+  names: BilingualDisplayNames,
+  locale: string,
+): string {
+  return locale === 'fa' ? names.fa : names.en
+}
+
 export function getLocalizedItemName(item: PriceItem, locale: string): string {
-  if (locale === 'fa') return item.name.fa || item.base_currency.fa
-  return (
-    item.name.en ||
-    item.base_currency.en ||
-    item.name.fa ||
-    item.base_currency.fa
+  return pickDisplayName(
+    getBilingualAssetLabels(item, item.base_currency.symbol),
+    locale,
   )
 }
 
