@@ -51,7 +51,18 @@ export async function GET(request: NextRequest) {
 
     let portfolioSnapshotCount = 0
     for (const user of activeUsers) {
-      const snap = await createPortfolioSnapshot(db, user.id)
+      // Create per-portfolio snapshots
+      const portfolios = await db.portfolio.findMany({
+        where: { userId: user.id },
+        select: { id: true },
+      })
+      for (const portfolio of portfolios) {
+        const snap = await createPortfolioSnapshot(db, user.id, portfolio.id)
+        if (snap) portfolioSnapshotCount++
+      }
+
+      // Create consolidated snapshot (portfolioId = null)
+      const snap = await createPortfolioSnapshot(db, user.id, null)
       if (snap) portfolioSnapshotCount++
     }
 
@@ -75,13 +86,14 @@ export async function GET(request: NextRequest) {
     for (const alert of portfolioAlerts) {
       const [currentSnap, previousSnap] = await Promise.all([
         db.portfolioSnapshot.findFirst({
-          where: { userId: alert.userId },
+          where: { userId: alert.userId, portfolioId: null },
           orderBy: { snapshotAt: 'desc' },
           select: { id: true, totalIRT: true, snapshotAt: true },
         }),
         db.portfolioSnapshot.findFirst({
           where: {
             userId: alert.userId,
+            portfolioId: null,
             snapshotAt: { lt: new Date(Date.now() - YESTERDAY_CUTOFF_MS) },
           },
           orderBy: { snapshotAt: 'desc' },
@@ -127,13 +139,14 @@ export async function GET(request: NextRequest) {
       const digestLocale = toAlertMessageLocale(user.preferredLocale)
       const [todaySnap, yesterdaySnap] = await Promise.all([
         db.portfolioSnapshot.findFirst({
-          where: { userId: user.id },
+          where: { userId: user.id, portfolioId: null },
           orderBy: { snapshotAt: 'desc' },
           select: { totalIRT: true, breakdown: true },
         }),
         db.portfolioSnapshot.findFirst({
           where: {
             userId: user.id,
+            portfolioId: null,
             snapshotAt: { lt: new Date(Date.now() - YESTERDAY_CUTOFF_MS) },
           },
           orderBy: { snapshotAt: 'desc' },

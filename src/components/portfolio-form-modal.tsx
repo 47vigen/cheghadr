@@ -1,0 +1,152 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+
+import { Button, Input, Label, Modal, Spinner, TextField } from '@heroui/react'
+import { useLocale, useTranslations } from 'next-intl'
+import { toast } from 'sonner'
+
+import { api } from '@/trpc/react'
+
+interface PortfolioFormModalProps {
+  isOpen: boolean
+  onClose: () => void
+  mode: 'create' | 'rename'
+  portfolio?: { id: string; name: string; emoji: string | null }
+}
+
+export function PortfolioFormModal({
+  isOpen,
+  onClose,
+  mode,
+  portfolio,
+}: PortfolioFormModalProps) {
+  const t = useTranslations('portfolios')
+  const locale = useLocale()
+
+  const [name, setName] = useState('')
+  const [emoji, setEmoji] = useState('')
+
+  useEffect(() => {
+    if (isOpen) {
+      setName(portfolio?.name ?? '')
+      setEmoji(portfolio?.emoji ?? '')
+    }
+  }, [isOpen, portfolio])
+
+  const utils = api.useUtils()
+
+  const createMutation = api.portfolio.create.useMutation({
+    onSuccess: () => {
+      toast.success(t('toastCreated'))
+      void utils.portfolio.list.invalidate()
+      onClose()
+    },
+    onError: (err) => {
+      toast.error(err.message || t('toastCreateError'))
+    },
+  })
+
+  const renameMutation = api.portfolio.rename.useMutation({
+    onSuccess: () => {
+      toast.success(t('toastRenamed'))
+      void utils.portfolio.list.invalidate()
+      onClose()
+    },
+    onError: (err) => {
+      toast.error(err.message || t('toastRenameError'))
+    },
+  })
+
+  const isPending = createMutation.isPending || renameMutation.isPending
+
+  const handleSave = () => {
+    if (!name.trim() || isPending) return
+
+    if (mode === 'create') {
+      createMutation.mutate({
+        name: name.trim(),
+        emoji: emoji.trim() || undefined,
+      })
+    } else if (portfolio) {
+      renameMutation.mutate({
+        id: portfolio.id,
+        name: name.trim(),
+        emoji: emoji.trim() || null,
+      })
+    }
+  }
+
+  return (
+    <Modal>
+      <Modal.Backdrop
+        isOpen={isOpen}
+        onOpenChange={(v: boolean) => {
+          if (!v) onClose()
+        }}
+      >
+        <Modal.Container placement="auto" size="md">
+          <Modal.Dialog
+            className="sm:max-w-[360px]"
+            dir={locale === 'fa' ? 'rtl' : 'ltr'}
+          >
+            <Modal.CloseTrigger />
+            <Modal.Header>
+              <Modal.Heading>
+                {mode === 'create' ? t('createTitle') : t('renameTitle')}
+              </Modal.Heading>
+            </Modal.Header>
+            <Modal.Body className="modal-body flex flex-col gap-3">
+              <TextField
+                value={name}
+                onChange={setName}
+                fullWidth
+                maxLength={50}
+              >
+                <Label>{t('name')}</Label>
+                <Input
+                  type="text"
+                  placeholder={t('namePlaceholder')}
+                  dir={locale === 'fa' ? 'rtl' : 'ltr'}
+                />
+              </TextField>
+              <TextField
+                value={emoji}
+                onChange={setEmoji}
+                fullWidth
+                maxLength={4}
+              >
+                <Label>{t('emoji')}</Label>
+                <Input
+                  type="text"
+                  placeholder="💼"
+                  dir="ltr"
+                />
+              </TextField>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                variant="ghost"
+                onPress={onClose}
+                isDisabled={isPending}
+              >
+                {t('cancel')}
+              </Button>
+              <Button
+                variant="primary"
+                onPress={handleSave}
+                isDisabled={!name.trim() || isPending}
+              >
+                {isPending ? (
+                  <Spinner size="sm" color="current" />
+                ) : (
+                  t('save')
+                )}
+              </Button>
+            </Modal.Footer>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
+    </Modal>
+  )
+}

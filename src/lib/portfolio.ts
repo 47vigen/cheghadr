@@ -5,18 +5,24 @@ import { getSellPriceBySymbol, parsePriceSnapshot } from '@/lib/prices'
 const DEDUP_WINDOW_MINUTES = 5
 
 /**
- * Creates a PortfolioSnapshot for a user based on their current assets and
- * the latest price snapshot. Returns null when:
- * - The user has no assets
+ * Creates a PortfolioSnapshot for a user.
+ *
+ * @param portfolioId - specific portfolio ID, or null for consolidated (all portfolios)
+ *
+ * Returns null when:
+ * - The user has no assets (in the given portfolio / across all)
  * - No price snapshot exists
  * - A snapshot was already created within the deduplication window (5 min)
  */
 export async function createPortfolioSnapshot(
   db: PrismaClient,
   userId: string,
+  portfolioId: string | null,
 ): Promise<PortfolioSnapshot | null> {
+  const whereClause = portfolioId ? { userId, portfolioId } : { userId }
+
   const [userAssets, priceSnapshot] = await Promise.all([
-    db.userAsset.findMany({ where: { userId } }),
+    db.userAsset.findMany({ where: whereClause }),
     db.priceSnapshot.findFirst({ orderBy: { snapshotAt: 'desc' } }),
   ])
 
@@ -28,7 +34,11 @@ export async function createPortfolioSnapshot(
   const dedupSince = new Date()
   dedupSince.setMinutes(dedupSince.getMinutes() - DEDUP_WINDOW_MINUTES)
   const recent = await db.portfolioSnapshot.findFirst({
-    where: { userId, snapshotAt: { gte: dedupSince } },
+    where: {
+      userId,
+      portfolioId: portfolioId ?? null,
+      snapshotAt: { gte: dedupSince },
+    },
   })
   if (recent) return null
 
@@ -50,6 +60,6 @@ export async function createPortfolioSnapshot(
   }
 
   return db.portfolioSnapshot.create({
-    data: { userId, totalIRT, breakdown },
+    data: { userId, portfolioId, totalIRT, breakdown },
   })
 }

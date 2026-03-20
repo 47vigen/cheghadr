@@ -6,6 +6,7 @@ import { clsx } from 'clsx'
 
 interface SectionProps {
   header?: ReactNode
+  trailing?: ReactNode
   children: ReactNode
   className?: string
   variant?: 'default' | 'hero'
@@ -13,6 +14,7 @@ interface SectionProps {
 
 export function Section({
   header,
+  trailing,
   children,
   className,
   variant = 'default',
@@ -21,15 +23,22 @@ export function Section({
 
   return (
     <section className={className}>
-      {header != null && (
-        <h2
-          className={clsx(
-            'section-header mb-0.5 px-2 py-0.5',
-            isHero && 'text-foreground/90',
+      {(header != null || trailing != null) && (
+        <div className="mb-0.5 flex items-center justify-between px-2 py-0.5">
+          {header != null && (
+            <h2
+              className={clsx(
+                'section-header',
+                isHero && 'text-foreground/90',
+              )}
+            >
+              {header}
+            </h2>
           )}
-        >
-          {header}
-        </h2>
+          {trailing != null && (
+            <div className="ms-auto flex items-center">{trailing}</div>
+          )}
+        </div>
       )}
       <div
         className={clsx(

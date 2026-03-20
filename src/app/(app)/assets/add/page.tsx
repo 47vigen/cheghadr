@@ -2,6 +2,7 @@
 
 import { Button } from '@heroui/react'
 import { IconArrowLeft } from '@tabler/icons-react'
+import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
 import { AssetPicker } from '@/components/asset-picker'
@@ -19,13 +20,23 @@ import { isTelegramWebApp } from '@/utils/telegram'
 export default function AddAssetPage() {
   const router = useRouter()
   const t = useTranslations('addAsset')
+  const searchParams = useSearchParams()
+  const portfolioId = searchParams.get('portfolioId') ?? ''
   useTelegramBackButton(true)
   const inTelegram = isTelegramWebApp()
 
   const { data, isLoading, isError, error, refetch } =
     api.prices.latest.useQuery()
 
-  if (isLoading) {
+  // Also fetch default portfolio if no portfolioId was passed
+  const portfoliosQuery = api.portfolio.list.useQuery(undefined, {
+    enabled: !portfolioId,
+  })
+
+  const resolvedPortfolioId =
+    portfolioId || (portfoliosQuery.data?.[0]?.id ?? '')
+
+  if (isLoading || (!portfolioId && portfoliosQuery.isLoading)) {
     return <AddAssetSkeleton />
   }
 
@@ -75,7 +86,11 @@ export default function AddAssetPage() {
         </Section>
       </div>
       <div>
-        <AssetPicker priceData={data.data} onSaved={() => router.push('/')} />
+        <AssetPicker
+          priceData={data.data}
+          portfolioId={resolvedPortfolioId}
+          onSaved={() => router.push('/')}
+        />
       </div>
     </PageShell>
   )
