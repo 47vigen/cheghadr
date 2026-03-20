@@ -1,3 +1,5 @@
+import WebApp from '@twa-dev/sdk'
+
 import { isTelegramWebApp } from '@/utils/telegram'
 
 export function downloadCSV(csv: string, filename: string) {
@@ -7,8 +9,7 @@ export function downloadCSV(csv: string, filename: string) {
 
   if (isTelegramWebApp()) {
     try {
-      const tg = (window as Window & { Telegram?: { WebApp?: { openLink?: (url: string) => void } } }).Telegram
-      tg?.WebApp?.openLink?.(url)
+      WebApp.openLink(url)
     } catch {
       triggerDownload(url, filename)
     }
