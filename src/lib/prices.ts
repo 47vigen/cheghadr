@@ -11,11 +11,24 @@ export function parsePriceSnapshot(data: unknown): PriceItem[] {
   return response?.data ?? []
 }
 
+/**
+ * Base asset symbol (e.g. USD). Prefers `base_currency.symbol`; if the API omits
+ * it, derives from the trading pair `symbol` (e.g. USD-IRT → USD).
+ */
+export function getBaseSymbol(item: PriceItem): string {
+  const fromBase = item.base_currency?.symbol
+  if (fromBase) return fromBase
+  const pair = item.symbol
+  if (!pair) return ''
+  const head = pair.split('-')[0]
+  return head || pair
+}
+
 export function findBySymbol(
   items: PriceItem[],
   symbol: string,
 ): PriceItem | undefined {
-  return items.find((item) => item.base_currency.symbol === symbol)
+  return items.find((item) => getBaseSymbol(item) === symbol)
 }
 
 export function filterPriceItems(
@@ -26,17 +39,17 @@ export function filterPriceItems(
   if (!q) return items
   return items.filter(
     (item) =>
-      item.name.fa.toLowerCase().includes(q) ||
-      item.base_currency.fa.toLowerCase().includes(q) ||
-      item.name.en.toLowerCase().includes(q) ||
-      item.base_currency.symbol.toLowerCase().includes(q),
+      (item.name?.fa?.toLowerCase()?.includes(q) ?? false) ||
+      (item.base_currency?.fa?.toLowerCase()?.includes(q) ?? false) ||
+      (item.name?.en?.toLowerCase()?.includes(q) ?? false) ||
+      (item.base_currency?.symbol?.toLowerCase()?.includes(q) ?? false),
   )
 }
 
 export function groupByCategory(items: PriceItem[]): Map<string, PriceItem[]> {
   const groups = new Map<string, PriceItem[]>()
   for (const item of items) {
-    const cat = item.base_currency.category?.symbol ?? 'OTHER'
+    const cat = item.base_currency?.category?.symbol ?? 'OTHER'
     const existing = groups.get(cat) ?? []
     existing.push(item)
     groups.set(cat, existing)
@@ -163,12 +176,14 @@ export function getBilingualAssetLabels(
   if (!priceItem) {
     return { fa: symbol, en: symbol }
   }
-  const fa = priceItem.name.fa || priceItem.base_currency.fa || symbol
+  const name = priceItem.name
+  const base = priceItem.base_currency
+  const fa = name?.fa || base?.fa || symbol
   const en =
-    priceItem.name.en ||
-    priceItem.base_currency.en ||
-    priceItem.name.fa ||
-    priceItem.base_currency.fa ||
+    name?.en ||
+    base?.en ||
+    name?.fa ||
+    base?.fa ||
     symbol
   return { fa, en }
 }
@@ -181,10 +196,7 @@ export function pickDisplayName(
 }
 
 export function getLocalizedItemName(item: PriceItem, locale: string): string {
-  return pickDisplayName(
-    getBilingualAssetLabels(item, item.base_currency.symbol),
-    locale,
-  )
+  return pickDisplayName(getBilingualAssetLabels(item, getBaseSymbol(item)), locale)
 }
 
 export function getLocalizedIrtName(locale: string): string {

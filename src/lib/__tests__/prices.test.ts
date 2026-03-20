@@ -7,6 +7,7 @@ import {
   findBySymbol,
   formatChange,
   formatIRT,
+  getBaseSymbol,
   getSellPriceBySymbol,
   getSnapshotStaleness,
   groupByCategory,
@@ -68,11 +69,33 @@ describe('parsePriceSnapshot', () => {
   })
 })
 
+describe('getBaseSymbol', () => {
+  it('uses base_currency.symbol when present', () => {
+    expect(getBaseSymbol(USD)).toBe('USD')
+  })
+
+  it('derives from pair symbol when base_currency is missing', () => {
+    const partial = {
+      symbol: 'ETH-IRT',
+      sell_price: '1',
+    } as PriceItem
+    expect(getBaseSymbol(partial)).toBe('ETH')
+  })
+})
+
 describe('findBySymbol', () => {
   const items = [USD, BTC, GOLD]
 
   it('finds existing symbol', () => {
     expect(findBySymbol(items, 'BTC')?.base_currency.symbol).toBe('BTC')
+  })
+
+  it('finds by pair-derived base when base_currency is missing', () => {
+    const partial = {
+      ...USD,
+      base_currency: undefined,
+    } as unknown as PriceItem
+    expect(findBySymbol([partial], 'USD')).toBe(partial)
   })
 
   it('returns undefined for missing symbol', () => {
@@ -240,5 +263,15 @@ describe('filterPriceItems', () => {
     const result = filterPriceItems(items, 'btc')
     expect(result).toHaveLength(1)
     expect(result[0]?.base_currency.symbol).toBe('BTC')
+  })
+
+  it('does not throw when name/base_currency fields are missing', () => {
+    const broken = {
+      symbol: 'X-IRT',
+      name: undefined,
+      base_currency: { symbol: 'X', fa: 'x', en: 'x', category: {} },
+    } as unknown as PriceItem
+    expect(() => filterPriceItems([broken], 'nope')).not.toThrow()
+    expect(filterPriceItems([broken], 'x')).toHaveLength(1)
   })
 })

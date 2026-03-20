@@ -10,6 +10,7 @@ import type { PriceItem } from '@/lib/prices'
 import {
   findBySymbol,
   formatIRT,
+  getBaseSymbol,
   getIntlLocale,
   getLocalizedIrtName,
   getLocalizedItemName,
@@ -50,9 +51,9 @@ export function CalculatorResult({
           const found = findBySymbol(items, toSymbol)
           return found
             ? {
-                symbol: found.base_currency.symbol,
+                symbol: getBaseSymbol(found),
                 displayName: getLocalizedItemName(found, locale),
-                png: found.png ?? found.base_currency.png ?? null,
+                png: found.png ?? found.base_currency?.png ?? null,
               }
             : null
         })()

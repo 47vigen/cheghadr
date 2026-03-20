@@ -13,6 +13,8 @@ import { useAssetSearchGroups } from '@/components/use-asset-search-groups'
 
 import type { PriceItem } from '@/lib/prices'
 import {
+  getBaseSymbol,
+  getBilingualAssetLabels,
   getLocalizedIrtName,
   getLocalizedItemName,
   IRT_ENTRY,
@@ -37,12 +39,12 @@ function getCurrentDisplay(
       displayName: getLocalizedIrtName(locale),
       png: IRT_ENTRY.png,
     }
-  const found = items.find((i) => i.base_currency.symbol === value)
+  const found = items.find((i) => getBaseSymbol(i) === value)
   if (!found) return { symbol: value, displayName: value, png: null }
   return {
-    symbol: found.base_currency.symbol,
+    symbol: getBaseSymbol(found),
     displayName: getLocalizedItemName(found, locale),
-    png: found.png ?? found.base_currency.png ?? null,
+    png: found.png ?? found.base_currency?.png ?? null,
   }
 }
 
@@ -110,12 +112,14 @@ export function AssetSelector({
                   searchPlaceholder={tPicker('search')}
                   groups={groups}
                   onSelect={(item) => {
-                    onChange(item.base_currency.symbol)
+                    onChange(getBaseSymbol(item))
                     closeModal()
                   }}
-                  getSubtitle={(item) => item.base_currency.en}
+                  getSubtitle={(item) =>
+                    getBilingualAssetLabels(item, getBaseSymbol(item)).en
+                  }
                   getAfter={(item) =>
-                    value === item.base_currency.symbol ? (
+                    value === getBaseSymbol(item) ? (
                       <span className="text-accent">✓</span>
                     ) : undefined
                   }
