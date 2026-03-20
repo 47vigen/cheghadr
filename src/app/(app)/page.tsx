@@ -4,8 +4,9 @@ import dynamic from 'next/dynamic'
 import { useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@heroui/react'
-import { IconPlus } from '@tabler/icons-react'
+import { IconDownload, IconPlus } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
+import { toast } from 'sonner'
 
 import { AlertSummaryCard } from '@/components/alerts/alert-summary-card'
 import { AssetListItem } from '@/components/asset-list-item'
@@ -13,6 +14,9 @@ import { BiggestMoverCard } from '@/components/biggest-mover-card'
 import { CategoryFilterHeader } from '@/components/category-filter-header'
 import { DynamicLoader } from '@/components/dynamic-loader'
 import { EmptyState } from '@/components/empty-state'
+import { PortfolioDeleteModal } from '@/components/portfolio-delete-modal'
+import { PortfolioFormModal } from '@/components/portfolio-form-modal'
+import { PortfolioSelector } from '@/components/portfolio-selector'
 import { PortfolioDelta } from '@/components/portfolio-delta'
 import { PortfolioTotal } from '@/components/portfolio-total'
 import { AssetsSkeleton } from '@/components/skeletons/assets-skeleton'
@@ -23,6 +27,7 @@ import { Section } from '@/components/ui/section'
 
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
 import { useRouter } from '@/i18n/navigation'
+import { downloadCSV } from '@/lib/csv-download'
 import { computeBiggestMover } from '@/lib/portfolio-utils'
 import { api } from '@/trpc/react'
 
@@ -49,11 +54,23 @@ export default function AssetsPage() {
   const tNav = useTranslations('nav')
   const tAlerts = useTranslations('alerts')
   const tBreakdown = useTranslations('breakdown')
+  const tPortfolios = useTranslations('portfolios')
+  const tExport = useTranslations('export')
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [portfolioToDelete, setPortfolioToDelete] = useState<{
+    id: string
+    name: string
+    assetCount: number
+  } | null>(null)
+
+  const portfoliosQuery = api.portfolio.list.useQuery()
 
   const { data, isLoading, isError, error, refetch } = api.assets.list.useQuery(
-    undefined,
+    selectedPortfolioId ? { portfolioId: selectedPortfolioId } : undefined,
     {
       refetchInterval: 30 * 60 * 1000,
       refetchOnWindowFocus: true,
@@ -61,19 +78,37 @@ export default function AssetsPage() {
   )
 
   const historyQuery = api.portfolio.history.useQuery(
-    { days: 30 },
+    selectedPortfolioId
+      ? { days: 30, portfolioId: selectedPortfolioId }
+      : { days: 30 },
     { refetchInterval: 30 * 60 * 1000, refetchOnWindowFocus: true },
   )
 
-  const breakdownQuery = api.portfolio.breakdown.useQuery(undefined, {
-    refetchInterval: 30 * 60 * 1000,
-    refetchOnWindowFocus: true,
-  })
+  const breakdownQuery = api.portfolio.breakdown.useQuery(
+    selectedPortfolioId ? { portfolioId: selectedPortfolioId } : undefined,
+    {
+      refetchInterval: 30 * 60 * 1000,
+      refetchOnWindowFocus: true,
+    },
+  )
+
+  const deltaQuery = api.portfolio.delta.useQuery(
+    selectedPortfolioId ? { portfolioId: selectedPortfolioId } : undefined,
+    {
+      refetchInterval: 30 * 60 * 1000,
+      refetchOnWindowFocus: true,
+    },
+  )
 
   const alertsQuery = api.alerts.list.useQuery(undefined, {
     refetchInterval: 30 * 60 * 1000,
     refetchOnWindowFocus: true,
   })
+
+  const exportQuery = api.portfolio.export.useQuery(
+    selectedPortfolioId ? { portfolioId: selectedPortfolioId } : undefined,
+    { enabled: false },
+  )
 
   const { isRefreshing } = usePullToRefresh(async () => {
     await Promise.all([
@@ -81,6 +116,7 @@ export default function AssetsPage() {
       historyQuery.refetch(),
       alertsQuery.refetch(),
       breakdownQuery.refetch(),
+      deltaQuery.refetch(),
     ])
   })
 
@@ -90,6 +126,13 @@ export default function AssetsPage() {
     const stillExists = data.assets.some((a) => a.category === selectedCategory)
     if (!stillExists) setSelectedCategory(null)
   }, [data, selectedCategory])
+
+  // Reset portfolio selection if the selected portfolio was deleted
+  useEffect(() => {
+    if (!selectedPortfolioId || !portfoliosQuery.data) return
+    const stillExists = portfoliosQuery.data.some((p) => p.id === selectedPortfolioId)
+    if (!stillExists) setSelectedPortfolioId(null)
+  }, [portfoliosQuery.data, selectedPortfolioId])
 
   const biggestMover = useMemo(
     () => (data ? computeBiggestMover(data.assets, locale) : null),
@@ -110,6 +153,35 @@ export default function AssetsPage() {
       ) ?? null
     )
   }, [selectedCategory, breakdownQuery.data])
+
+  const handleExport = async () => {
+    const result = await exportQuery.refetch()
+    if (result.data && result.data.rowCount > 0) {
+      const dateStr = new Date().toISOString().split('T')[0]?.replace(/-/g, '') ?? ''
+      downloadCSV(result.data.csv, `cheghadr-export-${dateStr}.csv`)
+      toast.success(tExport('success', { count: result.data.rowCount }))
+    } else {
+      toast.info(tExport('empty'))
+    }
+  }
+
+  const handlePortfolioSelect = (id: string | null) => {
+    if (id === null) {
+      setSelectedPortfolioId(null)
+    } else {
+      setSelectedPortfolioId(id)
+    }
+    setSelectedCategory(null)
+  }
+
+  const hasMultiplePortfolios =
+    (portfoliosQuery.data?.length ?? 0) > 1
+
+  const defaultPortfolioId = portfoliosQuery.data?.[0]?.id
+
+  const portfolioToDeleteData = portfolioToDelete
+    ? portfolioToDelete
+    : null
 
   if (isError) {
     return (
@@ -132,13 +204,36 @@ export default function AssetsPage() {
 
       <PageShell>
         <div>
-          <Section header={tNav('assets')} variant="hero">
+          <Section
+            header={tNav('assets')}
+            variant="hero"
+            trailing={
+              <Button
+                isIconOnly
+                variant="ghost"
+                size="sm"
+                onPress={() => void handleExport()}
+                isDisabled={exportQuery.isFetching}
+                aria-label={tExport('button')}
+              >
+                <IconDownload size={18} />
+              </Button>
+            }
+          >
+            {hasMultiplePortfolios && portfoliosQuery.data && (
+              <PortfolioSelector
+                portfolios={portfoliosQuery.data}
+                selectedId={selectedPortfolioId}
+                onSelect={handlePortfolioSelect}
+                onCreate={() => setShowCreateModal(true)}
+              />
+            )}
             <PortfolioTotal
               totalIRT={data.totalIRT}
               usdSellPrice={data.usdSellPrice}
               eurSellPrice={data.eurSellPrice}
             />
-            <PortfolioDelta />
+            <PortfolioDelta portfolioId={selectedPortfolioId ?? undefined} />
             {data.stale && (
               <div className="mt-2">
                 <StalenessBanner
@@ -149,6 +244,7 @@ export default function AssetsPage() {
                       refetch(),
                       historyQuery.refetch(),
                       breakdownQuery.refetch(),
+                      deltaQuery.refetch(),
                     ])
                   }
                 />
@@ -246,7 +342,14 @@ export default function AssetsPage() {
               variant="primary"
               fullWidth
               size="sm"
-              onPress={() => router.push('/assets/add')}
+              onPress={() => {
+                const pid = selectedPortfolioId ?? defaultPortfolioId
+                if (pid) {
+                  router.push(`/assets/add?portfolioId=${pid}`)
+                } else {
+                  router.push('/assets/add')
+                }
+              }}
               className="inline-flex items-center justify-center gap-2"
             >
               <IconPlus size={18} className="shrink-0" aria-hidden />
@@ -255,6 +358,21 @@ export default function AssetsPage() {
           </div>
         </>
       )}
+
+      <PortfolioFormModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        mode="create"
+      />
+
+      <PortfolioDeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false)
+          setPortfolioToDelete(null)
+        }}
+        portfolio={portfolioToDeleteData}
+      />
     </>
   )
 }

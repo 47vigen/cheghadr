@@ -21,10 +21,11 @@ import { api } from '@/trpc/react'
 
 interface AssetPickerProps {
   priceData: unknown
+  portfolioId: string
   onSaved: () => void
 }
 
-export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
+export function AssetPicker({ priceData, portfolioId, onSaved }: AssetPickerProps) {
   const t = useTranslations('assets')
   const tPicker = useTranslations('picker')
   const locale = useLocale()
@@ -78,7 +79,7 @@ export function AssetPicker({ priceData, onSaved }: AssetPickerProps) {
       toast.error(t('toastAddError'))
       return
     }
-    addMutation.mutate({ symbol: sym, quantity })
+    addMutation.mutate({ symbol: sym, quantity, portfolioId })
   }
 
   return (

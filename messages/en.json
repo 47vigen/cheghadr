@@ -8,9 +8,14 @@
   "login": {
     "title": "Cheghadr?",
     "subtitle": "Sign in with Telegram to continue",
+    "subtitlePortfolio": "Log in to track your portfolio",
     "loading": "Signing in…",
     "errorTelegram": "Error signing in via Telegram",
     "error": "Sign in error"
+  },
+  "guest": {
+    "ctaBanner": "📊 Track your portfolio — Log in with Telegram",
+    "loginPrompt": "Log in to see your assets"
   },
   "assets": {
     "totalValue": "Total Portfolio Value",
@@ -161,6 +166,34 @@
     "window1W": "1 Week",
     "window1M": "1 Month",
     "windowALL": "All Time"
+  },
+  "portfolios": {
+    "consolidated": "All Portfolios",
+    "newPortfolio": "New Portfolio",
+    "createTitle": "Create Portfolio",
+    "renameTitle": "Rename Portfolio",
+    "deleteTitle": "Delete Portfolio",
+    "deleteConfirm": "Are you sure? {count} assets in this portfolio will be deleted.",
+    "deleteLastError": "You must have at least one portfolio",
+    "maxReached": "Maximum {max} portfolios allowed",
+    "name": "Portfolio name",
+    "namePlaceholder": "e.g. Savings",
+    "emoji": "Emoji",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "toastCreated": "Portfolio created",
+    "toastRenamed": "Portfolio renamed",
+    "toastDeleted": "Portfolio deleted",
+    "toastCreateError": "Error creating portfolio",
+    "toastRenameError": "Error renaming",
+    "toastDeleteError": "Error deleting portfolio"
+  },
+  "export": {
+    "button": "CSV Export",
+    "success": "{count} rows downloaded",
+    "empty": "No data to export",
+    "error": "Export error"
   },
   "categories": {
     "CURRENCY": "Currency",

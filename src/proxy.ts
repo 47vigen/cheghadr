@@ -11,8 +11,9 @@ export default auth((req) => {
 
   const isLoginPage = pathname === '/login'
   const isApiRoute = pathname.startsWith('/api/')
+  const isGuestPage = pathname === '/prices' || pathname === '/calculator'
 
-  if (isLoginPage || isApiRoute) return NextResponse.next()
+  if (isLoginPage || isApiRoute || isGuestPage) return NextResponse.next()
 
   if (
     process.env.NODE_ENV === 'development' &&
@@ -22,7 +23,9 @@ export default auth((req) => {
   }
 
   if (!req.auth) {
-    return NextResponse.redirect(new URL('/login', req.url))
+    const loginUrl = new URL('/login', req.url)
+    loginUrl.searchParams.set('callbackUrl', pathname)
+    return NextResponse.redirect(loginUrl)
   }
 
   return NextResponse.next()

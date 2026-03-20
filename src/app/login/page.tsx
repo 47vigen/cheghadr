@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { Spinner, Text } from '@heroui/react'
 import { signIn } from 'next-auth/react'
+import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
 import { env } from '@/env'
@@ -13,12 +14,18 @@ import { getRawInitData } from '@/utils/telegram'
 export default function LoginPage() {
   const router = useRouter()
   const t = useTranslations('login')
+  const searchParams = useSearchParams()
+  // biome-ignore lint/suspicious/noExplicitAny: callbackUrl is a dynamic string from URL params
+  const callbackUrl = (searchParams.get('callbackUrl') ?? '/') as any
   const widgetContainerRef = useRef<HTMLDivElement>(null)
   const [mode, setMode] = useState<'loading' | 'miniapp' | 'standalone'>(
     'loading',
   )
   const [error, setError] = useState<string | null>(null)
   const attemptedRef = useRef(false)
+
+  const isFromAssets = callbackUrl === '/'
+  const subtitleKey = isFromAssets ? 'subtitlePortfolio' : 'subtitle'
 
   useEffect(() => {
     if (attemptedRef.current) return
@@ -36,7 +43,7 @@ export default function LoginPage() {
     signIn('telegram-miniapp', { initData: rawInitData, redirect: false })
       .then((result) => {
         if (result?.ok) {
-          router.replace('/')
+          router.replace(callbackUrl)
         } else {
           setError(t('errorTelegram'))
           setMode('standalone')
@@ -46,7 +53,7 @@ export default function LoginPage() {
         setError(t('errorTelegram'))
         setMode('standalone')
       })
-  }, [router, t])
+  }, [router, t, callbackUrl])
 
   useEffect(() => {
     if (mode !== 'standalone') return
@@ -59,7 +66,7 @@ export default function LoginPage() {
       })
 
       if (result?.ok) {
-        router.push('/')
+        router.push(callbackUrl)
       } else {
         setError(t('error'))
       }
@@ -82,7 +89,7 @@ export default function LoginPage() {
       script.remove()
       delete window.onTelegramAuth
     }
-  }, [mode, router, t])
+  }, [mode, router, t, callbackUrl])
 
   if (mode === 'loading' || mode === 'miniapp') {
     return (
@@ -104,7 +111,7 @@ export default function LoginPage() {
         <Text className="font-display font-semibold text-2xl">
           {t('title')}
         </Text>
-        <Text className="text-muted-foreground text-sm">{t('subtitle')}</Text>
+        <Text className="text-muted-foreground text-sm">{t(subtitleKey)}</Text>
       </div>
 
       {error && <p className="error-text">{error}</p>}

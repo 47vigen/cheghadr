@@ -1,7 +1,29 @@
+import type { PrismaClient } from '@prisma/client'
+import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
-import { findBySymbol, parsePriceSnapshot, sortedGroupEntries } from '@/lib/prices'
+import { createPortfolioSnapshot } from '@/lib/portfolio'
+import {
+  findBySymbol,
+  getSellPriceBySymbol,
+  parsePriceSnapshot,
+  sortedGroupEntries,
+} from '@/lib/prices'
 import { protectedProcedure, router } from '@/server/api/trpc'
+
+const MAX_PORTFOLIOS = 10
+
+async function requireOwnedPortfolio(
+  db: PrismaClient,
+  id: string,
+  userId: string,
+) {
+  const portfolio = await db.portfolio.findUnique({ where: { id } })
+  if (!portfolio || portfolio.userId !== userId) {
+    throw new TRPCError({ code: 'NOT_FOUND' })
+  }
+  return portfolio
+}
 
 function getComparisonDate(window: string): Date | null {
   const now = new Date()
@@ -22,12 +44,107 @@ function getComparisonDate(window: string): Date | null {
   }
 }
 
+const portfolioIdInput = z.string().min(1).optional()
+
 export const portfolioRouter = router({
+  list: protectedProcedure.query(async ({ ctx }) => {
+    const portfolios = await ctx.db.portfolio.findMany({
+      where: { userId: ctx.user.id },
+      orderBy: { createdAt: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        emoji: true,
+        createdAt: true,
+        _count: { select: { assets: true } },
+      },
+    })
+
+    return portfolios.map((p) => ({
+      id: p.id,
+      name: p.name,
+      emoji: p.emoji,
+      createdAt: p.createdAt,
+      assetCount: p._count.assets,
+    }))
+  }),
+
+  create: protectedProcedure
+    .input(
+      z.object({
+        name: z.string().min(1).max(50),
+        emoji: z.string().max(4).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const count = await ctx.db.portfolio.count({
+        where: { userId: ctx.user.id },
+      })
+
+      if (count >= MAX_PORTFOLIOS) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: `Maximum ${MAX_PORTFOLIOS} portfolios allowed`,
+        })
+      }
+
+      return ctx.db.portfolio.create({
+        data: {
+          userId: ctx.user.id,
+          name: input.name,
+          emoji: input.emoji ?? null,
+        },
+      })
+    }),
+
+  rename: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().min(1),
+        name: z.string().min(1).max(50),
+        emoji: z.string().max(4).optional().nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await requireOwnedPortfolio(ctx.db, input.id, ctx.user.id)
+
+      return ctx.db.portfolio.update({
+        where: { id: input.id },
+        data: {
+          name: input.name,
+          ...(input.emoji !== undefined ? { emoji: input.emoji } : {}),
+        },
+      })
+    }),
+
+  delete: protectedProcedure
+    .input(z.object({ id: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      await requireOwnedPortfolio(ctx.db, input.id, ctx.user.id)
+
+      const totalPortfolios = await ctx.db.portfolio.count({
+        where: { userId: ctx.user.id },
+      })
+
+      if (totalPortfolios <= 1) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'You must have at least one portfolio',
+        })
+      }
+
+      await ctx.db.portfolio.delete({ where: { id: input.id } })
+
+      // Recreate consolidated snapshot without this portfolio's assets
+      void createPortfolioSnapshot(ctx.db, ctx.user.id, null)
+    }),
+
   history: protectedProcedure
     .input(
       z
         .object({
           days: z.number().int().min(1).max(365).default(30),
+          portfolioId: portfolioIdInput,
         })
         .optional(),
     )
@@ -36,9 +153,14 @@ export const portfolioRouter = router({
       const since = new Date()
       since.setDate(since.getDate() - days)
 
+      const portfolioFilter = input?.portfolioId
+        ? { portfolioId: input.portfolioId }
+        : { portfolioId: null }
+
       const snapshots = await ctx.db.portfolioSnapshot.findMany({
         where: {
           userId: ctx.user.id,
+          ...portfolioFilter,
           snapshotAt: { gte: since },
         },
         orderBy: { snapshotAt: 'asc' },
@@ -59,14 +181,18 @@ export const portfolioRouter = router({
       z
         .object({
           window: z.enum(['1D', '1W', '1M', 'ALL']).default('1D'),
+          portfolioId: portfolioIdInput,
         })
         .optional(),
     )
     .query(async ({ ctx, input }) => {
       const window = input?.window ?? '1D'
+      const portfolioFilter = input?.portfolioId
+        ? { portfolioId: input.portfolioId }
+        : { portfolioId: null }
 
       const current = await ctx.db.portfolioSnapshot.findFirst({
-        where: { userId: ctx.user.id },
+        where: { userId: ctx.user.id, ...portfolioFilter },
         orderBy: { snapshotAt: 'desc' },
         select: { id: true, snapshotAt: true, totalIRT: true },
       })
@@ -79,13 +205,14 @@ export const portfolioRouter = router({
         ? await ctx.db.portfolioSnapshot.findFirst({
             where: {
               userId: ctx.user.id,
+              ...portfolioFilter,
               snapshotAt: { lte: comparisonDate },
             },
             orderBy: { snapshotAt: 'desc' },
             select: { id: true, snapshotAt: true, totalIRT: true },
           })
         : await ctx.db.portfolioSnapshot.findFirst({
-            where: { userId: ctx.user.id },
+            where: { userId: ctx.user.id, ...portfolioFilter },
             orderBy: { snapshotAt: 'asc' },
             select: { id: true, snapshotAt: true, totalIRT: true },
           })
@@ -101,59 +228,116 @@ export const portfolioRouter = router({
       return { currentIRT, previousIRT, deltaIRT, deltaPct }
     }),
 
-  breakdown: protectedProcedure.query(async ({ ctx }) => {
-    const [latestSnap, priceSnap] = await Promise.all([
-      ctx.db.portfolioSnapshot.findFirst({
-        where: { userId: ctx.user.id },
-        orderBy: { snapshotAt: 'desc' },
-        select: { totalIRT: true, breakdown: true },
-      }),
-      ctx.db.priceSnapshot.findFirst({
-        orderBy: { snapshotAt: 'desc' },
-      }),
-    ])
-
-    if (!latestSnap) return null
-
-    const prices = parsePriceSnapshot(priceSnap?.data)
-    const totalIRT = Number(latestSnap.totalIRT)
-    if (totalIRT === 0) return null
-
-    type BreakdownItem = { symbol: string; quantity: number; valueIRT: number }
-    const items = Array.isArray(latestSnap.breakdown)
-      ? (latestSnap.breakdown as BreakdownItem[])
-      : []
-
-    const categoryMap = new Map<
-      string,
-      { valueIRT: number; assets: BreakdownItem[] }
-    >()
-
-    for (const item of items) {
-      const priceItem = findBySymbol(prices, item.symbol)
-      const category =
-        priceItem?.base_currency.category?.symbol ?? 'OTHER'
-      const existing = categoryMap.get(category) ?? {
-        valueIRT: 0,
-        assets: [],
-      }
-      existing.valueIRT += item.valueIRT
-      existing.assets.push(item)
-      categoryMap.set(category, existing)
-    }
-
-    const categories = sortedGroupEntries(categoryMap).map(
-      ([category, bucket]) => ({
-        category,
-        valueIRT: bucket.valueIRT,
-        percentage: (bucket.valueIRT / totalIRT) * 100,
-        assets: bucket.assets.map((a) => ({
-          ...a,
-          percentage: (a.valueIRT / totalIRT) * 100,
-        })),
-      }),
+  breakdown: protectedProcedure
+    .input(
+      z
+        .object({
+          portfolioId: portfolioIdInput,
+        })
+        .optional(),
     )
+    .query(async ({ ctx, input }) => {
+      const portfolioFilter = input?.portfolioId
+        ? { portfolioId: input.portfolioId }
+        : { portfolioId: null }
 
-    return { totalIRT, categories }
-  }),
+      const [latestSnap, priceSnap] = await Promise.all([
+        ctx.db.portfolioSnapshot.findFirst({
+          where: { userId: ctx.user.id, ...portfolioFilter },
+          orderBy: { snapshotAt: 'desc' },
+          select: { totalIRT: true, breakdown: true },
+        }),
+        ctx.db.priceSnapshot.findFirst({
+          orderBy: { snapshotAt: 'desc' },
+        }),
+      ])
+
+      if (!latestSnap) return null
+
+      const prices = parsePriceSnapshot(priceSnap?.data)
+      const totalIRT = Number(latestSnap.totalIRT)
+      if (totalIRT === 0) return null
+
+      type BreakdownItem = { symbol: string; quantity: number; valueIRT: number }
+      const items = Array.isArray(latestSnap.breakdown)
+        ? (latestSnap.breakdown as BreakdownItem[])
+        : []
+
+      const categoryMap = new Map<
+        string,
+        { valueIRT: number; assets: BreakdownItem[] }
+      >()
+
+      for (const item of items) {
+        const priceItem = findBySymbol(prices, item.symbol)
+        const category =
+          priceItem?.base_currency.category?.symbol ?? 'OTHER'
+        const existing = categoryMap.get(category) ?? {
+          valueIRT: 0,
+          assets: [],
+        }
+        existing.valueIRT += item.valueIRT
+        existing.assets.push(item)
+        categoryMap.set(category, existing)
+      }
+
+      const categories = sortedGroupEntries(categoryMap).map(
+        ([category, bucket]) => ({
+          category,
+          valueIRT: bucket.valueIRT,
+          percentage: (bucket.valueIRT / totalIRT) * 100,
+          assets: bucket.assets.map((a) => ({
+            ...a,
+            percentage: (a.valueIRT / totalIRT) * 100,
+          })),
+        }),
+      )
+
+      return { totalIRT, categories }
+    }),
+
+  export: protectedProcedure
+    .input(
+      z
+        .object({
+          portfolioId: portfolioIdInput,
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const portfolioFilter = input?.portfolioId
+        ? { portfolioId: input.portfolioId }
+        : { portfolioId: null }
+
+      const [snapshots, priceSnap] = await Promise.all([
+        ctx.db.portfolioSnapshot.findMany({
+          where: { userId: ctx.user.id, ...portfolioFilter },
+          orderBy: { snapshotAt: 'asc' },
+          select: {
+            snapshotAt: true,
+            totalIRT: true,
+            breakdown: true,
+          },
+        }),
+        ctx.db.priceSnapshot.findFirst({
+          orderBy: { snapshotAt: 'desc' },
+        }),
+      ])
+
+      const prices = parsePriceSnapshot(priceSnap?.data)
+      const usdSellPrice = getSellPriceBySymbol('USD', prices)
+
+      const header = 'date,totalIRT,totalUSD,breakdown_json'
+      const rows = snapshots.map((s) => {
+        const totalIRT = Number(s.totalIRT)
+        const totalUSD =
+          usdSellPrice > 0 ? (totalIRT / usdSellPrice).toFixed(2) : ''
+        const date = s.snapshotAt.toISOString().split('T')[0] ?? ''
+        const breakdown = JSON.stringify(s.breakdown).replace(/"/g, '""')
+        return `${date},${totalIRT},"${totalUSD}","${breakdown}"`
+      })
+
+      const csv = [header, ...rows].join('\n')
+      return { csv, rowCount: snapshots.length }
+    }),
 })

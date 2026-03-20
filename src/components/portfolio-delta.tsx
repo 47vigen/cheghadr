@@ -13,14 +13,18 @@ type DeltaWindow = '1D' | '1W' | '1M' | 'ALL'
 
 const WINDOWS: DeltaWindow[] = ['1D', '1W', '1M', 'ALL']
 
-export function PortfolioDelta() {
+interface PortfolioDeltaProps {
+  portfolioId?: string
+}
+
+export function PortfolioDelta({ portfolioId }: PortfolioDeltaProps = {}) {
   const [window, setWindow] = useState<DeltaWindow>('1D')
   const t = useTranslations('delta')
   const locale = useLocale()
   const { selectionChanged } = useTelegramHaptics()
 
   const { data, isLoading } = api.portfolio.delta.useQuery(
-    { window },
+    portfolioId ? { window, portfolioId } : { window },
     { refetchInterval: 30 * 60 * 1000 },
   )
 

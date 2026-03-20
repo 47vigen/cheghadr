@@ -36,7 +36,7 @@ describe('createPortfolioSnapshot', () => {
       data: { data: [] },
     })
 
-    const result = await createPortfolioSnapshot(db, 'user-1')
+    const result = await createPortfolioSnapshot(db, 'user-1', null)
 
     expect(result).toBeNull()
     expect(db.portfolioSnapshot.create).not.toHaveBeenCalled()
@@ -58,7 +58,7 @@ describe('createPortfolioSnapshot', () => {
     })
     db.portfolioSnapshot.findFirst.mockResolvedValue({ id: 'recent' })
 
-    const result = await createPortfolioSnapshot(db, 'user-1')
+    const result = await createPortfolioSnapshot(db, 'user-1', null)
 
     expect(result).toBeNull()
     expect(db.portfolioSnapshot.create).not.toHaveBeenCalled()
@@ -87,11 +87,12 @@ describe('createPortfolioSnapshot', () => {
       updatedAt: new Date(),
     }))
 
-    const result = await createPortfolioSnapshot(db, 'user-1')
+    const result = await createPortfolioSnapshot(db, 'user-1', null)
 
     expect(db.portfolioSnapshot.create).toHaveBeenCalledWith({
       data: {
         userId: 'user-1',
+        portfolioId: null,
         totalIRT: 1000000,
         breakdown: [{ symbol: 'USD', quantity: 2, valueIRT: 1000000 }],
       },

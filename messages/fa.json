@@ -8,9 +8,14 @@
   "login": {
     "title": "چه‌قدر؟",
     "subtitle": "برای ادامه با تلگرام وارد شوید",
+    "subtitlePortfolio": "برای پیگیری سبد دارایی خود وارد شوید",
     "loading": "در حال ورود…",
     "errorTelegram": "خطا در ورود از طریق تلگرام",
     "error": "خطا در ورود"
+  },
+  "guest": {
+    "ctaBanner": "📊 سبد دارایی خود را دنبال کنید — ورود با تلگرام",
+    "loginPrompt": "برای دیدن دارایی‌ها وارد شوید"
   },
   "assets": {
     "totalValue": "ارزش کل دارایی‌ها",
@@ -161,6 +166,34 @@
     "window1W": "۱ هفته",
     "window1M": "۱ ماه",
     "windowALL": "از ابتدا"
+  },
+  "portfolios": {
+    "consolidated": "همه سبدها",
+    "newPortfolio": "سبد جدید",
+    "createTitle": "ایجاد سبد",
+    "renameTitle": "تغییر نام سبد",
+    "deleteTitle": "حذف سبد",
+    "deleteConfirm": "آیا مطمئنید؟ {count} دارایی در این سبد حذف خواهد شد.",
+    "deleteLastError": "حداقل یک سبد باید وجود داشته باشد",
+    "maxReached": "حداکثر {max} سبد مجاز است",
+    "name": "نام سبد",
+    "namePlaceholder": "مثلاً پس‌انداز",
+    "emoji": "ایموجی",
+    "save": "ذخیره",
+    "cancel": "لغو",
+    "delete": "حذف",
+    "toastCreated": "سبد ایجاد شد",
+    "toastRenamed": "سبد تغییر نام یافت",
+    "toastDeleted": "سبد حذف شد",
+    "toastCreateError": "خطا در ایجاد سبد",
+    "toastRenameError": "خطا در تغییر نام",
+    "toastDeleteError": "خطا در حذف سبد"
+  },
+  "export": {
+    "button": "خروجی CSV",
+    "success": "{count} ردیف دانلود شد",
+    "empty": "داده‌ای برای خروجی وجود ندارد",
+    "error": "خطا در خروجی"
   },
   "categories": {
     "CURRENCY": "ارز",

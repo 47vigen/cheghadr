@@ -33,19 +33,36 @@ model User {
   assets             UserAsset[]
   portfolioSnaps     PortfolioSnapshot[]
   alerts             Alert[]
+  portfolios         Portfolio[]
+}
+
+model Portfolio {
+  id        String              @id @default(cuid())
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  name      String
+  emoji     String?
+  createdAt DateTime            @default(now())
+  assets    UserAsset[]
+  snapshots PortfolioSnapshot[]
+
+  @@index([userId])
 }
 
 model UserAsset {
-  id        String   @id @default(cuid())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
-  symbol    String
-  quantity  Decimal  @db.Decimal(24, 8)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String    @id @default(cuid())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolioId String
+  symbol      String
+  quantity    Decimal   @db.Decimal(24, 8)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  @@unique([userId, symbol])
+  @@unique([userId, symbol, portfolioId])
   @@index([userId])
+  @@index([portfolioId])
 }
 
 model PriceSnapshot {
@@ -57,14 +74,17 @@ model PriceSnapshot {
 }
 
 model PortfolioSnapshot {
-  id         String   @id @default(cuid())
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String
-  snapshotAt DateTime @default(now())
-  totalIRT   Decimal  @db.Decimal(24, 2)
-  breakdown  Json
+  id          String     @id @default(cuid())
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  portfolio   Portfolio? @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolioId String?
+  snapshotAt  DateTime   @default(now())
+  totalIRT    Decimal    @db.Decimal(24, 2)
+  breakdown   Json
 
   @@index([userId, snapshotAt(sort: Desc)])
+  @@index([portfolioId, snapshotAt(sort: Desc)])
 }
 
 model Alert {
