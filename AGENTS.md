@@ -5,6 +5,18 @@
 ### Project overview
 Cheghadr? (چه‌قدر؟) is a Persian (RTL) personal net worth tracker — a Telegram Mini App + standalone web app built with Next.js 16 (App Router, Turbopack), tRPC v11, Prisma 7 + Neon Serverless Postgres, and NextAuth v5 (Telegram credentials). See `docs/phase-1-plan.md` for full architecture.
 
+### Source layout (high level)
+- `src/app/` — App Router routes and API route handlers.
+- `src/providers/` — React providers (TRPC, locale, Telegram, client root).
+- `src/components/assets/`, `portfolio/`, `prices/`, `layout/`, `calculator/` — feature UI by domain; `components/ui/` — shared primitives.
+- `src/hooks/` — client hooks.
+- `src/lib/prices/`, `src/lib/alerts/` — domain helpers (barrels via `index` where applicable).
+- `src/server/` — tRPC routers, auth, cron helpers, Prisma client.
+- `src/trpc/` — React Query client, persistence, tRPC provider (`query-client` + `persister` + `react.tsx`).
+
+### React Query persistence
+The browser persists part of the TanStack Query cache to `localStorage` (`TRPC_QUERY_PERSIST_KEY`, buster `TRPC_QUERY_PERSIST_BUSTER` in `src/trpc/persister.ts`). Only **successful** queries are dehydrated, and **user-scoped tRPC routers** (`alerts`, `assets`, `portfolio`, `user`) are excluded; **`prices`** may be persisted. Bumping the buster invalidates all clients’ stored cache.
+
 ### Key commands
 See `package.json` scripts. Most-used:
 - `pnpm dev` — Next.js dev server (Turbopack) on port 3000

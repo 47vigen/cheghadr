@@ -118,7 +118,7 @@ export default function LoginPage() {
         <Text className="text-muted-foreground text-sm">{t(subtitleKey)}</Text>
       </div>
 
-      {error && <p className="error-text">{error}</p>}
+      {error && <p className="text-destructive text-xs">{error}</p>}
 
       <div ref={widgetContainerRef} />
     </div>

@@ -68,7 +68,7 @@ export function AssetEditModal({
                 {t('editTitle', { name: assetName })}
               </Modal.Heading>
             </Modal.Header>
-            <Modal.Body className="modal-body">
+            <Modal.Body className="flex flex-col gap-4 p-4">
               <TextField
                 value={newQuantity}
                 onChange={setNewQuantity}

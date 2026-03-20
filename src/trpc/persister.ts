@@ -5,7 +5,8 @@ import SuperJSON from 'superjson'
 import { localStorageAsync } from './storage'
 
 export const TRPC_QUERY_PERSIST_KEY = 'cheghadr-trpc-cache'
-export const TRPC_QUERY_PERSIST_BUSTER = 'cheghadr-v1'
+/** Bump when persisted cache shape or privacy rules change (drops old localStorage payload). */
+export const TRPC_QUERY_PERSIST_BUSTER = 'cheghadr-v2'
 export const TRPC_QUERY_PERSIST_MAX_AGE = 1_000 * 60 * 60 * 24 * 7
 
 export const trpcQueryPersister = createAsyncStoragePersister({

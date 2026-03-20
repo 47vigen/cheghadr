@@ -1,6 +1,8 @@
 import { QueryClient } from '@tanstack/react-query'
 import SuperJSON from 'superjson'
 
+import { shouldDehydrateTrpcQuery } from './should-dehydrate-query'
+
 export function makeQueryClient() {
   return new QueryClient({
     defaultOptions: {
@@ -12,7 +14,7 @@ export function makeQueryClient() {
       },
       dehydrate: {
         serializeData: SuperJSON.serialize,
-        shouldDehydrateQuery: () => true,
+        shouldDehydrateQuery: shouldDehydrateTrpcQuery,
       },
       hydrate: {
         deserializeData: SuperJSON.deserialize,

@@ -96,7 +96,7 @@ export function PortfolioFormModal({
                 {mode === 'create' ? t('createTitle') : t('renameTitle')}
               </Modal.Heading>
             </Modal.Header>
-            <Modal.Body className="modal-body flex flex-col gap-3">
+            <Modal.Body className="flex flex-col gap-3 p-4">
               <TextField
                 value={name}
                 onChange={setName}

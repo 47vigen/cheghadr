@@ -184,10 +184,6 @@
     pointer-events: none;
   }
 
-  .modal-body {
-    @apply flex flex-col gap-4 p-4;
-  }
-
   .section-header {
     font-family: var(--font-display);
     font-size: var(--section-label-size);
@@ -217,18 +213,6 @@
 
   .font-mono {
     font-family: var(--font-mono);
-  }
-
-  .error-text {
-    @apply text-destructive text-xs;
-  }
-
-  .fab-shadow {
-    box-shadow: 0 2px 12px oklch(0 0 0 / 0.15);
-  }
-
-  [data-theme="dark"] .fab-shadow {
-    box-shadow: 0 4px 16px oklch(0 0 0 / 0.45);
   }
 
   .placeholder-enter {

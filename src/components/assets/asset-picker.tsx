@@ -124,7 +124,7 @@ export function AssetPicker({
                     : tPicker('enterQuantity')}
                 </Modal.Heading>
               </Modal.Header>
-              <Modal.Body className="modal-body">
+              <Modal.Body className="flex flex-col gap-4 p-4">
                 <TextField value={quantity} onChange={setQuantity} fullWidth>
                   <Label>{tPicker('enterQuantity')}</Label>
                   <Input

@@ -1,21 +1,16 @@
-# Next.js template
+# Cheghadr? (چه‌قدر؟)
 
-This is a Next.js template with shadcn/ui.
+Persian (RTL) personal net worth tracker: Telegram Mini App and standalone web app. Stack: **Next.js 16** (App Router, Turbopack), **tRPC v11**, **Prisma 7** + Neon Postgres, **NextAuth v5** (Telegram), **HeroUI** + Tailwind CSS v4.
 
-## Adding components
+## Docs
 
-To add components to your app, run the following command:
+- **[AGENTS.md](AGENTS.md)** — commands, env gotchas, and repo conventions for agents and contributors.
+- **[docs/phase-1-plan.md](docs/phase-1-plan.md)** — architecture and product context.
 
-```bash
-npx shadcn@latest add button
-```
+## Scripts
 
-This will place the ui components in the `components` directory.
+See `package.json` for the full list. Common tasks: `pnpm dev`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm db:push`, `pnpm check`.
 
-## Using components
+## Adding UI primitives
 
-To use the components in your app, import them as follows:
-
-```tsx
-import { Button } from "@/components/ui/button";
-```
+This project uses HeroUI, not shadcn. For new primitives, follow existing patterns under `src/components/ui/` and HeroUI docs.

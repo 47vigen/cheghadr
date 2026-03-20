@@ -17,6 +17,7 @@ import {
   trpcQueryPersister,
 } from './persister'
 import { getQueryClient } from './query-client'
+import { shouldDehydrateTrpcQuery } from './should-dehydrate-query'
 
 export const api = createTRPCReact<AppRouter>()
 
@@ -46,6 +47,9 @@ export function TRPCReactProvider({ children }: { children: ReactNode }) {
           persister: trpcQueryPersister,
           maxAge: TRPC_QUERY_PERSIST_MAX_AGE,
           buster: TRPC_QUERY_PERSIST_BUSTER,
+          dehydrateOptions: {
+            shouldDehydrateQuery: shouldDehydrateTrpcQuery,
+          },
         }}
       >
         {children}

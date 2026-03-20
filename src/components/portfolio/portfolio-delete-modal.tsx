@@ -56,7 +56,7 @@ export function PortfolioDeleteModal({
             <Modal.Header>
               <Modal.Heading>{t('deleteTitle')}</Modal.Heading>
             </Modal.Header>
-            <Modal.Body className="modal-body">
+            <Modal.Body className="flex flex-col gap-4 p-4">
               <p className="text-foreground text-sm">
                 {t('deleteConfirm', { count: portfolio.assetCount })}
               </p>

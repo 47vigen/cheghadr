@@ -22,7 +22,7 @@ export function AssetsFab({
     <>
       <div aria-hidden className="app-main-fab-scroll-spacer" />
       <div
-        className="fab-shadow fixed start-2 end-2 p-1.5"
+        className="fixed start-2 end-2 p-1.5 shadow-[0_2px_12px_oklch(0_0_0/0.15)] dark:shadow-[0_4px_16px_oklch(0_0_0/0.45)]"
         style={{
           bottom: 'calc(var(--bottom-above-tabbar) + var(--bottom-safe))',
         }}
