@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { priceCategorySectionId } from '@/lib/prices/anchors'
 
-const SCROLL_ROOT_SELECTOR = 'main'
+const MAIN_SELECTOR = 'main'
 
 export function usePriceCategoryScrollSpy(
   categories: string[],
@@ -34,7 +34,7 @@ export function usePriceCategoryScrollSpy(
   }, [categoriesKey])
 
   useEffect(() => {
-    const main = document.querySelector(SCROLL_ROOT_SELECTOR)
+    const main = document.querySelector(MAIN_SELECTOR)
     if (!main || categories.length === 0) return
 
     let raf = 0
@@ -50,6 +50,7 @@ export function usePriceCategoryScrollSpy(
         const first = list[0]
         if (first === undefined) return
 
+        // Document scroll: activation line moves with <main>’s top edge + offset (viewport coords).
         const activationY = main.getBoundingClientRect().top + activationOffsetPx
         let next = first
         for (const cat of list) {
@@ -63,13 +64,13 @@ export function usePriceCategoryScrollSpy(
       })
     }
 
-    main.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('scroll', update, { passive: true })
     window.addEventListener('resize', update, { passive: true })
     update()
     const ro = new ResizeObserver(update)
     ro.observe(main)
     return () => {
-      main.removeEventListener('scroll', update)
+      window.removeEventListener('scroll', update)
       window.removeEventListener('resize', update)
       ro.disconnect()
       cancelAnimationFrame(raf)

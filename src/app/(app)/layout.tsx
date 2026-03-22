@@ -11,7 +11,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     <div className="flex min-h-svh flex-col">
       <DevLocaleSwitcher />
       <GuestLoginBanner />
-      <main className="overscroll-behavior-y-contain flex-1 overflow-y-auto bg-background pb-[calc(var(--tabbar-height,56px)+env(safe-area-inset-bottom))] [touch-action:pan-y]">
+      <main className="overscroll-behavior-y-contain flex-1 bg-background pb-[calc(var(--tabbar-height,56px)+env(safe-area-inset-bottom))] [touch-action:pan-y]">
         {children}
       </main>
       <BottomNav />
