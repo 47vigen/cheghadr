@@ -40,7 +40,7 @@ export function PriceCategoryNav({
   return (
     <nav
       className={clsx(
-        'sticky z-20 -mx-[var(--page-px)] border-border/80 border-b bg-background/90 px-[var(--page-px)] py-2 backdrop-blur-md',
+        'sticky z-[55] -mx-[var(--page-px)] border-border/80 border-b bg-background/90 px-[var(--page-px)] py-2 backdrop-blur-md',
         'top-0',
       )}
       aria-label="Price categories"
