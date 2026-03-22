@@ -4,11 +4,16 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { priceCategorySectionId } from '@/lib/prices/anchors'
 
-const MAIN_SELECTOR = 'main'
-
+/**
+ * Scroll spy for document/window scrolling. Uses a viewport-fixed horizontal scan line
+ * (activationOffsetPx from the top of the viewport), so active category updates while
+ * scrolling. Do not anchor the line to `main.getBoundingClientRect()` when the window
+ * scrolls — that keeps section offset from main’s top constant and breaks the spy.
+ */
 export function usePriceCategoryScrollSpy(
   categories: string[],
-  activationOffsetPx = 72,
+  /** Distance from viewport top to the scan line (px); place below sticky category chips. */
+  activationOffsetPx = 96,
 ) {
   const [activeId, setActiveId] = useState('')
   const programmaticUntil = useRef(0)
@@ -34,8 +39,7 @@ export function usePriceCategoryScrollSpy(
   }, [categoriesKey])
 
   useEffect(() => {
-    const main = document.querySelector(MAIN_SELECTOR)
-    if (!main || categories.length === 0) return
+    if (categories.length === 0) return
 
     let raf = 0
 
@@ -50,8 +54,7 @@ export function usePriceCategoryScrollSpy(
         const first = list[0]
         if (first === undefined) return
 
-        // Document scroll: activation line moves with <main>’s top edge + offset (viewport coords).
-        const activationY = main.getBoundingClientRect().top + activationOffsetPx
+        const activationY = activationOffsetPx
         let next = first
         for (const cat of list) {
           const el = document.getElementById(priceCategorySectionId(cat))
@@ -67,12 +70,9 @@ export function usePriceCategoryScrollSpy(
     window.addEventListener('scroll', update, { passive: true })
     window.addEventListener('resize', update, { passive: true })
     update()
-    const ro = new ResizeObserver(update)
-    ro.observe(main)
     return () => {
       window.removeEventListener('scroll', update)
       window.removeEventListener('resize', update)
-      ro.disconnect()
       cancelAnimationFrame(raf)
     }
   }, [categories.length, activationOffsetPx])
