@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { Input, TextField } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { PageShell } from '@/components/layout/page-shell'
+import { PriceCategoryNav } from '@/components/prices/price-category-nav'
 import { PriceSection } from '@/components/prices/price-section'
 import { StalenessBanner } from '@/components/prices/staleness-banner'
 import { PricesSkeleton } from '@/components/skeletons/prices-skeleton'
@@ -16,8 +17,10 @@ import {
 } from '@/components/ui/async-states'
 import { Section } from '@/components/ui/section'
 
+import { usePriceCategoryScrollSpy } from '@/hooks/use-price-category-scroll-spy'
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
 
+import { priceCategorySectionId } from '@/lib/prices/anchors'
 import {
   filterPriceItems,
   groupByCategory,
@@ -39,6 +42,21 @@ export default function PricesPage() {
       refetchInterval: TRPC_REFETCH_INTERVAL_MS,
       refetchOnWindowFocus: true,
     })
+
+  const filteredPrices = useMemo(() => {
+    if (!data?.data) return []
+    return filterPriceItems(parsePriceSnapshot(data.data), search)
+  }, [data, search])
+
+  const entries = useMemo(() => {
+    const grouped = groupByCategory(filteredPrices)
+    return sortedGroupEntries(grouped)
+  }, [filteredPrices])
+
+  const categoryIds = useMemo(() => entries.map(([c]) => c), [entries])
+
+  const { activeId, scrollToCategory } =
+    usePriceCategoryScrollSpy(categoryIds)
 
   const { isRefreshing } = usePullToRefresh(async () => {
     await refetch()
@@ -64,11 +82,6 @@ export default function PricesPage() {
       <EmptyState header={t('unavailable')} description={t('checkLater')} />
     )
   }
-
-  const prices = parsePriceSnapshot(data.data)
-  const filtered = filterPriceItems(prices, search)
-  const grouped = groupByCategory(filtered)
-  const entries = sortedGroupEntries(grouped)
 
   return (
     <>
@@ -96,6 +109,14 @@ export default function PricesPage() {
           </Section>
         </div>
 
+        {entries.length > 0 ? (
+          <PriceCategoryNav
+            categories={categoryIds}
+            activeId={activeId}
+            onSelect={scrollToCategory}
+          />
+        ) : null}
+
         {entries.length === 0 && search ? (
           <div>
             <EmptyState header={t('noResults')} />
@@ -109,7 +130,11 @@ export default function PricesPage() {
           </div>
         ) : (
           entries.map(([category, items]) => (
-            <div key={category}>
+            <div
+              key={category}
+              id={priceCategorySectionId(category)}
+              className="scroll-mt-[4.5rem]"
+            >
               <PriceSection category={category} items={items} />
             </div>
           ))
