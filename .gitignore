@@ -38,3 +38,5 @@ next-env.d.ts
 
 # next-agents-md
 .next-docs/
+# heroui-agents-md
+.heroui-docs/
