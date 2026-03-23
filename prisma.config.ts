@@ -1,10 +1,13 @@
-import { defineConfig } from 'prisma/config'
+import 'dotenv/config'
 
-// Prisma 7: migrate uses this URL. For Neon, point DATABASE_URL (or a dedicated
-// migrate script) at the unpooled/direct connection when needed.
+import { defineConfig, env } from 'prisma/config'
+
 export default defineConfig({
-  schema: './prisma/schema.prisma',
+  schema: 'prisma/schema.prisma',
+  migrations: {
+    path: 'prisma/migrations',
+  },
   datasource: {
-    url: process.env.DATABASE_URL ?? '',
+    url: env('DATABASE_URL'),
   },
 })
