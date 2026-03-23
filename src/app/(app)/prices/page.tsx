@@ -20,13 +20,13 @@ import { Section } from '@/components/ui/section'
 import { usePriceCategoryScrollSpy } from '@/hooks/use-price-category-scroll-spy'
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
 
-import { priceCategorySectionId } from '@/lib/prices/anchors'
 import {
   filterPriceItems,
   groupByCategory,
   parsePriceSnapshot,
   sortedGroupEntries,
 } from '@/lib/prices'
+import { priceCategorySectionId } from '@/lib/prices/anchors'
 import { TRPC_REFETCH_INTERVAL_MS } from '@/trpc/constants'
 import { api } from '@/trpc/react'
 
@@ -55,8 +55,7 @@ export default function PricesPage() {
 
   const categoryIds = useMemo(() => entries.map(([c]) => c), [entries])
 
-  const { activeId, scrollToCategory } =
-    usePriceCategoryScrollSpy(categoryIds)
+  const { activeId, scrollToCategory } = usePriceCategoryScrollSpy(categoryIds)
 
   const { isRefreshing } = usePullToRefresh(async () => {
     await refetch()
@@ -87,7 +86,7 @@ export default function PricesPage() {
     <>
       <RefreshIndicator isRefreshing={isRefreshing} />
 
-      <PageShell>
+      <PageShell className="pb-[max(1.5rem,var(--bottom-safe))]">
         <div>
           <Section header={tNav('prices')} variant="hero">
             <TextField value={search} onChange={setSearch} fullWidth>
