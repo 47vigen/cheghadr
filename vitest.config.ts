@@ -9,6 +9,26 @@ export default defineConfig({
     environment: 'node',
     globals: true,
     include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
+      include: [
+        'src/lib/**',
+        'src/server/**',
+        'src/types/**',
+        'src/trpc/**',
+        'src/hooks/**',
+      ],
+      exclude: [
+        'src/modules/API/**',
+        'src/**/__tests__/**',
+      ],
+      thresholds: {
+        lines: 70,
+        functions: 70,
+        branches: 60,
+      },
+    },
   },
   resolve: {
     alias: {
