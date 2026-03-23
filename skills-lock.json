@@ -9,7 +9,7 @@
     "heroui-react": {
       "source": "heroui-inc/heroui",
       "sourceType": "github",
-      "computedHash": "890ddb374d1baf208b4015e38ebb16b633596e3de575927075640b6480eef917"
+      "computedHash": "6116a849a6039e8b4d9dda3f6251c462e4ce8f583c53fda77838d0b2c124fe41"
     },
     "neon-postgres": {
       "source": "neondatabase/agent-skills",
