@@ -320,6 +320,116 @@ describe('appRouter — alerts', () => {
       }),
     ).rejects.toMatchObject({ code: 'BAD_REQUEST' })
   })
+
+  it('create accepts PRICE alert with symbol', async () => {
+    vi.mocked(db.alert.count).mockResolvedValue(0)
+    vi.mocked(db.alert.create).mockResolvedValue({ id: 'alert-new' } as never)
+    const caller = createCaller(db)
+
+    const result = await caller.alerts.create({
+      type: 'PRICE',
+      symbol: 'USD',
+      direction: 'ABOVE',
+      thresholdIRT: '1500000',
+    })
+
+    expect(result).toMatchObject({ id: 'alert-new' })
+  })
+
+  it('create accepts PORTFOLIO alert without symbol', async () => {
+    vi.mocked(db.alert.count).mockResolvedValue(0)
+    vi.mocked(db.alert.create).mockResolvedValue({ id: 'alert-portfolio' } as never)
+    const caller = createCaller(db)
+
+    const result = await caller.alerts.create({
+      type: 'PORTFOLIO',
+      direction: 'BELOW',
+      thresholdIRT: '10000000',
+    })
+
+    expect(result).toMatchObject({ id: 'alert-portfolio' })
+  })
+
+  it('delete removes the alert owned by the caller', async () => {
+    vi.mocked(db.alert.findUnique).mockResolvedValue({
+      id: 'a1',
+      userId: 'user-1',
+    } as never)
+    vi.mocked(db.alert.delete).mockResolvedValue({ id: 'a1' } as never)
+    const caller = createCaller(db)
+
+    await caller.alerts.delete({ id: 'a1' })
+
+    expect(db.alert.delete).toHaveBeenCalledWith({ where: { id: 'a1' } })
+  })
+
+  it('delete throws FORBIDDEN when alert belongs to another user', async () => {
+    vi.mocked(db.alert.findUnique).mockResolvedValue({
+      id: 'a1',
+      userId: 'other-user',
+    } as never)
+    const caller = createCaller(db)
+
+    await expect(caller.alerts.delete({ id: 'a1' })).rejects.toMatchObject({
+      code: 'FORBIDDEN',
+    })
+  })
+
+  it('delete throws NOT_FOUND when alert does not exist', async () => {
+    vi.mocked(db.alert.findUnique).mockResolvedValue(null)
+    const caller = createCaller(db)
+
+    await expect(caller.alerts.delete({ id: 'missing' })).rejects.toMatchObject({
+      code: 'NOT_FOUND',
+    })
+  })
+})
+
+describe('appRouter — assets (extended)', () => {
+  let db: PrismaClient
+
+  beforeEach(() => {
+    db = createMockDb()
+    vi.mocked(db.priceSnapshot.findFirst).mockResolvedValue({
+      snapshotAt: new Date(),
+      data: { data: [] },
+    } as never)
+  })
+
+  it('add upserts with decimal quantity', async () => {
+    vi.mocked(db.portfolio.findUnique).mockResolvedValue({
+      id: 'pf-1',
+      userId: 'user-1',
+    } as never)
+    vi.mocked(db.userAsset.upsert).mockResolvedValue({
+      id: 'asset-btc',
+      symbol: 'BTC',
+      quantity: '0.00123',
+      portfolioId: 'pf-1',
+    } as never)
+    const caller = createCaller(db)
+
+    const result = await caller.assets.add({
+      symbol: 'BTC',
+      quantity: '0.00123',
+      portfolioId: 'pf-1',
+    })
+
+    expect(result.symbol).toBe('BTC')
+    expect(result.quantity).toBe('0.00123')
+  })
+
+  it('list returns aggregated assets across portfolio', async () => {
+    vi.mocked(db.userAsset.findMany).mockResolvedValue([
+      { id: 'a1', symbol: 'USD', quantity: '10', portfolioId: 'pf-1' },
+      { id: 'a2', symbol: 'BTC', quantity: '0.5', portfolioId: 'pf-1' },
+    ] as never)
+    const caller = createCaller(db)
+
+    const result = await caller.assets.list()
+
+    expect(result.assets).toHaveLength(2)
+  })
 })
 
 describe('appRouter — portfolio', () => {
@@ -386,5 +496,48 @@ describe('appRouter — portfolio', () => {
         }),
       }),
     )
+  })
+
+  it('history returns empty array when no snapshots exist', async () => {
+    vi.mocked(db.portfolioSnapshot.findMany).mockResolvedValue([])
+    const caller = createCaller(db)
+
+    const result = await caller.portfolio.history({ days: 30 })
+
+    expect(result).toEqual([])
+  })
+
+  it('delete succeeds when user has more than one portfolio', async () => {
+    vi.mocked(db.portfolio.findUnique).mockResolvedValue({
+      id: 'p2',
+      userId: 'user-1',
+    } as never)
+    vi.mocked(db.portfolio.count).mockResolvedValue(2)
+    vi.mocked(db.portfolio.delete).mockResolvedValue({ id: 'p2' } as never)
+    const caller = createCaller(db)
+
+    await expect(caller.portfolio.delete({ id: 'p2' })).resolves.not.toThrow()
+    expect(db.portfolio.delete).toHaveBeenCalledWith({ where: { id: 'p2' } })
+  })
+
+  it('delete throws FORBIDDEN when portfolio belongs to another user', async () => {
+    vi.mocked(db.portfolio.findUnique).mockResolvedValue({
+      id: 'p1',
+      userId: 'other-user',
+    } as never)
+    const caller = createCaller(db)
+
+    await expect(caller.portfolio.delete({ id: 'p1' })).rejects.toMatchObject({
+      code: 'FORBIDDEN',
+    })
+  })
+
+  it('delete throws NOT_FOUND when portfolio does not exist', async () => {
+    vi.mocked(db.portfolio.findUnique).mockResolvedValue(null)
+    const caller = createCaller(db)
+
+    await expect(caller.portfolio.delete({ id: 'missing' })).rejects.toMatchObject({
+      code: 'NOT_FOUND',
+    })
   })
 })

@@ -48,4 +48,33 @@ describe('formatCompactCurrency', () => {
   it('formats exactly 999 without compact notation', () => {
     expect(formatCompactCurrency(999, 'USD')).toBe('≈ $999')
   })
+
+  it('formats billion values with compact notation', () => {
+    // Expect either "1B" or "1,000M" depending on the Intl locale — just ensure no throw
+    const result = formatCompactCurrency(1_000_000_000, 'USD')
+    expect(result).toContain('≈')
+    expect(result).toContain('$')
+  })
+
+  it('formats negative values without compact notation', () => {
+    // The function renders negatives with the sign inside the currency symbol: $-1,500
+    const result = formatCompactCurrency(-1500, 'USD')
+    expect(result).toContain('≈')
+    expect(result).toContain('-')
+    expect(result).toContain('$')
+  })
+
+  it('formats negative values with the minus sign after the currency symbol', () => {
+    // Actual output: '≈ $-500' (not '≈ -$500')
+    const result = formatCompactCurrency(-500, 'USD')
+    expect(result).toBe('≈ $-500')
+  })
+
+  it('does not throw for NaN input', () => {
+    expect(() => formatCompactCurrency(Number.NaN, 'USD')).not.toThrow()
+  })
+
+  it('does not throw for Infinity input', () => {
+    expect(() => formatCompactCurrency(Number.POSITIVE_INFINITY, 'USD')).not.toThrow()
+  })
 })

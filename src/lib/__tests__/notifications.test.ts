@@ -93,4 +93,59 @@ describe('NotificationQueue', () => {
     expect(first.sent).toBe(1)
     expect(second.sent).toBe(0)
   })
+
+  it('returns correct succeededAlertIds for mixed success/failure', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    let callCount = 0
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(() => {
+        callCount++
+        // a1 succeeds (call 1), a2 fails both attempts (calls 2 & 3 — retry after 2s),
+        // a3 succeeds (call 4)
+        const ok = callCount !== 2 && callCount !== 3
+        return Promise.resolve({
+          ok: true,
+          json: async () =>
+            ok
+              ? { ok: true, result: { message_id: callCount } }
+              : { ok: false, description: 'Blocked' },
+        })
+      }),
+    )
+
+    const queue = new NotificationQueue()
+    queue.enqueue({ telegramUserId: BigInt(1), text: 'msg1', alertId: 'a1' })
+    queue.enqueue({ telegramUserId: BigInt(2), text: 'msg2', alertId: 'a2' })
+    queue.enqueue({ telegramUserId: BigInt(3), text: 'msg3', alertId: 'a3' })
+
+    const drainPromise = queue.drain()
+    await vi.runAllTimersAsync()
+    const result = await drainPromise
+
+    expect(result.sent).toBe(2)
+    expect(result.failed).toBe(1)
+    expect(result.succeededAlertIds).toEqual(['a1', 'a3'])
+  })
+
+  it('succeededAlertIds does not contain failed alert ids', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ ok: false, description: 'User blocked bot' }),
+      }),
+    )
+
+    const queue = new NotificationQueue()
+    queue.enqueue({ telegramUserId: BigInt(111), text: 'msg', alertId: 'failed-alert' })
+
+    const drainPromise = queue.drain()
+    await vi.runAllTimersAsync()
+    const result = await drainPromise
+
+    expect(result.succeededAlertIds).not.toContain('failed-alert')
+    expect(result.succeededAlertIds).toHaveLength(0)
+  })
 })
