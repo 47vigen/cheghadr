@@ -3,6 +3,7 @@
 import { useState } from 'react'
 
 import { Button, Input, Label, Spinner, Text, TextField } from '@heroui/react'
+import { clsx } from 'clsx'
 import { IconBriefcase } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
@@ -82,7 +83,7 @@ export function CreateAlertForm() {
   }
 
   return (
-    <div className="flex flex-col gap-3 p-2">
+    <div className="flex flex-col gap-4 px-1 py-1">
       {atLimit && (
         <Text className="text-sm text-warning">
           {t('maxAlertsReached', { max: MAX_ACTIVE_ALERTS })}
@@ -90,20 +91,18 @@ export function CreateAlertForm() {
       )}
 
       {/* Asset / Portfolio selector */}
-      <div>
-        {/* Portfolio option */}
+      <div className="flex flex-col gap-3">
         <Button
           variant={isPortfolio ? 'primary' : 'secondary'}
           size="sm"
           fullWidth
-          className="mb-2"
+          className="justify-start gap-2"
           onPress={() => setSelectedSymbol(PORTFOLIO_SYMBOL)}
         >
-          <IconBriefcase size={14} />
+          <IconBriefcase size={14} className="shrink-0" />
           {t('selectPortfolio')}
         </Button>
 
-        {/* Asset selector (only when not Portfolio — hide when Portfolio selected) */}
         {prices.length > 0 && !isPortfolio && (
           <AssetSelector
             label={t('selectAsset')}
@@ -117,16 +116,14 @@ export function CreateAlertForm() {
         )}
       </div>
 
-      {/* Current price hint */}
       {currentPrice !== null && currentPrice > 0 && (
-        <Text className="ps-1 text-muted-foreground text-xs">
+        <Text className="text-muted-foreground text-xs leading-relaxed">
           {t('currentPrice', {
             price: formatIRT(currentPrice, locale),
           })}
         </Text>
       )}
 
-      {/* Direction toggles */}
       <div className="flex gap-2">
         <Button
           variant={direction === 'ABOVE' ? 'primary' : 'secondary'}
@@ -146,7 +143,6 @@ export function CreateAlertForm() {
         </Button>
       </div>
 
-      {/* Threshold input */}
       <TextField
         value={threshold}
         onChange={setThreshold}
@@ -159,6 +155,7 @@ export function CreateAlertForm() {
           inputMode="decimal"
           placeholder={t('thresholdPlaceholder')}
           dir={locale === 'fa' ? 'rtl' : 'ltr'}
+          className="px-3 py-2.5"
         />
       </TextField>
 
@@ -168,6 +165,11 @@ export function CreateAlertForm() {
         onPress={handleSubmit}
         isDisabled={!canSubmit}
         isPending={createMutation.isPending}
+        className={clsx(
+          canSubmit &&
+            !createMutation.isPending &&
+            'bg-success text-success-foreground hover:opacity-95',
+        )}
       >
         {({ isPending }) =>
           isPending ? <Spinner size="sm" color="current" /> : t('createButton')

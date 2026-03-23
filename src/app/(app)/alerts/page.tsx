@@ -91,12 +91,13 @@ export default function AlertsPage() {
               <Placeholder
                 variant="empty"
                 iconSize="md"
+                className="gap-1.5 py-4"
                 header={t('noAlerts')}
                 description={t('noAlertsDescription')}
               >
                 <IconBellPlus />
               </Placeholder>
-              <div className="mt-3">
+              <div className="mt-2">
                 <CreateAlertForm />
               </div>
             </>
@@ -128,10 +129,12 @@ export default function AlertsPage() {
 
       <div>
         <Section header={t('settings')}>
-          <div className="flex items-center justify-between gap-3 px-1 py-2">
-            <div className="min-w-0">
-              <Text className="font-medium text-sm">{t('dailyDigest')}</Text>
-              <Text className="text-muted-foreground text-xs">
+          <div className="flex items-start justify-between gap-3 px-1 py-2">
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <Text className="block font-medium text-sm leading-snug">
+                {t('dailyDigest')}
+              </Text>
+              <Text className="block text-muted-foreground text-xs leading-relaxed">
                 {t('dailyDigestDescription')}
               </Text>
             </div>

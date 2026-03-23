@@ -10,7 +10,11 @@ import { Placeholder } from '@/components/ui/placeholder'
 import { Section } from '@/components/ui/section'
 
 import type { PriceItem } from '@/lib/prices'
-import { getBaseSymbol, getLocalizedItemName } from '@/lib/prices'
+import {
+  getAssetListSubtitle,
+  getBaseSymbol,
+  getLocalizedItemName,
+} from '@/lib/prices'
 
 export interface AssetListGroup {
   category: string
@@ -21,7 +25,7 @@ export interface AssetListGroup {
 interface AssetListSurfaceProps {
   groups: AssetListGroup[]
   onSelect: (item: PriceItem) => void
-  getSubtitle?: (item: PriceItem) => string
+  getSubtitle?: (item: PriceItem) => string | undefined
   getAfter?: (item: PriceItem) => ReactNode
   emptyHeader: string
 }
@@ -39,21 +43,30 @@ export function AssetListSurface({
   return (
     <>
       {groups.map((group) => (
-        <Section key={group.category} header={group.categoryLabel}>
+        <Section
+          key={group.category}
+          header={group.categoryLabel}
+          headerRowClassName="px-4"
+        >
           {group.items.map((item) => {
             const icon = item.png ?? item.base_currency?.png
             const name = getLocalizedItemName(item, locale)
+            const sym = getBaseSymbol(item)
+            const subtitle =
+              getSubtitle === undefined
+                ? getAssetListSubtitle(item, locale, sym)
+                : getSubtitle(item)
             return (
               <Cell
                 key={item.symbol}
                 before={
                   <AssetAvatar
                     alt={name}
-                    symbol={getBaseSymbol(item)}
+                    symbol={sym}
                     src={icon}
                   />
                 }
-                subtitle={getSubtitle?.(item)}
+                subtitle={subtitle}
                 after={getAfter?.(item)}
                 onClick={() => onSelect(item)}
               >

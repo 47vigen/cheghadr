@@ -33,6 +33,26 @@ export function getLocalizedItemName(item: PriceItem, locale: string): string {
   )
 }
 
+/** Secondary line for asset lists: other language or symbol — never duplicates the primary title. */
+export function getAssetListSubtitle(
+  item: PriceItem,
+  locale: string,
+  symbol: string,
+): string | undefined {
+  const labels = getBilingualAssetLabels(item, symbol)
+  const primary = getLocalizedItemName(item, locale)
+  if (locale === 'fa') {
+    return labels.en && labels.en !== primary ? labels.en : undefined
+  }
+  if (labels.fa && labels.fa !== primary) {
+    return labels.fa
+  }
+  if (symbol && symbol !== primary) {
+    return symbol
+  }
+  return undefined
+}
+
 export function getLocalizedIrtName(locale: string): string {
   return locale === 'fa' ? IRT_ENTRY.fa : IRT_ENTRY.en
 }

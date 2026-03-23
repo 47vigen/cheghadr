@@ -12,6 +12,7 @@ export {
 } from './format'
 export type { BilingualDisplayNames } from './i18n'
 export {
+  getAssetListSubtitle,
   getBilingualAssetLabels,
   getLocalizedIrtName,
   getLocalizedItemName,
