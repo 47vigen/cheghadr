@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { PriceItem } from '@/lib/prices'
 import {
+  getAssetListSubtitle,
   getBilingualAssetLabels,
   getLocalizedItemName,
   pickDisplayName,
@@ -101,5 +102,34 @@ describe('getLocalizedItemName', () => {
     )
     expect(getLocalizedItemName(pi, 'en')).toBe('Dollar')
     expect(getLocalizedItemName(pi, 'fa')).toBe('دلار')
+  })
+})
+
+describe('getAssetListSubtitle', () => {
+  it('for fa locale returns English secondary line', () => {
+    const pi = item(
+      'USD',
+      { fa: 'دلار آمریکا', en: 'US Dollar' },
+      { fa: 'دلار', en: 'Dollar' },
+    )
+    expect(getAssetListSubtitle(pi, 'fa', 'USD')).toBe('US Dollar')
+  })
+
+  it('for en locale returns Persian when distinct from primary', () => {
+    const pi = item(
+      'AED',
+      { fa: 'درهم امارات', en: 'UAE Dirham' },
+      { fa: 'درهم', en: 'Dirham' },
+    )
+    expect(getAssetListSubtitle(pi, 'en', 'AED')).toBe('درهم امارات')
+  })
+
+  it('for en locale falls back to symbol when names match', () => {
+    const pi = item(
+      'USD',
+      { fa: 'US Dollar', en: 'US Dollar' },
+      { fa: 'US Dollar', en: 'US Dollar' },
+    )
+    expect(getAssetListSubtitle(pi, 'en', 'USD')).toBe('USD')
   })
 })

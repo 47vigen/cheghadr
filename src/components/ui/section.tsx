@@ -9,6 +9,8 @@ interface SectionProps {
   trailing?: ReactNode
   children: ReactNode
   className?: string
+  /** Extra classes for the header row (e.g. match inset with `Cell` rows). */
+  headerRowClassName?: string
   variant?: 'default' | 'hero'
 }
 
@@ -17,6 +19,7 @@ export function Section({
   trailing,
   children,
   className,
+  headerRowClassName,
   variant = 'default',
 }: SectionProps) {
   const isHero = variant === 'hero'
@@ -24,7 +27,12 @@ export function Section({
   return (
     <section className={className}>
       {(header != null || trailing != null) && (
-        <div className="mb-0.5 flex items-center justify-between px-2 py-0.5">
+        <div
+          className={clsx(
+            'mb-0.5 flex items-center justify-between px-2 py-0.5',
+            headerRowClassName,
+          )}
+        >
           {header != null && (
             <h2
               className={clsx('section-header', isHero && 'text-foreground/90')}

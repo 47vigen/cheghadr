@@ -36,14 +36,18 @@ export function Cell({
         className,
       )}
     >
-      {before && <div className="shrink-0">{before}</div>}
-      <div className="min-w-0 flex-1">
+      {before && (
+        <div className="flex shrink-0 items-center self-center">{before}</div>
+      )}
+      <div className="flex min-w-0 flex-1 flex-col justify-center gap-0.5">
         {subhead && (
-          <div className="mb-0 text-muted-foreground text-xs">{subhead}</div>
+          <div className="text-muted-foreground text-xs leading-tight">
+            {subhead}
+          </div>
         )}
-        <div className="truncate font-medium">{children}</div>
+        <div className="truncate font-medium leading-snug">{children}</div>
         {subtitle && (
-          <div className="mt-0 truncate text-muted-foreground text-sm">
+          <div className="truncate text-muted-foreground text-sm leading-snug">
             {subtitle}
           </div>
         )}

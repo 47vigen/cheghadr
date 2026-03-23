@@ -3,6 +3,8 @@
 import { useState } from 'react'
 
 import { Modal } from '@heroui/react'
+import { IconChevronDown } from '@tabler/icons-react'
+import { clsx } from 'clsx'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { AssetSearchPanel } from '@/components/assets/asset-search-panel'
@@ -15,7 +17,6 @@ import { useAssetSearchGroups } from '@/hooks/use-asset-search-groups'
 import type { PriceItem } from '@/lib/prices'
 import {
   getBaseSymbol,
-  getBilingualAssetLabels,
   getLocalizedIrtName,
   getLocalizedItemName,
   IRT_ENTRY,
@@ -33,7 +34,11 @@ function getCurrentDisplay(
   value: string,
   items: PriceItem[],
   locale: string,
+  placeholderLabel: string,
 ): { symbol: string; displayName: string; png: string | null } {
+  if (!value) {
+    return { symbol: '', displayName: placeholderLabel, png: null }
+  }
   if (value === 'IRT')
     return {
       symbol: IRT_ENTRY.symbol,
@@ -57,37 +62,58 @@ export function AssetSelector({
   cellClassName,
 }: AssetSelectorProps) {
   const tPicker = useTranslations('picker')
-  const tCat = useTranslations('categories')
   const locale = useLocale()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
 
   const groups = useAssetSearchGroups(items, search)
 
-  const current = getCurrentDisplay(value, items, locale)
+  const current = getCurrentDisplay(value, items, locale, label)
 
   const closeModal = () => {
     setOpen(false)
     setSearch('')
   }
 
+  const hasSelection = Boolean(value)
+
   return (
     <>
-      <Cell
-        className={cellClassName}
-        before={
-          <AssetAvatar
-            alt={current.displayName}
-            symbol={current.symbol}
-            src={current.png}
-          />
-        }
-        subhead={label}
-        subtitle={current.symbol}
-        onClick={() => setOpen(true)}
-      >
-        {current.displayName}
-      </Cell>
+      <div className="flex flex-col gap-1.5">
+        <span className="text-muted-foreground text-xs leading-tight">
+          {label}
+        </span>
+        <Cell
+          className={clsx(
+            'rounded-xl border border-border bg-default/40 px-1 transition-colors hover:bg-default/55',
+            cellClassName,
+          )}
+          before={
+            <AssetAvatar
+              alt={current.displayName}
+              symbol={current.symbol || '?'}
+              src={current.png}
+            />
+          }
+          subtitle={hasSelection ? current.symbol : undefined}
+          after={
+            <IconChevronDown
+              size={18}
+              className="shrink-0 text-muted-foreground"
+              aria-hidden
+            />
+          }
+          onClick={() => setOpen(true)}
+        >
+          <span
+            className={clsx(
+              !hasSelection && 'font-normal text-muted-foreground',
+            )}
+          >
+            {current.displayName}
+          </span>
+        </Cell>
+      </div>
 
       <Modal>
         <Modal.Backdrop
@@ -98,14 +124,15 @@ export function AssetSelector({
           }}
         >
           <Modal.Container>
-            <Modal.Dialog className="sm:max-w-[360px]">
+            <Modal.Dialog
+              className="sm:max-w-[360px]"
+              dir={locale === 'fa' ? 'rtl' : 'ltr'}
+            >
               <Modal.CloseTrigger />
-              <Modal.Header>
-                <Modal.Heading>
-                  {label} — {tPicker('selectAsset')}
-                </Modal.Heading>
+              <Modal.Header className="flex flex-col gap-1 pe-2">
+                <Modal.Heading>{tPicker('selectAsset')}</Modal.Heading>
               </Modal.Header>
-              <Modal.Body>
+              <Modal.Body className="max-h-[min(70vh,480px)] overflow-y-auto overflow-x-hidden px-1 pb-0">
                 <AssetSearchPanel
                   search={search}
                   onSearchChange={setSearch}
@@ -116,9 +143,6 @@ export function AssetSelector({
                     onChange(getBaseSymbol(item))
                     closeModal()
                   }}
-                  getSubtitle={(item) =>
-                    getBilingualAssetLabels(item, getBaseSymbol(item)).en
-                  }
                   getAfter={(item) =>
                     value === getBaseSymbol(item) ? (
                       <span className="text-accent">✓</span>
@@ -127,7 +151,10 @@ export function AssetSelector({
                   emptyHeader={tPicker('noResults')}
                   beforeList={
                     !search.trim() ? (
-                      <Section header={tCat('CURRENCY')}>
+                      <Section
+                        header={tPicker('iranianToman')}
+                        headerRowClassName="px-4"
+                      >
                         <Cell
                           before={
                             <AssetAvatar
