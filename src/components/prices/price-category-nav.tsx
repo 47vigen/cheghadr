@@ -1,8 +1,9 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
+
 import { clsx } from 'clsx'
 import { useTranslations } from 'next-intl'
-import { useEffect, useRef } from 'react'
 
 import { knownCategories } from '@/lib/prices'
 

@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
   generateEtags: false,
   poweredByHeader: false,
 
+  // Logging
+  logging: {
+    browserToTerminal: true,
+  },
+
   experimental: {
     cssChunking: true,
     optimizeServerReact: true,

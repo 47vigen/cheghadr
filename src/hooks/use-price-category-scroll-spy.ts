@@ -77,10 +77,12 @@ export function usePriceCategoryScrollSpy(
       if (el) observer.observe(el)
     }
 
-    const scrollRoot =
-      document.scrollingElement ?? document.documentElement
+    const scrollRoot = document.scrollingElement ?? document.documentElement
 
-    window.addEventListener('scroll', onScroll, { passive: true, capture: true })
+    window.addEventListener('scroll', onScroll, {
+      passive: true,
+      capture: true,
+    })
     scrollRoot.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', onScroll, { passive: true })
 

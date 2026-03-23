@@ -4,7 +4,7 @@ import { isTelegramWebApp } from '@/utils/telegram'
 
 export function downloadCSV(csv: string, filename: string) {
   // UTF-8 BOM ensures Excel correctly interprets the encoding (important for Persian text)
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
+  const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' })
   const url = URL.createObjectURL(blob)
 
   if (isTelegramWebApp()) {

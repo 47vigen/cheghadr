@@ -17,6 +17,8 @@
       "**/*.tsx",
       "**/*.json",
       "**/*.mdx",
+      "!.agent",
+      "!.agents",
       "!src/modules/API/Swagger/gen",
       "!src/modules/API/Swagger/pure",
       "!src/modules/API/Swagger/ecotrust/gen"
