@@ -106,12 +106,12 @@ export async function handleCallbacks(ctx: BotContext): Promise<void> {
               where: { userId: user.id, isActive: true },
             })
             if (activeCount >= MAX_ACTIVE_ALERTS) {
-              await ctx.answerCallbackQuery({
-                text: t(locale, 'bot.alerts.wizard.maxReached', {
+              await ctx.reply(
+                t(locale, 'bot.alerts.wizard.maxReached', {
                   max: MAX_ACTIVE_ALERTS,
                 }),
-                show_alert: true,
-              })
+                { parse_mode: 'HTML' },
+              )
               return
             }
           }

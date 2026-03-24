@@ -12,9 +12,9 @@ import { db } from '@/server/db'
 
 import { CB } from '../callback-data'
 import type { BotContext } from '../context'
-import { t, tCategory } from '../i18n'
-import { getLocale } from '../middleware/locale'
+import { type BotLocale, t, tCategory } from '../i18n'
 import { buildAssetList } from '../screens/portfolio'
+import { loadBotUserAndLocale } from './context'
 
 const PAGE_SIZE = 10
 
@@ -25,10 +25,7 @@ async function getLatestPrices() {
   return snap ? parsePriceSnapshot(snap.data) : []
 }
 
-function categorySelectionKeyboard(
-  categories: string[],
-  locale: ReturnType<typeof getLocale>,
-) {
+function categorySelectionKeyboard(categories: string[], locale: BotLocale) {
   const kb = new InlineKeyboard()
   for (let i = 0; i < categories.length; i += 2) {
     const a = categories[i]
@@ -46,7 +43,7 @@ function assetPageKeyboard(
   category: string,
   page: number,
   totalPages: number,
-  locale: ReturnType<typeof getLocale>,
+  locale: BotLocale,
 ) {
   const kb = new InlineKeyboard()
   for (const item of items) {
@@ -63,10 +60,9 @@ export async function assetAddWizard(
   conversation: Conversation<BotContext>,
   ctx: BotContext,
 ): Promise<void> {
-  const locale = getLocale(ctx)
-  const user = ctx.botUser
-
-  if (!user) return
+  const loaded = await loadBotUserAndLocale(conversation)
+  if (!loaded) return
+  const { user, locale } = loaded
 
   // ── Step 1: Category ────────────────────────────────────────────────────
   const prices = await conversation.external(() => getLatestPrices())
@@ -216,7 +212,7 @@ export async function assetAddWizard(
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
-async function showMain(ctx: Context, locale: ReturnType<typeof getLocale>) {
+async function showMain(ctx: Context, locale: BotLocale) {
   const { buildMainMenu } = await import('../screens/main')
   const { text, keyboard } = buildMainMenu(locale)
   await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
