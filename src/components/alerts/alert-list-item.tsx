@@ -2,14 +2,13 @@
 
 import { useState } from 'react'
 
-import { Button, Modal, Spinner, Switch, Text } from '@heroui/react'
+import { Button, Modal, Spinner, Switch } from '@heroui/react'
 import type { Alert } from '@prisma/client'
 import { IconBell, IconTrash } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 import { Cell } from '@/components/ui/cell'
-import { Section } from '@/components/ui/section'
 
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 
@@ -116,7 +115,7 @@ export function AlertListItem({ alert }: AlertListItemProps) {
 
       <Modal>
         <Modal.Backdrop isOpen={deleteOpen} onOpenChange={setDeleteOpen}>
-          <Modal.Container>
+          <Modal.Container placement="auto" size="md">
             <Modal.Dialog
               className="sm:max-w-[360px]"
               dir={locale === 'fa' ? 'rtl' : 'ltr'}
@@ -125,34 +124,34 @@ export function AlertListItem({ alert }: AlertListItemProps) {
               <Modal.Header>
                 <Modal.Heading>{t('deleteTitle')}</Modal.Heading>
               </Modal.Header>
-              <Modal.Body>
-                <Section>
-                  <Text className="mb-4 text-center text-muted-foreground text-sm">
-                    {t('deleteConfirm')}
-                  </Text>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="secondary"
-                      fullWidth
-                      onPress={() => setDeleteOpen(false)}
-                    >
-                      {t('cancel')}
-                    </Button>
-                    <Button
-                      variant="danger"
-                      fullWidth
-                      onPress={() => deleteMutation.mutate({ id: alert.id })}
-                      isDisabled={deleteMutation.isPending}
-                    >
-                      {deleteMutation.isPending ? (
-                        <Spinner size="sm" color="current" />
-                      ) : (
-                        t('delete')
-                      )}
-                    </Button>
-                  </div>
-                </Section>
+              <Modal.Body className="p-4">
+                <p className="text-center text-muted-foreground text-sm">
+                  {t('deleteConfirm')}
+                </p>
               </Modal.Body>
+              <Modal.Footer>
+                <Button
+                  variant="secondary"
+                  fullWidth
+                  size="lg"
+                  onPress={() => setDeleteOpen(false)}
+                >
+                  {t('cancel')}
+                </Button>
+                <Button
+                  variant="danger"
+                  fullWidth
+                  size="lg"
+                  onPress={() => deleteMutation.mutate({ id: alert.id })}
+                  isDisabled={deleteMutation.isPending}
+                >
+                  {deleteMutation.isPending ? (
+                    <Spinner size="sm" color="current" />
+                  ) : (
+                    t('delete')
+                  )}
+                </Button>
+              </Modal.Footer>
             </Modal.Dialog>
           </Modal.Container>
         </Modal.Backdrop>

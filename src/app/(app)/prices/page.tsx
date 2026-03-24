@@ -150,6 +150,7 @@ export default function PricesPage() {
               <Input
                 placeholder={t('search')}
                 type="search"
+                className="py-3"
                 dir={locale === 'fa' ? 'rtl' : 'ltr'}
               />
             </TextField>

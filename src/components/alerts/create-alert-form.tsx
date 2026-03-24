@@ -94,7 +94,6 @@ export function CreateAlertForm() {
       <div className="flex flex-col gap-3">
         <Button
           variant={isPortfolio ? 'primary' : 'secondary'}
-          size="sm"
           fullWidth
           className="justify-start gap-2"
           onPress={() => setSelectedSymbol(PORTFOLIO_SYMBOL)}
@@ -127,7 +126,6 @@ export function CreateAlertForm() {
       <div className="flex gap-2">
         <Button
           variant={direction === 'ABOVE' ? 'primary' : 'secondary'}
-          size="sm"
           fullWidth
           onPress={() => setDirection('ABOVE')}
         >
@@ -135,7 +133,6 @@ export function CreateAlertForm() {
         </Button>
         <Button
           variant={direction === 'BELOW' ? 'primary' : 'secondary'}
-          size="sm"
           fullWidth
           onPress={() => setDirection('BELOW')}
         >
@@ -155,13 +152,14 @@ export function CreateAlertForm() {
           inputMode="decimal"
           placeholder={t('thresholdPlaceholder')}
           dir={locale === 'fa' ? 'rtl' : 'ltr'}
-          className="px-3 py-2.5"
+          className="py-3"
         />
       </TextField>
 
       <Button
         variant="primary"
         fullWidth
+        size="lg"
         onPress={handleSubmit}
         isDisabled={!canSubmit}
         isPending={createMutation.isPending}

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { Button, Input, Label, Modal, Spinner, TextField } from '@heroui/react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
@@ -26,6 +26,7 @@ export function AssetEditModal({
   onOpenChange,
 }: AssetEditModalProps) {
   const t = useTranslations('assets')
+  const locale = useLocale()
   const [newQuantity, setNewQuantity] = useState(String(quantity))
 
   useEffect(() => {
@@ -60,8 +61,11 @@ export function AssetEditModal({
   return (
     <Modal>
       <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>
-        <Modal.Container>
-          <Modal.Dialog className="sm:max-w-[360px]">
+        <Modal.Container placement="auto" size="md">
+          <Modal.Dialog
+            className="sm:max-w-[360px]"
+            dir={locale === 'fa' ? 'rtl' : 'ltr'}
+          >
             <Modal.CloseTrigger />
             <Modal.Header>
               <Modal.Heading>
@@ -80,11 +84,15 @@ export function AssetEditModal({
                   type="number"
                   inputMode="decimal"
                   placeholder={t('editQuantityPlaceholder')}
+                  className="py-3"
                 />
               </TextField>
+            </Modal.Body>
+            <Modal.Footer>
               <Button
                 variant="primary"
                 fullWidth
+                size="lg"
                 onPress={handleUpdate}
                 isDisabled={updateMutation.isPending}
               >
@@ -94,7 +102,7 @@ export function AssetEditModal({
                   t('save')
                 )}
               </Button>
-            </Modal.Body>
+            </Modal.Footer>
           </Modal.Dialog>
         </Modal.Container>
       </Modal.Backdrop>

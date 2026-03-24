@@ -45,7 +45,7 @@ export function AssetSearchPanel({
         placeholder={searchPlaceholder}
         type="search"
         dir={locale === 'fa' ? 'rtl' : 'ltr'}
-        className="[appearance:textfield] [color-scheme:inherit] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
+        className="py-3 [appearance:textfield] [color-scheme:inherit] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
       />
     </TextField>
   )

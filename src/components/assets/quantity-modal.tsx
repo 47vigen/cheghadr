@@ -56,6 +56,7 @@ export function QuantityModal({
                   inputMode="decimal"
                   placeholder={tPicker('enterQuantity')}
                   dir={locale === 'fa' ? 'rtl' : 'ltr'}
+                  className="py-3"
                   autoFocus
                 />
               </TextField>
@@ -64,6 +65,7 @@ export function QuantityModal({
               <Button
                 variant="primary"
                 fullWidth
+                size="lg"
                 onPress={onSave}
                 isDisabled={isPending}
               >

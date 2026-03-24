@@ -63,6 +63,7 @@ export function PortfolioDeleteModal({
             <Modal.Footer>
               <Button
                 variant="ghost"
+                size="lg"
                 onPress={() => onOpenChange(false)}
                 isDisabled={deleteMutation.isPending}
               >
@@ -70,6 +71,7 @@ export function PortfolioDeleteModal({
               </Button>
               <Button
                 variant="danger"
+                size="lg"
                 onPress={() => deleteMutation.mutate({ id: portfolio.id })}
                 isDisabled={deleteMutation.isPending}
               >

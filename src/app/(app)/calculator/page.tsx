@@ -115,6 +115,7 @@ export default function CalculatorPage() {
               type="number"
               inputMode="decimal"
               placeholder={t('amountPlaceholder')}
+              className="py-3"
             />
           </TextField>
         </Section>
