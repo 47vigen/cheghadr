@@ -17,9 +17,11 @@ vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => `[${key}]`,
 }))
 
+import type { PriceItem } from '@/lib/prices'
+
 import { useAssetSearchGroups } from '../use-asset-search-groups'
 
-function makeItem(symbol: string, category: string, fa: string, en: string) {
+function makeItem(symbol: string, category: string, fa: string, en: string): PriceItem {
   return {
     symbol: `${symbol}-IRT`,
     price_source: {},
@@ -34,7 +36,7 @@ function makeItem(symbol: string, category: string, fa: string, en: string) {
     png: null,
     created_at: '2024-01-01T00:00:00Z',
     is_up_to_date: true,
-  }
+  } as PriceItem
 }
 
 const ITEMS = [
