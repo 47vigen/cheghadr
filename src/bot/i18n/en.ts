@@ -83,6 +83,8 @@ const en = {
         selectAsset: 'Select an asset:',
         enterQuantity: '💬 Enter the quantity:\n<i>e.g. 0.5 or 1000</i>',
         invalidQuantity: '❌ Please enter a positive number.',
+        noPortfolio:
+          '⚠️ No portfolio found. Please create one via the app first.',
         selectPortfolio: 'Select a destination portfolio:',
         created: '✅ Asset added successfully.',
         cancelled: '↩️ Asset addition cancelled.',

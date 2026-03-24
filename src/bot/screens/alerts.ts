@@ -1,4 +1,4 @@
-import type { InlineKeyboard } from 'grammy'
+import { InlineKeyboard } from 'grammy'
 
 import {
   findBySymbol,
@@ -8,12 +8,12 @@ import {
 } from '@/lib/prices'
 import { db } from '@/server/db'
 
+import { CB } from '../callback-data'
 import type { BotLocale } from '../i18n'
 import { t } from '../i18n'
 import {
   alertDeleteConfirmKeyboard,
   alertListFooterKeyboard,
-  alertRowKeyboard,
 } from '../keyboards/alerts'
 
 interface ScreenResult {
@@ -54,7 +54,9 @@ export async function buildAlertList(
   const dirAbove = t(locale, 'bot.alerts.dirAbove')
   const dirBelow = t(locale, 'bot.alerts.dirBelow')
 
+  const kb = new InlineKeyboard()
   const lines: string[] = [t(locale, 'bot.alerts.listTitle')]
+
   for (const alert of alerts) {
     const dir = alert.direction === 'ABOVE' ? dirAbove : dirBelow
     const threshold = formatThreshold(alert.thresholdIRT.toString(), locale)
@@ -72,10 +74,21 @@ export async function buildAlertList(
     }
 
     lines.push(`\n${status} ${label}`)
+
+    // Per-alert toggle/delete buttons
+    kb.text(status, CB.alertToggle(alert.id))
+      .text(t(locale, 'bot.alerts.deleteBtn'), CB.alertDeleteConfirm(alert.id))
+      .row()
+  }
+
+  // Footer buttons
+  const footer = alertListFooterKeyboard(locale)
+  for (const row of footer.inline_keyboard) {
+    kb.row(...row)
   }
 
   const text = lines.join('\n')
-  return { text, keyboard: alertListFooterKeyboard(locale) }
+  return { text, keyboard: kb }
 }
 
 export async function buildAlertDeleteConfirm(
@@ -95,5 +108,3 @@ export async function buildAlertDeleteConfirm(
     keyboard: alertDeleteConfirmKeyboard(locale, alertId),
   }
 }
-
-export { alertRowKeyboard }
