@@ -9,6 +9,8 @@ on:
   pull_request:
     branches:
       - production
+      - "claude/**"
+      - "cursor/**"
 
 jobs:
   ci:

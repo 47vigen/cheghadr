@@ -148,7 +148,7 @@ This project uses **HeroUI** (not shadcn/ui). For new primitives, follow existin
 
 ## Contributing
 
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
 
 ---
 
@@ -166,4 +166,4 @@ To report a security vulnerability, please see [SECURITY.md](SECURITY.md). Do **
 
 ## License
 
-[MIT](LICENSE) — Copyright (c) 2026 47vigen
+This project is licensed under the [MIT License](LICENSE) — Copyright (c) 2026 47vigen
