@@ -15,7 +15,9 @@ import {
 } from '@/server/api/helpers'
 import { protectedProcedure, router } from '@/server/api/trpc'
 
-const quantitySchema = positiveDecimalStringSchema('مقدار باید عددی مثبت باشد')
+const quantitySchema = positiveDecimalStringSchema(
+  'Quantity must be a positive number',
+)
 
 export const assetsRouter = router({
   list: protectedProcedure

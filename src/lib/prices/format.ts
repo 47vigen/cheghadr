@@ -3,13 +3,13 @@ export function getIntlLocale(locale: string): string {
   return locale === 'fa' ? 'fa-IR' : 'en-US'
 }
 
-export function formatIRT(value: number, locale = 'fa'): string {
+export function formatIRT(value: number, locale = 'en'): string {
   return new Intl.NumberFormat(getIntlLocale(locale)).format(Math.round(value))
 }
 
 export function formatChange(
   change: string | null | undefined,
-  locale = 'fa',
+  locale = 'en',
 ): {
   text: string
   positive: boolean

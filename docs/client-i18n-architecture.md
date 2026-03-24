@@ -2,6 +2,8 @@
 
 Design for migrating from server-side locale routing (`[locale]`) to client-only locale detection and message loading.
 
+**Product defaults (English-first):** New `User.preferredLocale` rows default to `en` in Prisma; the Telegram bot falls back to `en` when unset; auto-created portfolios use an English name; tRPC validation and error messages are in English. The **web UI language** still follows client detection (Telegram `language_code` / `navigator.language`), not the DB value on first paint.
+
 ---
 
 ## 1. LocaleProvider

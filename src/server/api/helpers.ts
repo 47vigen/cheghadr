@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { createPortfolioSnapshot } from '@/lib/portfolio'
 
 /** Default portfolio name when auto-creating (matches web `portfolio.ensureDefault`). */
-export const DEFAULT_PORTFOLIO_NAME = 'سبد اصلی'
+export const DEFAULT_PORTFOLIO_NAME = 'Main portfolio'
 
 type OwnedRecord = { userId: string }
 

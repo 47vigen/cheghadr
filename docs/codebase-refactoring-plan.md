@@ -223,7 +223,7 @@ model User {
   id                 String              @id @default(cuid())
   telegramUserId     BigInt              @unique
   dailyDigestEnabled Boolean             @default(false)
-  preferredLocale    PreferredLocale     @default(fa)
+  preferredLocale    PreferredLocale     @default(en)
   createdAt          DateTime            @default(now())
   // Missing: updatedAt DateTime @updatedAt
 }
@@ -250,7 +250,7 @@ model User {
   id                 String              @id @default(cuid())
   telegramUserId     BigInt              @unique
   dailyDigestEnabled Boolean             @default(false)
-  preferredLocale    PreferredLocale     @default(fa)
+  preferredLocale    PreferredLocale     @default(en)
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt        // NEW
   // ... relations
@@ -330,7 +330,7 @@ model User {
   id                   String              @id @default(cuid())
   telegramUserId       BigInt              @unique
   dailyDigestEnabled   Boolean             @default(false)
-  preferredLocale      PreferredLocale     @default(fa)
+  preferredLocale      PreferredLocale     @default(en)
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
 

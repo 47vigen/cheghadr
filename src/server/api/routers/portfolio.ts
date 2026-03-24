@@ -45,7 +45,7 @@ export const portfolioRouter = router({
     }))
   }),
 
-  /** Ensures the user has at least one portfolio (creates "سبد اصلی" if none). */
+  /** Ensures the user has at least one portfolio (creates "Main portfolio" if none). */
   ensureDefault: protectedProcedure.mutation(({ ctx }) =>
     ensureDefaultPortfolio(ctx.db, ctx.user.id),
   ),
@@ -65,7 +65,7 @@ export const portfolioRouter = router({
       if (count >= MAX_PORTFOLIOS) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: `حداکثر ${MAX_PORTFOLIOS} سبد مجاز است`,
+          message: `Maximum ${MAX_PORTFOLIOS} portfolios allowed`,
         })
       }
 
@@ -110,7 +110,7 @@ export const portfolioRouter = router({
       if (totalPortfolios <= 1) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: 'حداقل یک سبد باید وجود داشته باشد',
+          message: 'At least one portfolio must remain',
         })
       }
 

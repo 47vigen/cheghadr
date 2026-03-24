@@ -3,7 +3,7 @@
 ## Cursor Cloud specific instructions
 
 ### Project overview
-Cheghadr? (چه‌قدر؟) is a Persian (RTL) personal net worth tracker — a Telegram Mini App + standalone web app built with Next.js 16 (App Router, Turbopack), tRPC v11, Prisma 7 + Neon Serverless Postgres, and NextAuth v5 (Telegram credentials). See `docs/phase-1-plan.md` for full architecture.
+Cheghadr? (چه‌قدر؟) is a bilingual personal net worth tracker (English default, Persian supported) — a Telegram Mini App + standalone web app built with Next.js 16 (App Router, Turbopack), tRPC v11, Prisma 7 + Neon Serverless Postgres, and NextAuth v5 (Telegram credentials). See `docs/phase-1-plan.md` for full architecture.
 
 ### Source layout (high level)
 - `src/app/` — App Router routes and API route handlers.

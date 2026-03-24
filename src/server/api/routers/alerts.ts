@@ -10,7 +10,7 @@ import {
 import { protectedProcedure, router } from '@/server/api/trpc'
 
 const thresholdSchema = positiveDecimalStringSchema(
-  'آستانه باید عددی مثبت باشد',
+  'Threshold must be a positive number',
 )
 
 export const alertsRouter = router({
@@ -34,7 +34,7 @@ export const alertsRouter = router({
       if (input.type === 'PRICE' && !input.symbol) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: 'نماد دارایی برای هشدار قیمت الزامی است',
+          message: 'Asset symbol is required for price alerts',
         })
       }
 
@@ -45,7 +45,7 @@ export const alertsRouter = router({
       if (activeCount >= MAX_ACTIVE_ALERTS) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: `حداکثر ${MAX_ACTIVE_ALERTS} هشدار فعال مجاز است`,
+          message: `Maximum ${MAX_ACTIVE_ALERTS} active alerts allowed`,
         })
       }
 
@@ -60,7 +60,7 @@ export const alertsRouter = router({
           if (!item) {
             throw new TRPCError({
               code: 'BAD_REQUEST',
-              message: 'نماد دارایی معتبر نیست',
+              message: 'Invalid asset symbol',
             })
           }
         }
@@ -89,7 +89,7 @@ export const alertsRouter = router({
         if (activeCount >= MAX_ACTIVE_ALERTS) {
           throw new TRPCError({
             code: 'BAD_REQUEST',
-            message: `حداکثر ${MAX_ACTIVE_ALERTS} هشدار فعال مجاز است`,
+            message: `Maximum ${MAX_ACTIVE_ALERTS} active alerts allowed`,
           })
         }
       }

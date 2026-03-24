@@ -14,7 +14,7 @@ A comprehensive visual UX/UI review was conducted across all user flows of the C
 **Key findings:**
 - **Critical:** Missing back button on Add Asset page when running outside Telegram
 - **Critical:** Accessibility violation (missing DialogTitle) in AssetSelector modal
-- **High:** Locale defaults to English in standalone web; RTL not tested for Persian users
+- **High:** Standalone web often shows English from `navigator.language`; RTL for Persian (`fa`) not fully tested in review
 - **High:** Staleness banner lacks manual refresh CTA
 - **Medium:** Several alignment, touch target, and visual hierarchy improvements needed
 
@@ -48,7 +48,7 @@ A comprehensive visual UX/UI review was conducted across all user flows of the C
 
 | ID | Flow | Issue | Description |
 |----|------|-------|-------------|
-| H1 | General | **Locale defaults to English in standalone** | `LocaleProvider` detects locale from `WebApp.initDataUnsafe?.user?.language_code` or `navigator.language`. In browser dev, this often resolves to `en`, so the app shows English and LTR. Persian users in Telegram see `fa` + RTL. **Recommendation:** Add a locale switcher for standalone dev/testing, or document that Persian is only shown in Telegram. |
+| H1 | General | **UI locale follows client detection** | `LocaleProvider` uses Telegram `language_code` or `navigator.language` (mapped to `en` / `fa`). Standalone browser dev often gets `en` + LTR; Persian Telegram clients get `fa` + RTL. A dev locale switcher exists in development. Server-side defaults (new users, API messages) are English-first. |
 | H2 | Staleness | **No manual refresh CTA** | When prices are stale (>60 min), `StalenessBanner` shows "Prices may not be up to date" or "Last updated: X ago" but there is no "Refresh" or "Update prices" button. Users cannot manually trigger a refresh. **Fix:** Add a refresh button that calls `refetch()` on the prices query, or implement pull-to-refresh more prominently. |
 | H3 | Add Asset | **Full-page navigation vs modal** | Add Asset is a full page (`/assets/add`) rather than a modal/bottom sheet. PRD mentions Telegram Main Button and BackButton for sub-pages. For Telegram Mini Apps, a bottom sheet may feel more native. **Recommendation:** Consider converting Add Asset to a modal overlay for in-Telegram usage. |
 | H4 | Tabbar | **Safe area at bottom** | Tabbar may not account for `env(safe-area-inset-bottom)` on devices with home indicators. Content padding uses `--tabbar-height` (72px) but safe area could cause overlap on notched devices. **Fix:** Add `padding-bottom: env(safe-area-inset-bottom)` to tabbar container. |
@@ -146,7 +146,7 @@ A comprehensive visual UX/UI review was conducted across all user flows of the C
 | Calculator: From/To, amount, swap | ✅ | AssetSelector, Input, swap |
 | Telegram BackButton on sub-pages | ⚠️ | Only in Telegram; no fallback |
 | Telegram MainButton for primary actions | ✅ | useTelegramMainButton |
-| RTL + Persian | ✅ | LocaleProvider sets dir/lang |
+| RTL when locale is fa | ✅ | LocaleProvider sets dir/lang |
 | TelegramUI components | ✅ | Used throughout |
 | Vazirmatn font | ✅ | Applied |
 

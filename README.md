@@ -22,9 +22,9 @@
 [![Telegram Apps](https://img.shields.io/badge/Telegram_Apps-SDK-26A5E4?logo=telegram&logoColor=white&style=for-the-badge)](https://docs.telegram-mini-apps.com/)
 [![Vercel](https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white&style=for-the-badge)](https://vercel.com)
 
-**Persian (RTL) personal net worth tracker** — available as a Telegram Mini App and a standalone web application.
+**Bilingual personal net worth tracker** (English by default, Persian supported) — available as a Telegram Mini App and a standalone web application.
 
-Track your assets, monitor prices, visualize portfolio performance, and set price alerts — all in Farsi with full RTL support.
+Track your assets, monitor prices, visualize portfolio performance, and set price alerts. The UI follows Telegram `language_code` or the browser language when possible; **English** is the default for new database users, server validation messages, and auto-created portfolio names. **Persian (fa)** uses full RTL layout.
 
 ### Telegram
 
@@ -41,7 +41,7 @@ Track your assets, monitor prices, visualize portfolio performance, and set pric
 - **Net worth breakdown** — See your portfolio split by asset category
 - **Telegram Mini App** — Works natively inside Telegram on mobile — [open app](https://t.me/CheghadrAppBot/app)
 - **Standalone web app** — Also runs as a regular browser app with Telegram login widget
-- **Farsi / RTL** — Fully localized in Persian with RTL layout
+- **English + Persian** — next-intl with RTL when the active locale is `fa`
 
 ---
 
@@ -160,6 +160,7 @@ src/
 └── styles/               # Global CSS and theme variables
 prisma/
 ├── schema.prisma         # Data model
+├── migrations/           # SQL migrations (e.g. default column changes)
 └── seed.ts               # Database seed script
 docs/
 ├── cron-scheduling.md    # Production cron-job.org URLs, schedules, auth

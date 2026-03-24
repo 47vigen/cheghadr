@@ -177,7 +177,7 @@ describe('appRouter — portfolio ensureDefault', () => {
     expect(db.portfolio.create).toHaveBeenCalledWith({
       data: {
         userId: 'user-1',
-        name: 'سبد اصلی',
+        name: 'Main portfolio',
       },
       select: { id: true },
     })

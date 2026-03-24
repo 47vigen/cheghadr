@@ -128,8 +128,14 @@ describe('groupByCategory', () => {
 })
 
 describe('formatIRT', () => {
-  it('formats large numbers with Persian digits', () => {
+  it('formats large numbers with Western digits by default', () => {
     const result = formatIRT(1234567)
+    expect(result).toMatch(/[0-9]/)
+    expect(result).not.toMatch(/[۰-۹]/)
+  })
+
+  it('formats with Persian digits when locale is fa', () => {
+    const result = formatIRT(1234567, 'fa')
     expect(result).toMatch(/[۰-۹]/)
   })
 

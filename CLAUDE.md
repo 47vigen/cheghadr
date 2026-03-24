@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Cheghadr? (چه‌قدر؟) is a Persian (RTL) personal net worth tracker — a Telegram Mini App + standalone web app.
+Cheghadr? (چه‌قدر؟) is a bilingual personal net worth tracker (English default, Persian supported) — a Telegram Mini App + standalone web app.
 
-**Stack:** Next.js 16 (App Router, Turbopack) · TypeScript 5 (strict) · tRPC v11 · Prisma 7 + Neon Serverless PostgreSQL · NextAuth v5 (Telegram provider) · HeroUI v3 · Tailwind CSS v4 · Jotai · TanStack React Query v5 · next-intl (Persian + English)
+**Stack:** Next.js 16 (App Router, Turbopack) · TypeScript 5 (strict) · tRPC v11 · Prisma 7 + Neon Serverless PostgreSQL · NextAuth v5 (Telegram provider) · HeroUI v3 · Tailwind CSS v4 · Jotai · TanStack React Query v5 · next-intl (English + Persian)
 
 ## Commands
 
@@ -61,7 +61,7 @@ Auth runs in `src/proxy.ts` (Next.js 16 proxy, Node.js runtime) — **not** Edge
 
 ### i18n
 
-Persian (fa) is the primary locale. Translations live in `src/i18n/`. The app is RTL.
+English (`en`) is the default locale in config and for new `User.preferredLocale` rows; Persian (`fa`) is fully supported with RTL. The web client picks `en` or `fa` from Telegram `language_code` or `navigator.language` (`LocaleProvider`). Translations live in `messages/*.json` and `src/i18n/`.
 
 ### Database models
 
