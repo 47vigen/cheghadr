@@ -4,7 +4,30 @@ import { z } from 'zod'
 
 import { createPortfolioSnapshot } from '@/lib/portfolio'
 
+/** Default portfolio name when auto-creating (matches web `portfolio.ensureDefault`). */
+export const DEFAULT_PORTFOLIO_NAME = 'سبد اصلی'
+
 type OwnedRecord = { userId: string }
+
+/** Ensures the user has at least one portfolio; creates {@link DEFAULT_PORTFOLIO_NAME} if none. */
+export async function ensureDefaultPortfolio(
+  db: PrismaClient,
+  userId: string,
+): Promise<{ id: string }> {
+  const existing = await db.portfolio.findFirst({
+    where: { userId },
+    orderBy: { createdAt: 'asc' },
+    select: { id: true },
+  })
+  if (existing) return existing
+  return db.portfolio.create({
+    data: {
+      userId,
+      name: DEFAULT_PORTFOLIO_NAME,
+    },
+    select: { id: true },
+  })
+}
 
 async function requireOwnedRecord<T extends OwnedRecord>(
   findUnique: () => Promise<T | null>,

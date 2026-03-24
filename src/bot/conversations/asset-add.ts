@@ -8,6 +8,10 @@ import {
   parsePriceSnapshot,
   sortedGroupEntries,
 } from '@/lib/prices'
+import {
+  ensureDefaultPortfolio,
+  refreshPortfolioSnapshotsAfterAssetChange,
+} from '@/server/api/helpers'
 import { db } from '@/server/db'
 
 import { CB } from '../callback-data'
@@ -69,6 +73,14 @@ export async function assetAddWizard(
   const grouped = groupByCategory(prices)
   const categories = sortedGroupEntries(grouped).map(([cat]) => cat)
 
+  if (categories.length === 0) {
+    await ctx.editMessageText(t(locale, 'bot.assets.wizard.noPriceData'), {
+      parse_mode: 'HTML',
+    })
+    setTimeout(() => showMain(ctx, locale), 2000)
+    return
+  }
+
   await ctx.editMessageText(t(locale, 'bot.assets.wizard.selectCategory'), {
     parse_mode: 'HTML',
     reply_markup: categorySelectionKeyboard(categories, locale),
@@ -103,6 +115,7 @@ export async function assetAddWizard(
         symbol: item.base_currency?.symbol ?? '',
         name: getLocalizedItemName(item, locale),
       }))
+      .filter((row) => row.symbol.length > 0)
 
     const editCtx = selectedSymbol === undefined ? catCtx : ctx
     await editCtx.editMessageText(t(locale, 'bot.assets.wizard.selectAsset'), {
@@ -143,6 +156,9 @@ export async function assetAddWizard(
     }
   }
 
+  const symbol = selectedSymbol
+  if (!symbol) return
+
   // ── Step 3: Quantity (free text) ─────────────────────────────────────────
   await ctx.editMessageText(t(locale, 'bot.assets.wizard.enterQuantity'), {
     parse_mode: 'HTML',
@@ -165,36 +181,29 @@ export async function assetAddWizard(
   }
 
   // ── Step 4: Save (upsert) ─────────────────────────────────────────────────
-  // Find or get default portfolio
   const portfolio = await conversation.external(() =>
-    db.portfolio.findFirst({ where: { userId: user.id } }),
+    ensureDefaultPortfolio(db, user.id),
   )
 
-  if (!portfolio) {
-    await ctx.reply(t(locale, 'bot.assets.wizard.noPortfolio'), {
-      parse_mode: 'HTML',
-    })
-    return
-  }
-
-  await conversation.external(() =>
-    db.userAsset.upsert({
+  await conversation.external(async () => {
+    await db.userAsset.upsert({
       where: {
         userId_symbol_portfolioId: {
           userId: user.id,
-          symbol: selectedSymbol!,
+          symbol,
           portfolioId: portfolio.id,
         },
       },
       update: { quantity },
       create: {
         userId: user.id,
-        symbol: selectedSymbol!,
+        symbol,
         portfolioId: portfolio.id,
         quantity,
       },
-    }),
-  )
+    })
+    refreshPortfolioSnapshotsAfterAssetChange(db, user.id, portfolio.id)
+  })
 
   const successMsg = await ctx.reply(t(locale, 'bot.assets.wizard.created'), {
     parse_mode: 'HTML',
