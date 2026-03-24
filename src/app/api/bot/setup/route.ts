@@ -3,10 +3,27 @@ import { NextResponse } from 'next/server'
 
 import { verifyCronAuth } from '@/server/cron/auth'
 
+/**
+ * Webhook base must be a stable public HTTPS origin. `VERCEL_URL` is tied to
+ * one deployment and changes on every deploy, which breaks Telegram webhooks.
+ */
 function resolveBaseUrl(): string {
-  return process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : (process.env.NEXTAUTH_URL ?? 'http://localhost:3000')
+  const nextAuth = process.env.NEXTAUTH_URL?.replace(/\/$/, '')
+  if (nextAuth?.startsWith('https://')) {
+    return nextAuth
+  }
+
+  const productionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  if (productionHost) {
+    const host = productionHost.replace(/^https?:\/\//, '').replace(/\/$/, '')
+    return `https://${host}`
+  }
+
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`
+  }
+
+  return nextAuth ?? 'http://localhost:3000'
 }
 
 function webhookUnreachableWarning(baseUrl: string): string | undefined {
