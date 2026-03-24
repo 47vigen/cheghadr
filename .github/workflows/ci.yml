@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - production
+      - "claude/**"
+      - "cursor/**"
+  pull_request:
+    branches:
+      - production
+      - "claude/**"
+      - "cursor/**"
+
+jobs:
+  ci:
+    name: Typecheck, Lint, Test
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/cheghadr"
+      SKIP_ENV_VALIDATION: 1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+        env:
+          SKIP_ENV_VALIDATION: 1
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+        env:
+          SKIP_ENV_VALIDATION: 1

@@ -40,7 +40,6 @@ describe('usePlatform', () => {
 
   it('uses WebApp.platform when it is not "unknown"', async () => {
     const WebApp = (await import('@twa-dev/sdk')).default
-    // @ts-expect-error — mocked module
     WebApp.platform = 'ios'
 
     const { usePlatform } = await import('../use-platform')
@@ -54,7 +53,6 @@ describe('usePlatform', () => {
 
   it('falls back to UAParser OS when WebApp platform is unknown', async () => {
     const WebApp = (await import('@twa-dev/sdk')).default
-    // @ts-expect-error — mocked module
     WebApp.platform = 'unknown'
 
     const { usePlatform } = await import('../use-platform')
