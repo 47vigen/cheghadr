@@ -5,8 +5,6 @@ import { webhookCallback } from 'grammy'
 
 import { createBot } from '@/bot/index'
 
-export const runtime = 'nodejs'
-
 export async function POST(request: NextRequest): Promise<Response> {
   const secret = request.headers.get('x-telegram-bot-api-secret-token')
   if (secret !== process.env.TELEGRAM_WEBHOOK_SECRET) {

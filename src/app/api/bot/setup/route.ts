@@ -3,8 +3,6 @@ import { NextResponse } from 'next/server'
 
 import { verifyCronAuth } from '@/server/cron/auth'
 
-export const runtime = 'nodejs'
-
 function resolveBaseUrl(): string {
   return process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
