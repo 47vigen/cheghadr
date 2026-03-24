@@ -152,7 +152,10 @@ describe('validateInitData — boundary cases', () => {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([k, v]) => `${k}=${v}`)
       .join('\n')
-    const hash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex')
+    const hash = crypto
+      .createHmac('sha256', secretKey)
+      .update(dataCheckString)
+      .digest('hex')
     params.set('hash', hash)
 
     const result = validateInitData(params.toString(), BOT_TOKEN)

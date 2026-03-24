@@ -139,7 +139,11 @@ describe('NotificationQueue', () => {
     )
 
     const queue = new NotificationQueue()
-    queue.enqueue({ telegramUserId: BigInt(111), text: 'msg', alertId: 'failed-alert' })
+    queue.enqueue({
+      telegramUserId: BigInt(111),
+      text: 'msg',
+      alertId: 'failed-alert',
+    })
 
     const drainPromise = queue.drain()
     await vi.runAllTimersAsync()

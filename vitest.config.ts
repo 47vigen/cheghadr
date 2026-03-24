@@ -19,10 +19,7 @@ export default defineConfig({
         'src/trpc/**',
         'src/hooks/**',
       ],
-      exclude: [
-        'src/modules/API/**',
-        'src/**/__tests__/**',
-      ],
+      exclude: ['src/modules/API/**', 'src/**/__tests__/**'],
       thresholds: {
         lines: 70,
         functions: 70,

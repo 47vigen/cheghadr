@@ -313,7 +313,13 @@ describe('evaluatePriceAlerts', () => {
       data: {
         data: [
           {
-            base_currency: { symbol: 'USD', category: null, png: null, fa: 'دلار', en: 'USD' },
+            base_currency: {
+              symbol: 'USD',
+              category: null,
+              png: null,
+              fa: 'دلار',
+              en: 'USD',
+            },
             name: { fa: 'دلار', en: 'US Dollar' },
             sell_price: '0', // zero price
             change: '0',
@@ -323,7 +329,11 @@ describe('evaluatePriceAlerts', () => {
       },
     }
 
-    const drainPromise = evaluatePriceAlerts(db, badSnapshot, makeSnapshot('1400000'))
+    const drainPromise = evaluatePriceAlerts(
+      db,
+      badSnapshot,
+      makeSnapshot('1400000'),
+    )
     await vi.runAllTimersAsync()
     const result = await drainPromise
 

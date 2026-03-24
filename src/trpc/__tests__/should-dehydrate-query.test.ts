@@ -80,27 +80,23 @@ describe('shouldDehydrateTrpcQuery', () => {
   const USER_SCOPED_ROUTERS = ['alerts', 'assets', 'portfolio', 'user'] as const
   const PUBLIC_ROUTERS = ['prices'] as const
 
-  it.each(USER_SCOPED_ROUTERS)(
-    'blocks SSR for user-scoped router: %s',
-    (router) => {
-      expect(
-        shouldDehydrateTrpcQuery(
-          q({ queryKey: [[router, 'list']], state: { status: 'success' } }),
-        ),
-      ).toBe(false)
-    },
-  )
+  it.each(
+    USER_SCOPED_ROUTERS,
+  )('blocks SSR for user-scoped router: %s', (router) => {
+    expect(
+      shouldDehydrateTrpcQuery(
+        q({ queryKey: [[router, 'list']], state: { status: 'success' } }),
+      ),
+    ).toBe(false)
+  })
 
-  it.each(PUBLIC_ROUTERS)(
-    'allows SSR for public router: %s',
-    (router) => {
-      expect(
-        shouldDehydrateTrpcQuery(
-          q({ queryKey: [[router, 'latest']], state: { status: 'success' } }),
-        ),
-      ).toBe(true)
-    },
-  )
+  it.each(PUBLIC_ROUTERS)('allows SSR for public router: %s', (router) => {
+    expect(
+      shouldDehydrateTrpcQuery(
+        q({ queryKey: [[router, 'latest']], state: { status: 'success' } }),
+      ),
+    ).toBe(true)
+  })
 
   it('blocks user-scoped routers regardless of procedure name', () => {
     for (const router of USER_SCOPED_ROUTERS) {

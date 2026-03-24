@@ -21,14 +21,30 @@ import type { PriceItem } from '@/lib/prices'
 
 import { useAssetSearchGroups } from '../use-asset-search-groups'
 
-function makeItem(symbol: string, category: string, fa: string, en: string): PriceItem {
+function makeItem(
+  symbol: string,
+  category: string,
+  fa: string,
+  en: string,
+): PriceItem {
   return {
     symbol: `${symbol}-IRT`,
     price_source: {},
     // groupByCategory reads item.base_currency?.category?.symbol
-    base_currency: { symbol, category: { symbol: category }, png: null, fa, en },
+    base_currency: {
+      symbol,
+      category: { symbol: category },
+      png: null,
+      fa,
+      en,
+    },
     name: { symbol, category: { symbol: category }, fa, en },
-    quote_currency: { symbol: 'IRT', category: { symbol: 'CURRENCY' }, fa: 'تومان', en: 'Toman' },
+    quote_currency: {
+      symbol: 'IRT',
+      category: { symbol: 'CURRENCY' },
+      fa: 'تومان',
+      en: 'Toman',
+    },
     sell_price: '1000',
     buy_price: '1000',
     is_tradable: true,
@@ -73,7 +89,9 @@ describe('useAssetSearchGroups', () => {
   })
 
   it('returns empty groups when search matches nothing', () => {
-    const { result } = renderHook(() => useAssetSearchGroups(ITEMS, 'xyznotfound'))
+    const { result } = renderHook(() =>
+      useAssetSearchGroups(ITEMS, 'xyznotfound'),
+    )
 
     expect(result.current).toHaveLength(0)
   })
@@ -90,7 +108,9 @@ describe('useAssetSearchGroups', () => {
     const itemsWithUnknownCat = [
       makeItem('XYZ', 'EXOTIC_UNKNOWN', 'ایکس', 'XYZ'),
     ]
-    const { result } = renderHook(() => useAssetSearchGroups(itemsWithUnknownCat, ''))
+    const { result } = renderHook(() =>
+      useAssetSearchGroups(itemsWithUnknownCat, ''),
+    )
 
     const group = result.current.find((g) => g.category === 'EXOTIC_UNKNOWN')
     // Unknown categories use the raw symbol as the label (not run through tCat)

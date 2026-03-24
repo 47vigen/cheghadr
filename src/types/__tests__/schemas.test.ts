@@ -22,7 +22,9 @@ describe('parseBreakdownJson', () => {
   })
 
   it('accepts decimal quantity and valueIRT', () => {
-    const raw = [{ symbol: 'BTC', quantity: 0.00123456, valueIRT: 5_000_000_000.5 }]
+    const raw = [
+      { symbol: 'BTC', quantity: 0.00123456, valueIRT: 5_000_000_000.5 },
+    ]
     expect(parseBreakdownJson(raw)).toEqual(raw)
   })
 
@@ -37,7 +39,9 @@ describe('parseBreakdownJson', () => {
   })
 
   it('strips extra fields and returns only schema fields', () => {
-    const raw = [{ symbol: 'USD', quantity: 1, valueIRT: 100, extra: 'ignored' }]
+    const raw = [
+      { symbol: 'USD', quantity: 1, valueIRT: 100, extra: 'ignored' },
+    ]
     const result = parseBreakdownJson(raw)
     expect(result).toEqual([{ symbol: 'USD', quantity: 1, valueIRT: 100 }])
     expect((result[0] as Record<string, unknown>).extra).toBeUndefined()

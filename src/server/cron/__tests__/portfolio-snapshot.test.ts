@@ -6,7 +6,9 @@ vi.mock('@/lib/portfolio', () => ({
 }))
 
 vi.mock('@/lib/telegram-bot', () => ({
-  sendBotMessageWithRetry: vi.fn().mockResolvedValue({ success: true, messageId: 1 }),
+  sendBotMessageWithRetry: vi
+    .fn()
+    .mockResolvedValue({ success: true, messageId: 1 }),
 }))
 
 import { createPortfolioSnapshot } from '@/lib/portfolio'
@@ -97,7 +99,9 @@ describe('runPortfolioCron', () => {
         preferredLocale: 'fa',
       },
     ] as never)
-    vi.mocked(db.portfolio.findMany).mockResolvedValue([{ id: 'pf-1' }] as never)
+    vi.mocked(db.portfolio.findMany).mockResolvedValue([
+      { id: 'pf-1' },
+    ] as never)
 
     // null means "recent snapshot already exists, skipped"
     vi.mocked(createPortfolioSnapshot).mockResolvedValue(null)
@@ -141,7 +145,9 @@ describe('runPortfolioCron', () => {
   it('prunes old portfolio snapshots and returns pruned count', async () => {
     const db = createMockDb()
     vi.mocked(db.user.findMany).mockResolvedValue([])
-    vi.mocked(db.portfolioSnapshot.deleteMany).mockResolvedValue({ count: 7 } as never)
+    vi.mocked(db.portfolioSnapshot.deleteMany).mockResolvedValue({
+      count: 7,
+    } as never)
 
     const runPromise = runPortfolioCron(db)
     await vi.runAllTimersAsync()

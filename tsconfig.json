@@ -31,5 +31,5 @@
     "commitlint.config.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "prisma"]
+  "exclude": [".agents", "node_modules", "prisma"]
 }

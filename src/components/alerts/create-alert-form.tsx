@@ -3,8 +3,8 @@
 import { useState } from 'react'
 
 import { Button, Input, Label, Spinner, Text, TextField } from '@heroui/react'
-import { clsx } from 'clsx'
 import { IconBriefcase } from '@tabler/icons-react'
+import { clsx } from 'clsx'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 

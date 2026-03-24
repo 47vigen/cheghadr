@@ -59,13 +59,7 @@ export function AssetListSurface({
             return (
               <Cell
                 key={item.symbol}
-                before={
-                  <AssetAvatar
-                    alt={name}
-                    symbol={sym}
-                    src={icon}
-                  />
-                }
+                before={<AssetAvatar alt={name} symbol={sym} src={icon} />}
                 subtitle={subtitle}
                 after={getAfter?.(item)}
                 onClick={() => onSelect(item)}

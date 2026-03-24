@@ -75,6 +75,8 @@ describe('formatCompactCurrency', () => {
   })
 
   it('does not throw for Infinity input', () => {
-    expect(() => formatCompactCurrency(Number.POSITIVE_INFINITY, 'USD')).not.toThrow()
+    expect(() =>
+      formatCompactCurrency(Number.POSITIVE_INFINITY, 'USD'),
+    ).not.toThrow()
   })
 })

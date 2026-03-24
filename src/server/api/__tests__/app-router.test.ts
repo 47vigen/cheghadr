@@ -338,7 +338,9 @@ describe('appRouter — alerts', () => {
 
   it('create accepts PORTFOLIO alert without symbol', async () => {
     vi.mocked(db.alert.count).mockResolvedValue(0)
-    vi.mocked(db.alert.create).mockResolvedValue({ id: 'alert-portfolio' } as never)
+    vi.mocked(db.alert.create).mockResolvedValue({
+      id: 'alert-portfolio',
+    } as never)
     const caller = createCaller(db)
 
     const result = await caller.alerts.create({
@@ -379,9 +381,11 @@ describe('appRouter — alerts', () => {
     vi.mocked(db.alert.findUnique).mockResolvedValue(null)
     const caller = createCaller(db)
 
-    await expect(caller.alerts.delete({ id: 'missing' })).rejects.toMatchObject({
-      code: 'NOT_FOUND',
-    })
+    await expect(caller.alerts.delete({ id: 'missing' })).rejects.toMatchObject(
+      {
+        code: 'NOT_FOUND',
+      },
+    )
   })
 })
 
@@ -536,7 +540,9 @@ describe('appRouter — portfolio', () => {
     vi.mocked(db.portfolio.findUnique).mockResolvedValue(null)
     const caller = createCaller(db)
 
-    await expect(caller.portfolio.delete({ id: 'missing' })).rejects.toMatchObject({
+    await expect(
+      caller.portfolio.delete({ id: 'missing' }),
+    ).rejects.toMatchObject({
       code: 'NOT_FOUND',
     })
   })

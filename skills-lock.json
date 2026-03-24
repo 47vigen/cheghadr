@@ -24,7 +24,7 @@
     "next-browser": {
       "source": "vercel-labs/next-browser",
       "sourceType": "github",
-      "computedHash": "30e14b4b0b1c498a2ed217ebbe1ffc89dabd2a5b7d06c6ce96e2d15d914b9a8a"
+      "computedHash": "59416ec0113bc9d7310d75c668d4067fb8edea656a51d822b22e60fb069edea9"
     },
     "prisma-cli": {
       "source": "prisma/skills",
