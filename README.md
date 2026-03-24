@@ -22,9 +22,9 @@
 [![Telegram Apps](https://img.shields.io/badge/Telegram_Apps-SDK-26A5E4?logo=telegram&logoColor=white&style=for-the-badge)](https://docs.telegram-mini-apps.com/)
 [![Vercel](https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white&style=for-the-badge)](https://vercel.com)
 
-**Personal net worth tracker** available as a Telegram Mini App and a standalone web application.
+---
 
-Track your assets, monitor prices, visualize portfolio performance, and set price alerts.
+**Personal net worth tracker** available as a Telegram Mini App and a standalone web application. Track your assets, monitor prices, visualize portfolio performance, and set price alerts.
 
 ## Features
 
