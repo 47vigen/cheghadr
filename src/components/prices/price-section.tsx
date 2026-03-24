@@ -11,9 +11,10 @@ import { knownCategories } from '@/lib/prices'
 interface PriceSectionProps {
   category: string
   items: PriceItem[]
+  onPress?: (item: PriceItem) => void
 }
 
-export function PriceSection({ category, items }: PriceSectionProps) {
+export function PriceSection({ category, items, onPress }: PriceSectionProps) {
   const tCat = useTranslations('categories')
   const label = knownCategories.has(category)
     ? tCat(category as Parameters<typeof tCat>[0])
@@ -22,7 +23,7 @@ export function PriceSection({ category, items }: PriceSectionProps) {
   return (
     <Section header={label}>
       {items.map((item) => (
-        <PriceRow key={item.symbol} item={item} />
+        <PriceRow key={item.symbol} item={item} onPress={onPress} />
       ))}
     </Section>
   )

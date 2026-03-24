@@ -12,9 +12,10 @@ import { formatIRT, getBaseSymbol, getLocalizedItemName } from '@/lib/prices'
 
 interface PriceRowProps {
   item: PriceItem
+  onPress?: (item: PriceItem) => void
 }
 
-export function PriceRow({ item }: PriceRowProps) {
+export function PriceRow({ item, onPress }: PriceRowProps) {
   const locale = useLocale()
   const t = useTranslations('assets')
   const icon = item.png ?? item.base_currency?.png
@@ -26,6 +27,7 @@ export function PriceRow({ item }: PriceRowProps) {
       before={
         <AssetAvatar alt={name} symbol={getBaseSymbol(item)} src={icon} />
       }
+      onClick={onPress ? () => onPress(item) : undefined}
       after={
         <div className="flex flex-col items-end gap-0.5">
           <Text
