@@ -7,6 +7,7 @@ import { handleCallbacks } from './handlers/callbacks'
 import { handleMessage } from './handlers/message'
 import { userMiddleware } from './middleware/user'
 import { prismaSessionAdapter } from './session/adapter'
+import { conversationContextStorageAdapter } from './session/conversation-storage'
 import type { SessionData } from './session/types'
 
 export function createBot(): Bot<BotContext> {
@@ -24,8 +25,16 @@ export function createBot(): Bot<BotContext> {
     }),
   )
 
-  // 2. Conversations plugin (must come after session)
-  bot.use(conversations<BotContext, BotContext>())
+  // 2. Conversations plugin (must come after session; persist state in ctx.session for webhooks)
+  bot.use(
+    conversations<BotContext, BotContext>({
+      storage: {
+        type: 'context',
+        version: 1,
+        adapter: conversationContextStorageAdapter,
+      },
+    }),
+  )
 
   // Conversations use dynamic imports to avoid circular deps
   // Cast is safe: at runtime OC=BotContext guarantees session/botUser are present

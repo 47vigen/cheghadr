@@ -1,4 +1,6 @@
+import type { ConversationData, VersionedState } from '@grammyjs/conversations'
+
 export interface SessionData {
-  // Grammy conversations plugin stores its own wizard state here automatically.
-  // No additional app-level ephemeral fields are needed.
+  /** Persisted replay state for @grammyjs/conversations (see conversation-storage). */
+  grammyConversations?: VersionedState<ConversationData>
 }

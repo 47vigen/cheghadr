@@ -28,6 +28,14 @@ export async function handleCallbacks(ctx: BotContext): Promise<void> {
     return
   }
 
+  if (screen === 'wz') {
+    console.warn(
+      '[bot/callbacks] Wizard callback with no active conversation:',
+      data,
+    )
+    return
+  }
+
   // ── Home ────────────────────────────────────────────────────────────────
   if (screen === 'h') {
     const { text, keyboard } = await buildMainMenu(user.id, locale)
