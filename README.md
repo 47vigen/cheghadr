@@ -5,22 +5,9 @@
 [![Telegram Mini App](https://img.shields.io/badge/Telegram-Mini_App-26A5E4?logo=telegram&logoColor=white&style=for-the-badge)](https://t.me/CheghadrAppBot/app)
 [![Telegram Bot](https://img.shields.io/badge/Telegram-%40CheghadrAppBot-26A5E4?logo=telegram&logoColor=white&style=for-the-badge)](https://t.me/CheghadrAppBot)
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white&style=for-the-badge)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white&style=for-the-badge)](https://www.typescriptlang.org/)
 [![tRPC](https://img.shields.io/badge/tRPC-11-2596BE?logo=trpc&logoColor=white&style=for-the-badge)](https://trpc.io/)
-[![TanStack Query](https://img.shields.io/badge/TanStack_Query-5-FF4154?logo=reactquery&logoColor=white&style=for-the-badge)](https://tanstack.com/query/latest)
 [![Prisma](https://img.shields.io/badge/Prisma-7-2D3748?logo=prisma&logoColor=white&style=for-the-badge)](https://www.prisma.io/)
 [![Neon](https://img.shields.io/badge/Neon-00E5BF?logo=neon&logoColor=black&style=for-the-badge)](https://neon.tech)
-[![NextAuth.js](https://img.shields.io/badge/NextAuth.js-5-000000?logo=nextauth&logoColor=white&style=for-the-badge)](https://next-auth.js.org/)
-[![HeroUI](https://img.shields.io/badge/HeroUI-v3-006FEE?style=for-the-badge)](https://heroui.com/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white&style=for-the-badge)](https://tailwindcss.com/)
-[![Recharts](https://img.shields.io/badge/Recharts-3-8884D8?style=for-the-badge&logo=recharts&logoColor=white)](https://recharts.org/)
-[![Jotai](https://img.shields.io/badge/Jotai-2-000000?logo=jotai&logoColor=white&style=for-the-badge)](https://jotai.org/)
-[![next-intl](https://img.shields.io/badge/next--intl-4-000000?style=for-the-badge)](https://next-intl.dev/)
-[![Vitest](https://img.shields.io/badge/Vitest-4-6E9F18?logo=vitest&logoColor=white&style=for-the-badge)](https://vitest.dev/)
-[![Testing Library](https://img.shields.io/badge/Testing_Library-16-E33332?logo=testinglibrary&logoColor=white&style=for-the-badge)](https://testing-library.com/)
-[![Biome](https://img.shields.io/badge/Biome-2-60A5FA?logo=biome&logoColor=white&style=for-the-badge)](https://biomejs.dev/)
-[![Telegram Apps](https://img.shields.io/badge/Telegram_Apps-SDK-26A5E4?logo=telegram&logoColor=white&style=for-the-badge)](https://docs.telegram-mini-apps.com/)
-[![Vercel](https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white&style=for-the-badge)](https://vercel.com)
 
 ---
 
