@@ -57,11 +57,25 @@ export async function GET(request: NextRequest): Promise<Response> {
   const result = await fetch(
     `https://api.telegram.org/bot${token}/getWebhookInfo`,
   )
-  const telegram = await result.json()
+  const telegram = (await result.json()) as {
+    ok?: boolean
+    result?: { url?: string; pending_update_count?: number }
+  }
+
+  const webhookUrlFromTelegram = telegram.result?.url?.trim() ?? ''
+  const webhookRegistered = webhookUrlFromTelegram.length > 0
+  const setupEndpoint = `${baseUrl.replace(/\/$/, '')}/api/bot/setup`
 
   return NextResponse.json({
     expectedWebhookUrl,
     baseUrlWarning: webhookUnreachableWarning(baseUrl),
+    webhookRegistered,
+    ...(webhookRegistered
+      ? {}
+      : {
+          hint: 'No webhook on Telegram. GET only reads status. Send POST to this same path with the same Authorization header to call setWebhook.',
+          registerWithPostCurlTemplate: `curl -sS -X POST -H "Authorization: Bearer $CRON_SECRET" "${setupEndpoint}"`,
+        }),
     telegram,
   })
 }
