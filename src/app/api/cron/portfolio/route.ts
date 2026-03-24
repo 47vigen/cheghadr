@@ -24,8 +24,8 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('[CRON:PORTFOLIO] Portfolio cron failed:', error)
     return NextResponse.json(
-      { error: 'Portfolio cron failed' },
-      { status: 500 },
+      { success: false, error: 'Portfolio cron failed' },
+      { status: 200 },
     )
   }
 }

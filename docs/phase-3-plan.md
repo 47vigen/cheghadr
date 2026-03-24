@@ -41,7 +41,7 @@ Phase 2 delivered all three core screens. Here's what exists and is ready for Ph
 | **Price search util** | ✅ `filterPriceItems()` implemented | `src/lib/prices.ts` |
 | **TelegramUI** | ✅ `AppRoot` wrapping app, `requestFullscreen()` on iOS/Android | `src/components/telegram-provider.tsx` |
 | **Auth** | ✅ Dual-path: initData + NextAuth + dev bypass | `src/server/api/trpc.ts`, `src/proxy.ts` |
-| **Cron** | ✅ `/api/cron/prices` route + `vercel.json` schedule | `src/app/api/cron/prices/route.ts` |
+| **Cron** | ✅ `/api/cron/prices` route; production schedule via **cron-job.org** (see `docs/cron-scheduling.md`) | `src/app/api/cron/prices/route.ts` |
 | **Tests** | ✅ 33 unit tests passing (Vitest) | `src/**/*.test.ts` |
 
 ### What Phase 3 Builds On
@@ -637,7 +637,7 @@ The existing `error.tsx` already catches these with a generic "خطایی رخ �
    - `NEXTAUTH_SECRET` — Random 32+ char string (`openssl rand -base64 32`)
    - `NEXTAUTH_URL` — Production URL (e.g., `https://cheghadr.vercel.app`)
    - `TELEGRAM_BOT_TOKEN` — From BotFather
-   - `CRON_SECRET` — Random string for cron auth (Vercel auto-sends as Bearer token)
+   - `CRON_SECRET` — Random string; the external scheduler (e.g. cron-job.org) must send `Authorization: Bearer <CRON_SECRET>` on cron requests
    - `NEXT_PUBLIC_ECOTRUST_API_URL` — Ecotrust API base URL
    - `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` — Bot username without `@`
 3. Deploy with `vercel --prod` or push to `main` branch.
@@ -660,13 +660,12 @@ Verify all 4 models exist: `User`, `UserAsset`, `PriceSnapshot`, `PortfolioSnaps
 
 ### Task 3.5.4 — Verify Cron Job
 
-1. After deploy, check Vercel Dashboard → Cron Jobs → Verify `/api/cron/prices` is registered.
-2. **Hobby plan limitation:** `vercel.json` currently has `"schedule": "0 6 * * *"` (once daily at 6:00 UTC). On Hobby plan, this is the minimum frequency. On Pro plan, change to `"*/30 * * * *"` for every 30 minutes.
-3. Trigger a manual cron execution via curl:
+1. In **[cron-job.org](https://cron-job.org)** (or your scheduler), confirm jobs exist for `/api/cron/prices` and (if applicable) `/api/cron/portfolio` with the `Authorization: Bearer $CRON_SECRET` header. We do **not** use Vercel Cron; `vercel.json` has no `crons` entry. Schedules and URLs: [`docs/cron-scheduling.md`](./cron-scheduling.md).
+2. Trigger a manual run via curl:
    ```bash
    curl -H "Authorization: Bearer $CRON_SECRET" https://cheghadr.vercel.app/api/cron/prices
    ```
-4. Verify a `PriceSnapshot` was created in the database.
+3. Verify a `PriceSnapshot` was created in the database.
 
 ### Task 3.5.5 — Smoke Test Checklist
 
@@ -924,7 +923,7 @@ Phase 3 is complete when:
 | `messages/fa.json` | Add new i18n keys |
 | `messages/en.json` | Add new i18n keys |
 | `src/styles/globals.css` | Add `--tg-viewport-height` fallback |
-| `vercel.json` | Document cron schedule options |
+| `docs/cron-scheduling.md` | Production cron-job.org URLs and schedules |
 
 ### New Dependencies
 

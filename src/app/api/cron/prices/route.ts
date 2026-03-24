@@ -16,8 +16,8 @@ export async function GET(request: NextRequest) {
   if (configError) {
     console.error(`[CRON] ${configError}`)
     return NextResponse.json(
-      { error: 'API URL not configured' },
-      { status: 500 },
+      { success: false, error: 'API URL not configured' },
+      { status: 200 },
     )
   }
 
@@ -34,8 +34,8 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('[CRON] Price snapshot failed:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch prices' },
-      { status: 500 },
+      { success: false, error: 'Failed to fetch prices' },
+      { status: 200 },
     )
   }
 }

@@ -183,7 +183,7 @@ Per the roadmap: "values stay current without manual refresh."
 - On window focus, React Query's `refetchOnWindowFocus` (enabled by default) triggers a refresh.
 - No WebSocket or SSE — polling is sufficient for 30-minute update intervals.
 
-**Rationale:** Simple, reliable, no additional infrastructure. The 30-minute polling matches the cron schedule perfectly.
+**Rationale:** Simple, reliable, no additional infrastructure. The 30-minute polling matches the server cron schedule (production: **cron-job.org** — `docs/cron-scheduling.md`).
 
 ---
 

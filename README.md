@@ -84,7 +84,7 @@ Copy `.env.example` to `.env` and fill in the values:
 | `NEXTAUTH_SECRET` | Random secret, min 32 chars — `openssl rand -base64 32` | Yes |
 | `NEXTAUTH_URL` | App URL — `http://localhost:3000` for local dev | Yes |
 | `TELEGRAM_BOT_TOKEN` | Bot token from @BotFather | Yes |
-| `CRON_SECRET` | Random secret for protecting cron endpoints | Yes |
+| `CRON_SECRET` | Random secret; external scheduler must send `Authorization: Bearer …` to `/api/cron/*` | Yes |
 | `NEXT_PUBLIC_ECOTRUST_API_URL` | Ecotrust price API base URL | Yes |
 | `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` | Bot username from @BotFather (without @) | Yes |
 | `DEV_TELEGRAM_USER_ID` | Development only: bypass Telegram auth with this user ID | No |
@@ -121,7 +121,7 @@ src/
 │   ├── (app)/            # Authenticated route group
 │   └── api/
 │       ├── auth/         # NextAuth route
-│       ├── cron/         # Vercel Cron endpoints (prices, portfolio)
+│       ├── cron/         # Cron HTTP routes (prices, portfolio); production triggered via cron-job.org
 │       └── trpc/         # tRPC endpoint
 ├── components/           # Feature-based UI components
 ├── server/               # Backend: tRPC routers, auth, cron jobs, DB
@@ -135,8 +135,13 @@ prisma/
 ├── schema.prisma         # Data model
 └── seed.ts               # Database seed script
 docs/
+├── cron-scheduling.md    # Production cron-job.org URLs, schedules, auth
 └── phase-1-plan.md       # Architecture and product context
 ```
+
+### Production cron
+
+Schedulers call **`/api/cron/prices`** and **`/api/cron/portfolio`** with **`Authorization: Bearer $CRON_SECRET`**. We use **[cron-job.org](https://cron-job.org)** instead of Vercel Cron. Full table and expressions: [`docs/cron-scheduling.md`](docs/cron-scheduling.md).
 
 ---
 

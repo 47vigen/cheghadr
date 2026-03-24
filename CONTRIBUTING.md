@@ -122,6 +122,7 @@ pnpm test
 | `pnpm dev` fails with lock error | Kill orphaned `next-server` processes |
 | Telegram login widget shows "Bot domain invalid" | Expected in local dev; use `DEV_TELEGRAM_USER_ID` |
 | `/api/cron/*` returns 500 | Ecotrust API may be unreachable from your machine; expected in dev |
+| Where production crons run | **cron-job.org** (not Vercel Cron) — see `docs/cron-scheduling.md` |
 | Env validation error on startup | Ensure all required vars in `.env` are filled, or set `SKIP_ENV_VALIDATION=1` |
 
 ---

@@ -41,7 +41,7 @@ v1 is live as of March 18, 2026. Here's what exists and is relevant to Phase A:
 | **Portfolio total** | `PortfolioTotal` component shows `totalIRT` in Toman | Add delta row (±X IRT / Y%) below total |
 | **Bottom nav** | 3 tabs: My Assets `/`, Prices `/prices`, Calculator `/calculator` | Add alerts section within My Assets (no 4th tab) |
 | **i18n** | `fa.json` + `en.json` with `next-intl` | Add `alerts` and `delta` namespaces |
-| **Vercel cron** | `vercel.json` — single daily cron | Change to `*/30 6-22 * * *` (every 30 min, 06:00–22:30 UTC) |
+| **Cron trigger** | Was: Vercel `vercel.json` (Hobby: daily only) | **Production:** [cron-job.org](https://cron-job.org) — `*/30 6-22 * * *` for prices; see `docs/cron-scheduling.md` |
 
 ### Key v1 patterns to follow
 
@@ -124,7 +124,7 @@ Rationale:
 - Iranian financial markets (and crypto) move fast — daily-only snapshots miss intraday moves entirely
 - Price alerts are meaningless if we only have one price point per day
 
-Implementation: Change `vercel.json` cron schedule to `*/30 6-22 * * *` (every 30 min from 06:00 to 22:30 UTC, covering ~09:30–02:00 Tehran time). This gives ~34 snapshots/day.
+Implementation: Configure the external scheduler (production: **cron-job.org**) with `*/30 6-22 * * *` for `/api/cron/prices` (every 30 min from 06:00 to 22:30 UTC, covering ~09:30–02:00 Tehran time). This gives ~34 snapshots/day. See `docs/cron-scheduling.md`.
 
 **Impact on existing system:**
 - `PriceSnapshot` table grows from ~1 row/day to ~34 rows/day (still negligible with 90-day pruning)
@@ -825,6 +825,8 @@ Calls a new `alerts.toggleDigest` procedure (or a `user.updatePreferences` proce
 
 ## 11. Cron Architecture Changes
 
+**Production:** These intervals are implemented with **[cron-job.org](https://cron-job.org)** calling the routes below (not Vercel Cron). See [`docs/cron-scheduling.md`](./cron-scheduling.md).
+
 ### Current state (v1)
 
 ```
@@ -856,7 +858,9 @@ Calls a new `alerts.toggleDigest` procedure (or a `user.updatePreferences` proce
 └── Prune old PortfolioSnapshots (365 days)
 ```
 
-### `vercel.json` changes
+### Schedule (cron-job.org; optional `vercel.json` equivalent)
+
+Vercel Cron is not used in production. The expressions below are what you configure in cron-job.org (same paths on your deployed origin):
 
 ```json
 {
@@ -1138,6 +1142,6 @@ pnpm check                   # typecheck + lint
 | `src/server/api/routers/portfolio.ts` | Add `delta` procedure |
 | `src/app/api/cron/prices/route.ts` | Add alert evaluation step, remove portfolio snapshot logic |
 | `src/app/(app)/page.tsx` | Add `PortfolioDelta` + `AlertSummaryCard` sections |
-| `vercel.json` | Update cron schedule (30 min price, daily portfolio) |
+| `docs/cron-scheduling.md` | cron-job.org schedules (30 min price, daily portfolio) |
 | `messages/fa.json` | Add `alerts`, `delta` namespaces |
 | `messages/en.json` | Add `alerts`, `delta` namespaces |

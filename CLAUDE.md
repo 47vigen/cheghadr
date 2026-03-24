@@ -36,7 +36,7 @@ pnpm swagger      # Regenerate Ecotrust API types from OpenAPI spec + format
 - `src/app/login/` — Telegram Web App login
 - `src/app/api/trpc/[trpc]` — tRPC endpoint
 - `src/app/api/auth/[...nextauth]` — NextAuth routes
-- `src/app/api/cron/prices` and `cron/portfolio` — Scheduled price/portfolio snapshot jobs
+- `src/app/api/cron/prices` and `cron/portfolio` — Price/portfolio snapshot jobs (production: invoked by **cron-job.org**, not Vercel Cron — see `docs/cron-scheduling.md`)
 
 ### Backend layer (`src/server/`)
 
@@ -77,7 +77,7 @@ Key Prisma models: `User` (Telegram profile), `Portfolio`, `UserAsset` (holdings
 - **Turbopack cache corruption**: If dev server panics with "Failed to restore task data", delete `.next/` and restart.
 - **Stale dev lock**: If `pnpm dev` fails with "Unable to acquire lock at .next/dev/lock", kill orphan `next-server` processes and remove `.next/dev/lock`.
 - **Telegram Login Widget**: Shows "Bot domain invalid" in local dev — expected, because Telegram Widget requires a domain registered with BotFather.
-- **Cron endpoint**: `/api/cron/prices` requires `Authorization: Bearer $CRON_SECRET`. The Ecotrust API may be unreachable from cloud VMs; cron 500 on fetch failure is expected in dev.
+- **Cron endpoints**: `/api/cron/prices` and `/api/cron/portfolio` require `Authorization: Bearer $CRON_SECRET` (set on **cron-job.org** or curl). Vercel Cron is not used (`vercel.json` has no `crons`). See `docs/cron-scheduling.md`. The Ecotrust API may be unreachable from some networks; cron 500 on fetch failure is expected in dev.
 - **`--inspect` flag**: `pnpm dev` includes `--inspect`. "Starting inspector failed" warning is harmless if port 9229 is in use.
 - **`SKIP_ENV_VALIDATION=1`**: Bypasses `@t3-oss/env-nextjs` strict validation (useful for builds with incomplete env vars).
 

@@ -58,7 +58,7 @@ Full implementation of every milestone in `docs/phase-1-plan.md`.
 **Milestone 1.4 — Cron + Price Snapshots:**
 - `src/app/api/cron/prices/route.ts` — fetches Ecotrust, stores `PriceSnapshot`, prunes > 90 days
 - `src/components/staleness-badge.tsx` — warning UI when snapshot is > 60 minutes old
-- `vercel.json` — Vercel Cron config (schedule adjusted for plan — see below)
+- `vercel.json` — was used for Vercel Cron during Phase 1; production now uses **cron-job.org** (`docs/cron-scheduling.md`), file is `{}`
 
 **Testing:**
 - `vitest.config.ts` + `src/server/auth/__tests__/telegram.test.ts` — 8 unit tests covering `validateInitData` and `validateTelegramWidget`
@@ -95,7 +95,7 @@ Vercel Hobby plan only allows cron jobs that run **once per day**. The original 
 
 > *Hobby accounts are limited to daily cron jobs. This cron expression would run more than once per day.*
 
-Changed to `0 6 * * *` (6am UTC daily). Upgrade to Vercel Pro to restore 30-minute snapshots.
+The project later moved scheduling to **[cron-job.org](https://cron-job.org)** so price snapshots can run every 30 minutes without Vercel Pro. `vercel.json` no longer defines `crons`. See [`docs/cron-scheduling.md`](./cron-scheduling.md).
 
 ---
 
@@ -142,7 +142,7 @@ Changes:
 | `url = env("DATABASE_URL")` in schema | Removed | Prisma 7 breaks with `url` in datasource; moved to `prisma.config.ts` |
 | `new Pool(...)` passed to `PrismaNeon` | `new PrismaNeon({ connectionString })` | Prisma 7 adapter API changed: takes `PoolConfig`, not a `Pool` instance |
 | `next-auth@beta` JWT augmentation via `next-auth/jwt` | Used `token.telegramUserId` with `as` casts | Module augmentation for `next-auth/jwt` is unreliable in v5 beta.30 |
-| `cron schedule: */30 * * * *` | Changed to `0 6 * * *` (daily) | Vercel Hobby plan limit; restore with Pro upgrade |
+| `cron schedule: */30 * * * *` | Vercel Hobby forced daily; then **cron-job.org** for flexible schedules | See `docs/cron-scheduling.md`; `vercel.json` has no `crons` |
 | `src/middleware.ts` | `src/proxy.ts` | Next.js 16 deprecates `middleware.ts`; proxy runs on Node.js |
 
 ---
@@ -175,7 +175,7 @@ Changes:
 | `src/components/telegram-provider.tsx` | AppRoot + SDK init |
 | `src/components/staleness-badge.tsx` | Price staleness indicator |
 | `src/types/telegram.d.ts` | Global Telegram SDK types |
-| `vercel.json` | Cron job schedule |
+| `vercel.json` | Empty `{}` — cron schedules live in cron-job.org (`docs/cron-scheduling.md`) |
 | `vitest.config.ts` | Test runner config |
 
 ### Modified files (8)
@@ -252,13 +252,9 @@ In the Vercel dashboard → Settings → Environment Variables:
 | `CRON_SECRET` | Production only |
 | `NEXT_PUBLIC_ECOTRUST_API_URL` | All environments (`https://ecotrust.ir`) |
 
-### 6. Upgrade Cron to 30-Minute Interval (Optional)
+### 6. Production cron scheduling (cron-job.org)
 
-On Vercel Pro, restore the original schedule in `vercel.json`:
-
-```json
-{ "schedule": "*/30 * * * *" }
-```
+Vercel Cron is **not** used. Configure **[cron-job.org](https://cron-job.org)** (or another HTTP cron) to **GET** the cron routes with header `Authorization: Bearer $CRON_SECRET`. Schedules and URLs: [`docs/cron-scheduling.md`](./cron-scheduling.md). Repository `vercel.json` stays `{}` (no `crons`).
 
 ---
 

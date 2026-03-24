@@ -83,12 +83,14 @@ DATABASE_URL="postgresql://user:pass@ep-xxx.region.neon.tech/cheghadr?sslmode=re
 
 ### Decision 2: Cron Strategy
 
+**Current production:** Scheduling runs on **[cron-job.org](https://cron-job.org)** calling `/api/cron/*` with `Authorization: Bearer $CRON_SECRET`. **Vercel Cron is not used** (Hobby allows only [once-daily crons](https://vercel.com/docs/cron-jobs/usage-and-pricing)); `vercel.json` has no `crons` array. Operational detail: [`docs/cron-scheduling.md`](./cron-scheduling.md).
+
 | Option | Pros | Cons | Recommendation |
 |---|---|---|---|
-| **Vercel Cron** | Zero infra, defined in `vercel.json`, runs in same project | Requires Vercel hosting; minimum 1-min interval (we need 30 min — fine) | ✅ **Recommended** |
-| External scheduler (cron-job.org, Upstash QStash) | Platform-agnostic | Extra service to manage, auth for cron endpoint |  |
+| **Vercel Cron** | Zero infra, defined in `vercel.json`, runs in same project | Requires Vercel hosting; Hobby plan limits frequency | Was considered for Phase 1 |
+| External scheduler (cron-job.org, Upstash QStash) | Platform-agnostic; avoids Hobby cron limits | Extra service to manage, must send `CRON_SECRET` header | ✅ **In use (cron-job.org)** |
 
-**Recommendation: Vercel Cron.** Defined in `vercel.json`, triggers a Next.js API route. Protected by `CRON_SECRET` header validation. No external dependencies.
+**Historical note:** Phase 1 originally recommended Vercel Cron in `vercel.json`. Production switched to an external scheduler for interval control on Hobby.
 
 ```jsonc
 // vercel.json
@@ -783,7 +785,7 @@ export async function GET(request: NextRequest) {
 }
 ```
 
-**Vercel Cron configuration** — `vercel.json`:
+**Example schedule (external scheduler)** — Production uses **cron-job.org**, not Vercel Cron; see [`docs/cron-scheduling.md`](./cron-scheduling.md). Equivalent to:
 ```json
 {
   "crons": [
@@ -855,7 +857,7 @@ The existing Kubb-generated client (`getPrices`) calls Ecotrust directly from th
 
 - [ ] Cron route `/api/cron/prices` fetches Ecotrust and saves `PriceSnapshot`
 - [ ] Cron route protected by `CRON_SECRET` header
-- [ ] `vercel.json` with 30-minute cron schedule
+- [ ] External scheduler (e.g. cron-job.org) hits `/api/cron/prices` on a 30-minute cadence with `CRON_SECRET` auth — see `docs/cron-scheduling.md`
 - [ ] Snapshot pruning (90 days) works
 - [ ] tRPC `prices.latest` returns the most recent snapshot with staleness flag
 - [ ] Staleness badge component created
@@ -1015,7 +1017,7 @@ Phase 1 is complete when **all** of the following are true:
 - [ ] Snapshots older than 90 days are pruned
 - [ ] tRPC `prices.latest` returns the most recent snapshot
 - [ ] Staleness flag is `true` when snapshot is > 60 minutes old
-- [ ] `vercel.json` configured with 30-minute cron schedule
+- [ ] Production cron configured (cron-job.org or equivalent), not Vercel Cron — `docs/cron-scheduling.md`
 
 ### Telegram Integration
 - [ ] TelegramUI `AppRoot` wraps the app
@@ -1085,7 +1087,7 @@ cheghadr/
 │   ├── utils/                            (existing)
 │   ├── env.js                            (modified: new vars)
 │   └── middleware.ts                     (route protection)
-├── vercel.json                           (cron config)
+├── vercel.json                           (optional; no `crons` — use `docs/cron-scheduling.md`)
 ├── .env.example                          (updated)
 ├── package.json                          (updated deps)
 └── ... (existing config files)

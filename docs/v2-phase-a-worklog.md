@@ -220,7 +220,11 @@ Uses `YESTERDAY_CUTOFF_MS` named constant instead of `23 * 60 * 60 * 1000` inlin
 
 Portfolio snapshot creation and pruning were removed (now owned by `/api/cron/portfolio`). The price cron now only: fetches prices → saves snapshot → evaluates price alerts → prunes old price snapshots.
 
-### `vercel.json` (modified)
+### `vercel.json` (historical / optional)
+
+During v2 Phase A work, schedules matching the following were added for Vercel Cron. **Production now uses [cron-job.org](https://cron-job.org)** instead; repo `vercel.json` is `{}` and does not list `crons`. See [`docs/cron-scheduling.md`](./cron-scheduling.md).
+
+Equivalent expressions for an external scheduler:
 
 ```json
 {
@@ -231,7 +235,7 @@ Portfolio snapshot creation and pruning were removed (now owned by `/api/cron/po
 }
 ```
 
-Previously a single daily run; now a 30-minute price cron (06:00–22:30 UTC) plus a separate daily portfolio cron.
+Previously a single daily run; target behavior is a 30-minute price cron (06:00–22:30 UTC) plus a separate daily portfolio cron.
 
 ---
 
