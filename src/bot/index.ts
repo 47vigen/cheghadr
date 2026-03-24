@@ -1,3 +1,4 @@
+import type { Conversation } from '@grammyjs/conversations'
 import { conversations, createConversation } from '@grammyjs/conversations'
 import { Bot, session } from 'grammy'
 
@@ -7,17 +8,6 @@ import { handleMessage } from './handlers/message'
 import { userMiddleware } from './middleware/user'
 import { prismaSessionAdapter } from './session/adapter'
 import type { SessionData } from './session/types'
-
-// Lazy-loaded conversation factories to avoid circular imports at module load time
-async function _getConversations() {
-  const [{ priceAlertWizard }, { portfolioAlertWizard }, { assetAddWizard }] =
-    await Promise.all([
-      import('./conversations/alert-create'),
-      import('./conversations/alert-create'),
-      import('./conversations/asset-add'),
-    ])
-  return { priceAlertWizard, portfolioAlertWizard, assetAddWizard }
-}
 
 export function createBot(): Bot<BotContext> {
   const token = process.env.TELEGRAM_BOT_TOKEN
@@ -35,30 +25,39 @@ export function createBot(): Bot<BotContext> {
   )
 
   // 2. Conversations plugin (must come after session)
-  bot.use(conversations())
+  bot.use(conversations<BotContext, BotContext>())
 
-  // Conversations are registered in registerConversations() called before first use
-  // We'll register them directly here using dynamic imports to avoid circular deps
+  // Conversations use dynamic imports to avoid circular deps
+  // Cast is safe: at runtime OC=BotContext guarantees session/botUser are present
   bot.use(
-    createConversation(async (conversation, ctx) => {
+    createConversation<BotContext, BotContext>(async (conversation, ctx) => {
       const { priceAlertWizard } = await import('./conversations/alert-create')
-      return priceAlertWizard(conversation, ctx)
+      return priceAlertWizard(
+        conversation as unknown as Conversation<BotContext>,
+        ctx,
+      )
     }, 'priceAlert'),
   )
 
   bot.use(
-    createConversation(async (conversation, ctx) => {
+    createConversation<BotContext, BotContext>(async (conversation, ctx) => {
       const { portfolioAlertWizard } = await import(
         './conversations/alert-create'
       )
-      return portfolioAlertWizard(conversation, ctx)
+      return portfolioAlertWizard(
+        conversation as unknown as Conversation<BotContext>,
+        ctx,
+      )
     }, 'portfolioAlert'),
   )
 
   bot.use(
-    createConversation(async (conversation, ctx) => {
+    createConversation<BotContext, BotContext>(async (conversation, ctx) => {
       const { assetAddWizard } = await import('./conversations/asset-add')
-      return assetAddWizard(conversation, ctx)
+      return assetAddWizard(
+        conversation as unknown as Conversation<BotContext>,
+        ctx,
+      )
     }, 'assetAdd'),
   )
 

@@ -1,4 +1,3 @@
-import Decimal from 'decimal.js'
 import type { InlineKeyboard } from 'grammy'
 
 import {
@@ -39,7 +38,7 @@ export async function buildPortfolioSummary(
     }
   }
 
-  const totalValue = new Decimal(snapshot.totalIRT.toString()).toNumber()
+  const totalValue = Number(snapshot.totalIRT)
   const formatted = formatIRT(totalValue, locale)
 
   // Calculate delta from 24h ago snapshot
@@ -51,7 +50,7 @@ export async function buildPortfolioSummary(
 
   let deltaLine = ''
   if (prevSnapshot) {
-    const prev = new Decimal(prevSnapshot.totalIRT.toString()).toNumber()
+    const prev = Number(prevSnapshot.totalIRT)
     if (prev > 0) {
       const pct = ((totalValue - prev) / prev) * 100
       const sign = pct >= 0 ? '+' : ''
@@ -84,7 +83,7 @@ export async function buildBreakdown(
     }
   }
 
-  const total = new Decimal(snapshot.totalIRT.toString()).toNumber()
+  const total = Number(snapshot.totalIRT)
   const breakdown = snapshot.breakdown as Array<{
     symbol: string
     quantity: number
@@ -137,9 +136,9 @@ export async function buildAssetList(
   for (const asset of assets) {
     const item = findBySymbol(prices, asset.symbol)
     const name = item ? getLocalizedItemName(item, locale) : asset.symbol
-    const qty = new Decimal(asset.quantity.toString())
+    const qty = Number(asset.quantity)
     const price = item ? Number(item.sell_price ?? 0) : 0
-    const value = qty.mul(price).toNumber()
+    const value = qty * price
 
     const changeInfo = item ? formatChange(item.change, locale) : null
     const changeStr = changeInfo ? ` (${changeInfo.text})` : ''

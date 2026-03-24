@@ -10,6 +10,7 @@ export interface BotUser {
   dailyDigestEnabled: boolean
 }
 
-export type BotContext = Context &
-  SessionFlavor<SessionData> &
-  ConversationFlavor & { botUser?: BotUser }
+type BotContextBase = Context &
+  SessionFlavor<SessionData> & { botUser?: BotUser }
+
+export type BotContext = BotContextBase & ConversationFlavor<BotContextBase>

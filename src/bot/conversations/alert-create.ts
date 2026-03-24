@@ -1,4 +1,5 @@
 import type { Conversation } from '@grammyjs/conversations'
+import type { Context } from 'grammy'
 import { InlineKeyboard } from 'grammy'
 
 import { MAX_ACTIVE_ALERTS } from '@/lib/alerts/utils'
@@ -234,7 +235,9 @@ export async function priceAlertWizard(
   setTimeout(async () => {
     const { text, keyboard } = await buildAlertList(user.id, locale)
     await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
-    await successMsg.delete().catch(() => null)
+    await ctx.api
+      .deleteMessage(ctx.chat?.id, successMsg.message_id)
+      .catch(() => null)
   }, 1000)
 }
 
@@ -332,13 +335,15 @@ export async function portfolioAlertWizard(
   setTimeout(async () => {
     const { text, keyboard } = await buildAlertList(user.id, locale)
     await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
-    await successMsg.delete().catch(() => null)
+    await ctx.api
+      .deleteMessage(ctx.chat?.id, successMsg.message_id)
+      .catch(() => null)
   }, 1000)
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
-async function showMain(ctx: BotContext, locale: ReturnType<typeof getLocale>) {
+async function showMain(ctx: Context, locale: ReturnType<typeof getLocale>) {
   const { buildMainMenu } = await import('../screens/main')
   const { text, keyboard } = buildMainMenu(locale)
   await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
