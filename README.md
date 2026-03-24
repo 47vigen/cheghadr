@@ -22,16 +22,9 @@
 [![Telegram Apps](https://img.shields.io/badge/Telegram_Apps-SDK-26A5E4?logo=telegram&logoColor=white&style=for-the-badge)](https://docs.telegram-mini-apps.com/)
 [![Vercel](https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white&style=for-the-badge)](https://vercel.com)
 
-**Bilingual personal net worth tracker** (English by default, Persian supported) — available as a Telegram Mini App and a standalone web application.
+**Personal net worth tracker** available as a Telegram Mini App and a standalone web application.
 
-Track your assets, monitor prices, visualize portfolio performance, and set price alerts. The UI follows Telegram `language_code` or the browser language when possible; **English** is the default for new database users, server validation messages, and auto-created portfolio names. **Persian (fa)** uses full RTL layout.
-
-### Telegram
-
-- **Bot:** [@CheghadrAppBot](https://t.me/CheghadrAppBot)
-- **Mini App:** [Open in Telegram](https://t.me/CheghadrAppBot/app)
-
----
+Track your assets, monitor prices, visualize portfolio performance, and set price alerts.
 
 ## Features
 
@@ -43,24 +36,29 @@ Track your assets, monitor prices, visualize portfolio performance, and set pric
 - **Standalone web app** — Also runs as a regular browser app with Telegram login widget
 - **English + Persian** — next-intl with RTL when the active locale is `fa`
 
+## Telegram
+
+- **Bot:** [@CheghadrAppBot](https://t.me/CheghadrAppBot)
+- **Mini App:** [Open in Telegram](https://t.me/CheghadrAppBot/app)
+
 ---
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 16 (App Router, Turbopack) |
-| Language | TypeScript 5 (strict) |
-| API | tRPC v11 + TanStack React Query v5 |
-| Database | Prisma 7 + Neon (serverless PostgreSQL) |
-| Auth | NextAuth v5 (Telegram strategy) |
-| UI | HeroUI v3 + Tailwind CSS v4 |
-| Charts | Recharts |
-| State | Jotai |
-| i18n | next-intl |
-| Testing | Vitest + Testing Library |
-| Linting | Biome |
-| Telegram | @telegram-apps/sdk |
+| Layer     | Technology                              |
+| --------- | --------------------------------------- |
+| Framework | Next.js 16 (App Router, Turbopack)      |
+| Language  | TypeScript 5 (strict)                   |
+| API       | tRPC v11 + TanStack React Query v5      |
+| Database  | Prisma 7 + Neon (serverless PostgreSQL) |
+| Auth      | NextAuth v5 (Telegram strategy)         |
+| UI        | HeroUI v3 + Tailwind CSS v4             |
+| Charts    | Recharts                                |
+| State     | Jotai                                   |
+| i18n      | next-intl                               |
+| Testing   | Vitest + Testing Library                |
+| Linting   | Biome                                   |
+| Telegram  | @telegram-apps/sdk                      |
 
 ---
 
@@ -104,39 +102,39 @@ The app will be available at [http://localhost:3000](http://localhost:3000).
 
 Copy `.env.example` to `.env` and fill in the values:
 
-| Variable | Description | Required |
-|---|---|---|
-| `DATABASE_URL` | Neon PostgreSQL connection string (pooled) | Yes |
-| `DIRECT_URL` | Neon direct connection (for migrations) | No |
-| `NEXTAUTH_SECRET` | Random secret, min 32 chars — `openssl rand -base64 32` | Yes |
-| `NEXTAUTH_URL` | App URL — `http://localhost:3000` for local dev | Yes |
-| `TELEGRAM_BOT_TOKEN` | Bot token from @BotFather | Yes |
-| `CRON_SECRET` | Random secret; external scheduler must send `Authorization: Bearer …` to `/api/cron/*` | Yes |
-| `NEXT_PUBLIC_ECOTRUST_API_URL` | Ecotrust price API base URL | Yes |
-| `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` | Bot username from @BotFather (without @) | Yes |
-| `DEV_TELEGRAM_USER_ID` | Development only: bypass Telegram auth with this user ID | No |
-| `SKIP_ENV_VALIDATION` | Set to `1` to skip env validation (CI, Docker) | No |
+| Variable                            | Description                                                                            | Required |
+| ----------------------------------- | -------------------------------------------------------------------------------------- | -------- |
+| `DATABASE_URL`                      | Neon PostgreSQL connection string (pooled)                                             | Yes      |
+| `DIRECT_URL`                        | Neon direct connection (for migrations)                                                | No       |
+| `NEXTAUTH_SECRET`                   | Random secret, min 32 chars — `openssl rand -base64 32`                                | Yes      |
+| `NEXTAUTH_URL`                      | App URL — `http://localhost:3000` for local dev                                        | Yes      |
+| `TELEGRAM_BOT_TOKEN`                | Bot token from @BotFather                                                              | Yes      |
+| `CRON_SECRET`                       | Random secret; external scheduler must send `Authorization: Bearer …` to `/api/cron/*` | Yes      |
+| `NEXT_PUBLIC_ECOTRUST_API_URL`      | Ecotrust price API base URL                                                            | Yes      |
+| `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` | Bot username from @BotFather (without @)                                               | Yes      |
+| `DEV_TELEGRAM_USER_ID`              | Development only: bypass Telegram auth with this user ID                               | No       |
+| `SKIP_ENV_VALIDATION`               | Set to `1` to skip env validation (CI, Docker)                                         | No       |
 
 ---
 
 ## Scripts
 
-| Script | Description |
-|---|---|
-| `pnpm dev` | Start development server (Turbopack + Node debugger) |
-| `pnpm build` | Build for production |
-| `pnpm start` | Start production server |
-| `pnpm check` | Run typecheck + lint |
-| `pnpm typecheck` | TypeScript type check |
-| `pnpm lint` | Biome lint |
-| `pnpm lint:fix` | Biome lint with auto-fix |
-| `pnpm test` | Run unit tests |
-| `pnpm test:watch` | Run tests in watch mode |
-| `pnpm db:push` | Sync Prisma schema to database |
-| `pnpm db:migrate` | Run Prisma migrations (dev) |
-| `pnpm db:studio` | Open Prisma Studio |
-| `pnpm db:seed` | Seed the database |
-| `pnpm swagger:gen` | Regenerate Ecotrust API types from OpenAPI spec |
+| Script             | Description                                          |
+| ------------------ | ---------------------------------------------------- |
+| `pnpm dev`         | Start development server (Turbopack + Node debugger) |
+| `pnpm build`       | Build for production                                 |
+| `pnpm start`       | Start production server                              |
+| `pnpm check`       | Run typecheck + lint                                 |
+| `pnpm typecheck`   | TypeScript type check                                |
+| `pnpm lint`        | Biome lint                                           |
+| `pnpm lint:fix`    | Biome lint with auto-fix                             |
+| `pnpm test`        | Run unit tests                                       |
+| `pnpm test:watch`  | Run tests in watch mode                              |
+| `pnpm db:push`     | Sync Prisma schema to database                       |
+| `pnpm db:migrate`  | Run Prisma migrations (dev)                          |
+| `pnpm db:studio`   | Open Prisma Studio                                   |
+| `pnpm db:seed`     | Seed the database                                    |
+| `pnpm swagger:gen` | Regenerate Ecotrust API types from OpenAPI spec      |
 
 ---
 
