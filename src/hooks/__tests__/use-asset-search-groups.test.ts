@@ -25,7 +25,7 @@ function makeItem(symbol: string, category: string, fa: string, en: string) {
     price_source: {},
     // groupByCategory reads item.base_currency?.category?.symbol
     base_currency: { symbol, category: { symbol: category }, png: null, fa, en },
-    name: { fa, en },
+    name: { symbol, category: { symbol: category }, fa, en },
     quote_currency: { symbol: 'IRT', category: { symbol: 'CURRENCY' }, fa: 'تومان', en: 'Toman' },
     sell_price: '1000',
     buy_price: '1000',
