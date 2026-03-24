@@ -39,6 +39,7 @@ const fa = {
       window1M: '۱ ماه',
       windowALL: 'کل دوره',
       breakdownTitle: '📂 <b>ترکیب سبد</b>',
+      breakdownTotal: '💰 جمع کل: <b>{value}</b>',
       assetsTitle: '🏦 <b>دارایی‌ها</b>',
       noAssetData: '📊 قیمت دارایی‌ها در دسترس نیست.',
       assetRow: '{name} — {qty} عدد — {value} تومان',

@@ -13,13 +13,16 @@ import {
   getLocalizedItemName,
   getSellPriceBySymbol,
   getSnapshotStaleness,
+  type PriceItem,
   parsePriceSnapshot,
+  sortedGroupEntries,
 } from '@/lib/prices'
 import { db } from '@/server/db'
+import { type BreakdownItem, parseBreakdownJson } from '@/types/schemas'
 
 import { escapeTelegramHtml } from '../html-escape'
 import type { BotLocale } from '../i18n'
-import { t } from '../i18n'
+import { t, tCategory } from '../i18n'
 import { assetListFooterKeyboard } from '../keyboards/assets'
 import { portfolioSubKeyboard } from '../keyboards/portfolio'
 
@@ -157,16 +160,24 @@ export async function buildPortfolioHomeCard(
   return lines.join('\n')
 }
 
+function categoryForSymbol(symbol: string, prices: PriceItem[]): string {
+  const item = findBySymbol(prices, symbol)
+  return item?.base_currency?.category?.symbol ?? 'OTHER'
+}
+
 export async function buildBreakdown(
   userId: string,
   locale: BotLocale,
 ): Promise<ScreenResult> {
   const keyboard = portfolioSubKeyboard(locale)
 
-  const snapshot = await db.portfolioSnapshot.findFirst({
-    where: { userId, portfolioId: null },
-    orderBy: { snapshotAt: 'desc' },
-  })
+  const [snapshot, priceSnap] = await Promise.all([
+    db.portfolioSnapshot.findFirst({
+      where: { userId, portfolioId: null },
+      orderBy: { snapshotAt: 'desc' },
+    }),
+    db.priceSnapshot.findFirst({ orderBy: { snapshotAt: 'desc' } }),
+  ])
 
   if (!snapshot) {
     return {
@@ -176,27 +187,62 @@ export async function buildBreakdown(
   }
 
   const total = Number(snapshot.totalIRT)
-  const breakdown = snapshot.breakdown as Array<{
-    symbol: string
-    quantity: number
-    valueIRT: number
-  }>
+  const breakdown = parseBreakdownJson(snapshot.breakdown)
 
-  // Group by category — we just list top items with percentage
-  const lines: string[] = []
-  for (const item of breakdown) {
-    if (total > 0) {
-      const pct = ((item.valueIRT / total) * 100).toFixed(1)
-      const val = formatIRT(item.valueIRT, locale)
-      const sym = escapeTelegramHtml(item.symbol)
-      lines.push(`• <b>${sym}</b>  ${pct}%  —  ${val}`)
+  if (breakdown.length === 0 || total <= 0) {
+    return {
+      text: `${t(locale, 'bot.portfolio.breakdownTitle')}\n\n${t(locale, 'bot.portfolio.noData')}`,
+      keyboard,
     }
   }
 
-  const text =
-    t(locale, 'bot.portfolio.breakdownTitle') +
-    '\n\n' +
-    (lines.length > 0 ? lines.join('\n') : t(locale, 'bot.portfolio.noData'))
+  const prices = priceSnap ? parsePriceSnapshot(priceSnap.data) : []
+  const byCategory = new Map<string, BreakdownItem[]>()
+
+  for (const item of breakdown) {
+    const cat =
+      prices.length > 0 ? categoryForSymbol(item.symbol, prices) : 'OTHER'
+    const bucket = byCategory.get(cat) ?? []
+    bucket.push(item)
+    byCategory.set(cat, bucket)
+  }
+
+  for (const items of byCategory.values()) {
+    items.sort((a, b) => b.valueIRT - a.valueIRT)
+  }
+
+  const blocks: string[] = [
+    t(locale, 'bot.portfolio.breakdownTitle'),
+    '',
+    t(locale, 'bot.portfolio.breakdownTotal', {
+      value: formatIRT(Math.round(total), locale),
+    }),
+  ]
+
+  for (const [cat, items] of sortedGroupEntries(byCategory)) {
+    const catLabel = escapeTelegramHtml(tCategory(locale, cat))
+    const lines: string[] = [`<b>${catLabel}</b>`]
+    for (const item of items) {
+      const pct = ((item.valueIRT / total) * 100).toFixed(1)
+      const val = formatIRT(item.valueIRT, locale)
+      const priceItem = findBySymbol(prices, item.symbol)
+      const rawName = priceItem
+        ? getLocalizedItemName(priceItem, locale)
+        : item.symbol
+      const name = escapeTelegramHtml(rawName)
+      const sym = escapeTelegramHtml(item.symbol)
+      const title =
+        priceItem && rawName.trim() !== item.symbol.trim()
+          ? `<b>${name}</b> <i>(${sym})</i>`
+          : `<b>${sym}</b>`
+      lines.push(`  ▸ ${title}`)
+      lines.push(`     ${pct}% · ${val}`)
+    }
+    blocks.push('')
+    blocks.push(lines.join('\n'))
+  }
+
+  const text = blocks.join('\n').replace(/^\n+/, '')
 
   return { text, keyboard }
 }

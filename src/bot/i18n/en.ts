@@ -40,6 +40,7 @@ const en = {
       window1M: '1M',
       windowALL: 'All time',
       breakdownTitle: '📂 <b>Portfolio Breakdown</b>',
+      breakdownTotal: '💰 Total: <b>{value}</b>',
       assetsTitle: '🏦 <b>My Assets</b>',
       noAssetData: '📊 Asset prices are currently unavailable.',
       assetRow: '{name} — {qty} units — {value} Toman',
