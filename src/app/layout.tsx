@@ -2,6 +2,9 @@ import type { Metadata } from 'next'
 import Script from 'next/script'
 import type { ReactNode } from 'react'
 
+import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
+
 import '@/styles/globals.css'
 
 import { ClientRootWrapper } from '@/providers/client-root-wrapper'
@@ -24,6 +27,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <Script src="/theme-init.js" strategy="beforeInteractive" />
         <ClientRootWrapper>{children}</ClientRootWrapper>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )

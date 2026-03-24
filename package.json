@@ -55,6 +55,8 @@
     "@trpc/react-query": "^11.15.0",
     "@trpc/server": "^11.15.0",
     "@twa-dev/sdk": "^8.0.2",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "clsx": "^2.1.1",
     "dotenv": "^17.3.1",
     "grammy": "^1.41.1",
