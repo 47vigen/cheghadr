@@ -107,3 +107,9 @@ model Alert {
   @@index([symbol, isActive])
   @@index([type, isActive])
 }
+
+model BotSession {
+  chatId    BigInt   @id
+  data      Json
+  updatedAt DateTime @updatedAt
+}

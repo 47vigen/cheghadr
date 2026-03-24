@@ -23,6 +23,9 @@ export const env = createEnv({
     // Cron
     CRON_SECRET: z.string().min(1),
 
+    // Telegram bot webhook
+    TELEGRAM_WEBHOOK_SECRET: z.string().min(32),
+
     NEXT_PUBLIC_ECOTRUST_API_URL: z.url(),
   },
   client: {
@@ -50,6 +53,8 @@ export const env = createEnv({
     DEV_TELEGRAM_USER_ID: process.env.DEV_TELEGRAM_USER_ID,
 
     CRON_SECRET: process.env.CRON_SECRET,
+
+    TELEGRAM_WEBHOOK_SECRET: process.env.TELEGRAM_WEBHOOK_SECRET,
 
     NEXT_PUBLIC_ECOTRUST_API_URL: process.env.NEXT_PUBLIC_ECOTRUST_API_URL,
     NEXT_PUBLIC_TELEGRAM_BOT_USERNAME:
