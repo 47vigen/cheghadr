@@ -204,12 +204,13 @@ export async function assetAddWizard(
     parse_mode: 'HTML',
   })
 
+  const successChatId = ctx.chat?.id
+  const successMsgId = successMsg.message_id
   setTimeout(async () => {
     const { text, keyboard } = await buildAssetList(user.id, locale)
     await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
-    await ctx.api
-      .deleteMessage(ctx.chat?.id, successMsg.message_id)
-      .catch(() => null)
+    if (successChatId)
+      await ctx.api.deleteMessage(successChatId, successMsgId).catch(() => null)
   }, 1000)
 }
 

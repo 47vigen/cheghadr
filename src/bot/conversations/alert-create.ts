@@ -231,13 +231,14 @@ export async function priceAlertWizard(
     parse_mode: 'HTML',
   })
 
+  const successChatId = ctx.chat?.id
+  const successMsgId = successMsg.message_id
   // Show alert list after 1 second
   setTimeout(async () => {
     const { text, keyboard } = await buildAlertList(user.id, locale)
     await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
-    await ctx.api
-      .deleteMessage(ctx.chat?.id, successMsg.message_id)
-      .catch(() => null)
+    if (successChatId)
+      await ctx.api.deleteMessage(successChatId, successMsgId).catch(() => null)
   }, 1000)
 }
 
@@ -332,12 +333,15 @@ export async function portfolioAlertWizard(
     parse_mode: 'HTML',
   })
 
+  const successChatId2 = ctx.chat?.id
+  const successMsgId2 = successMsg.message_id
   setTimeout(async () => {
     const { text, keyboard } = await buildAlertList(user.id, locale)
     await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
-    await ctx.api
-      .deleteMessage(ctx.chat?.id, successMsg.message_id)
-      .catch(() => null)
+    if (successChatId2)
+      await ctx.api
+        .deleteMessage(successChatId2, successMsgId2)
+        .catch(() => null)
   }, 1000)
 }
 
