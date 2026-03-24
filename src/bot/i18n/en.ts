@@ -7,6 +7,10 @@ const en = {
     mainMenu: {
       title: '📱 <b>Cheghadr?</b>',
     },
+    wizard: {
+      pagePrev: '◀️',
+      pageNext: '▶️',
+    },
     nav: {
       portfolio: '💼 Portfolio',
       prices: '📊 Prices',
@@ -19,9 +23,10 @@ const en = {
     },
     portfolio: {
       title: '💼 <b>Portfolio</b>',
-      noData: 'No data to display.\nAdd assets through the app to get started.',
+      noData:
+        '📭 No data to display.\nAdd assets through the app to get started.',
       homeTotal: 'Total value: <b>{value}</b> Toman',
-      homeChangeHeading: '<b>Change</b> (vs snapshots):',
+      homeChangeHeading: '<b>Change</b> (vs last saved prices):',
       homeDeltaRow:
         '{label}: <b>{signIrt}{irt}</b> ({signPct}{pct}{pctSuffix})',
       homeStale: '⚠️ Quotes are about <b>{minutes}</b> minutes old.',
@@ -37,7 +42,7 @@ const en = {
     },
     prices: {
       selectCategory: '📊 <b>Prices</b>\nSelect a category:',
-      noData: 'No prices available. Please try again later.',
+      noData: '📭 No prices available. Please try again later.',
       pageTitle: '{cat}\nPage {n} of {total}',
       prev: '◀️ Prev',
       next: 'Next ▶️',
@@ -50,10 +55,10 @@ const en = {
       newPortfolio: '➕ Portfolio Alert',
       dirAbove: 'above',
       dirBelow: 'below',
-      labelPrice: '📈 {name}  {dir} {threshold} T',
-      labelPortfolio: '💼 Portfolio  {dir} {threshold} T',
+      labelPrice: '📈 {name}  {dir} {threshold} Toman',
+      labelPortfolio: '💼 Portfolio  {dir} {threshold} Toman',
       statusActive: '✅',
-      statusPaused: '⏸',
+      statusPaused: '⏸️',
       deleteBtn: '🗑',
       deleteConfirmTitle: '⚠️ Delete this alert?',
       deleteYes: '✅ Yes, delete',
@@ -110,7 +115,7 @@ const en = {
       languageChanged: '✅ Language updated.',
       digest: 'Daily digest:',
       digestEnabled: '✅ Enabled',
-      digestDisabled: '⏸ Disabled',
+      digestDisabled: '⏸️ Disabled',
       digestToggled: '✅ Daily digest preference updated.',
     },
   },
@@ -120,7 +125,7 @@ const en = {
     GOLD: '🥇 Gold',
     COIN: '🏅 Coin',
     SILVER: '🥈 Silver',
-    BORS: '📈 Stocks',
+    BORS: '🏢 Stocks',
     GOLD_FUNDS: '🏦 Gold Funds',
     STOCK_FUNDS: '📊 Stock Funds',
     FIXED_INCOME_FUNDS: '🏛 Fixed Income Funds',

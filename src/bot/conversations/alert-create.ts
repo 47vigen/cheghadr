@@ -50,8 +50,18 @@ function assetPageKeyboard(
   for (const item of items) {
     kb.text(item.name, CB.wizardAsset(item.symbol)).row()
   }
-  if (page > 0) kb.text('◀️', CB.wizardPagePrev(category, page - 1))
-  if (page < totalPages - 1) kb.text('▶️', CB.wizardPageNext(category, page + 1))
+  if (page > 0) {
+    kb.text(
+      t(locale, 'bot.wizard.pagePrev'),
+      CB.wizardPagePrev(category, page - 1),
+    )
+  }
+  if (page < totalPages - 1) {
+    kb.text(
+      t(locale, 'bot.wizard.pageNext'),
+      CB.wizardPageNext(category, page + 1),
+    )
+  }
   if (page > 0 || page < totalPages - 1) kb.row()
   kb.text(t(locale, 'bot.alerts.wizard.cancel'), CB.WIZARD_CANCEL)
   return kb

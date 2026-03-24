@@ -17,6 +17,7 @@ import {
 } from '@/lib/prices'
 import { db } from '@/server/db'
 
+import { escapeTelegramHtml } from '../html-escape'
 import type { BotLocale } from '../i18n'
 import { t } from '../i18n'
 import { assetListFooterKeyboard } from '../keyboards/assets'
@@ -187,7 +188,8 @@ export async function buildBreakdown(
     if (total > 0) {
       const pct = ((item.valueIRT / total) * 100).toFixed(1)
       const val = formatIRT(item.valueIRT, locale)
-      lines.push(`• <b>${item.symbol}</b>  ${pct}%  —  ${val}`)
+      const sym = escapeTelegramHtml(item.symbol)
+      lines.push(`• <b>${sym}</b>  ${pct}%  —  ${val}`)
     }
   }
 
@@ -226,7 +228,9 @@ export async function buildAssetList(
   const lines: string[] = []
   for (const asset of assets) {
     const item = findBySymbol(prices, asset.symbol)
-    const name = item ? getLocalizedItemName(item, locale) : asset.symbol
+    const rawName = item ? getLocalizedItemName(item, locale) : asset.symbol
+    const name = escapeTelegramHtml(rawName)
+    const symbol = escapeTelegramHtml(asset.symbol)
     const qty = Number(asset.quantity)
     const price = item ? Number(item.sell_price ?? 0) : 0
     const value = qty * price
@@ -235,7 +239,7 @@ export async function buildAssetList(
     const changeStr = changeInfo ? ` (${changeInfo.text})` : ''
 
     lines.push(
-      `• <b>${name}</b> (${asset.symbol})\n  ${qty.toFixed(4)} × ${formatIRT(price, locale)} = <b>${formatIRT(value, locale)}</b>${changeStr}`,
+      `• <b>${name}</b> (${symbol})\n  ${qty.toFixed(4)} × ${formatIRT(price, locale)} = <b>${formatIRT(value, locale)}</b>${changeStr}`,
     )
   }
 

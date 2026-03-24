@@ -10,6 +10,7 @@ import {
 } from '@/lib/prices'
 import { db } from '@/server/db'
 
+import { escapeTelegramHtml } from '../html-escape'
 import type { BotLocale } from '../i18n'
 import { t, tCategory } from '../i18n'
 import { categoryKeyboard, pricePageKeyboard } from '../keyboards/prices'
@@ -72,7 +73,7 @@ export async function buildPricePage(
     (safePage + 1) * PAGE_SIZE,
   )
 
-  const catLabel = tCategory(locale, category)
+  const catLabel = escapeTelegramHtml(tCategory(locale, category))
   const header = t(locale, 'bot.prices.pageTitle', {
     cat: catLabel,
     n: safePage + 1,
@@ -80,7 +81,7 @@ export async function buildPricePage(
   })
 
   const lines = pageItems.map((item) => {
-    const name = getLocalizedItemName(item, locale)
+    const name = escapeTelegramHtml(getLocalizedItemName(item, locale))
     const price = formatIRT(Number(item.sell_price ?? 0), locale)
     const changeInfo = formatChange(item.change, locale)
     const changeStr = changeInfo

@@ -11,7 +11,11 @@ export async function handleMessage(ctx: BotContext): Promise<void> {
     await ctx.reply(t(locale, 'bot.notRegistered'), { parse_mode: 'HTML' })
     return
   }
-  const { text, keyboard } = await buildMainMenu(user.id, locale)
+  const cmd = ctx.message?.text?.trim().split(/\s+/)[0]?.toLowerCase()
+  const showWelcome = cmd === '/start'
+  const { text, keyboard } = await buildMainMenu(user.id, locale, {
+    showWelcome,
+  })
   await ctx.reply(text, {
     parse_mode: 'HTML',
     reply_markup: keyboard,

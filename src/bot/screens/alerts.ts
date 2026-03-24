@@ -9,6 +9,7 @@ import {
 import { db } from '@/server/db'
 
 import { CB } from '../callback-data'
+import { escapeTelegramHtml } from '../html-escape'
 import type { BotLocale } from '../i18n'
 import { t } from '../i18n'
 import {
@@ -67,7 +68,8 @@ export async function buildAlertList(
     let label: string
     if (alert.type === 'PRICE' && alert.symbol) {
       const item = findBySymbol(prices, alert.symbol)
-      const name = item ? getLocalizedItemName(item, locale) : alert.symbol
+      const rawName = item ? getLocalizedItemName(item, locale) : alert.symbol
+      const name = escapeTelegramHtml(rawName)
       label = t(locale, 'bot.alerts.labelPrice', { name, dir, threshold })
     } else {
       label = t(locale, 'bot.alerts.labelPortfolio', { dir, threshold })

@@ -6,6 +6,10 @@ const fa = {
     mainMenu: {
       title: '📱 <b>چه‌قدر؟</b>',
     },
+    wizard: {
+      pagePrev: '◀️',
+      pageNext: '▶️',
+    },
     nav: {
       portfolio: '💼 سبد دارایی',
       prices: '📊 قیمت‌ها',
@@ -19,9 +23,9 @@ const fa = {
     portfolio: {
       title: '💼 <b>سبد دارایی</b>',
       noData:
-        'اطلاعاتی برای نمایش وجود ندارد.\nدارایی‌های خود را از طریق اپ اضافه کنید.',
+        '📭 اطلاعاتی برای نمایش وجود ندارد.\nدارایی‌های خود را از طریق اپ اضافه کنید.',
       homeTotal: 'ارزش کل: <b>{value}</b> تومان',
-      homeChangeHeading: '<b>تغییر</b> (نسبت به اسنپ‌شات‌ها):',
+      homeChangeHeading: '<b>تغییر</b> (نسبت به آخرین ذخیرهٔ قیمت‌ها):',
       homeDeltaRow:
         '{label}: <b>{signIrt}{irt}</b> ({signPct}{pct}{pctSuffix})',
       homeStale: '⚠️ قیمت‌ها حدود <b>{minutes}</b> دقیقه قدیمی هستند.',
@@ -37,7 +41,7 @@ const fa = {
     },
     prices: {
       selectCategory: '📊 <b>قیمت‌ها</b>\nیک دسته‌بندی انتخاب کنید:',
-      noData: 'قیمتی در دسترس نیست. کمی بعد دوباره امتحان کنید.',
+      noData: '📭 قیمتی در دسترس نیست. کمی بعد دوباره امتحان کنید.',
       pageTitle: '{cat}\nصفحه {n} از {total}',
       prev: '◀️ قبلی',
       next: 'بعدی ▶️',
@@ -53,7 +57,7 @@ const fa = {
       labelPrice: '📈 {name}  {dir} {threshold} تومان',
       labelPortfolio: '💼 سبد  {dir} {threshold} تومان',
       statusActive: '✅',
-      statusPaused: '⏸',
+      statusPaused: '⏸️',
       deleteBtn: '🗑',
       deleteConfirmTitle: '⚠️ آیا این هشدار حذف شود؟',
       deleteYes: '✅ بله، حذف کن',
@@ -110,7 +114,7 @@ const fa = {
       languageChanged: '✅ زبان تغییر کرد.',
       digest: 'خلاصه روزانه:',
       digestEnabled: '✅ فعال',
-      digestDisabled: '⏸ غیرفعال',
+      digestDisabled: '⏸️ غیرفعال',
       digestToggled: '✅ وضعیت خلاصه روزانه تغییر کرد.',
     },
   },
@@ -120,7 +124,7 @@ const fa = {
     GOLD: '🥇 طلا',
     COIN: '🏅 سکه',
     SILVER: '🥈 نقره',
-    BORS: '📈 بورس',
+    BORS: '🏢 بورس',
     GOLD_FUNDS: '🏦 صندوق طلا',
     STOCK_FUNDS: '📊 صندوق سهام',
     FIXED_INCOME_FUNDS: '🏛 صندوق درآمد ثابت',

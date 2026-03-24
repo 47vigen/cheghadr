@@ -2,7 +2,7 @@ import { MAX_ACTIVE_ALERTS } from '@/lib/alerts/utils'
 import { db } from '@/server/db'
 
 import type { BotContext } from '../context'
-import { t } from '../i18n'
+import { type BotLocale, t } from '../i18n'
 import { getLocale } from '../middleware/locale'
 import { buildAlertDeleteConfirm, buildAlertList } from '../screens/alerts'
 import { buildMainMenu } from '../screens/main'
@@ -10,10 +10,34 @@ import { buildAssetList, buildBreakdown } from '../screens/portfolio'
 import { buildCategoryMenu, buildPricePage } from '../screens/prices'
 import { buildSettings } from '../screens/settings'
 
+/** When re-activating an alert would exceed the cap, show a Telegram alert and return true. */
+async function tryAnswerMaxAlertToggle(
+  ctx: BotContext,
+  userId: string,
+  locale: BotLocale,
+  alertId: string,
+): Promise<boolean> {
+  const alert = await db.alert.findUnique({ where: { id: alertId } })
+  if (!alert || alert.userId !== userId || alert.isActive) {
+    return false
+  }
+  const activeCount = await db.alert.count({
+    where: { userId, isActive: true },
+  })
+  if (activeCount < MAX_ACTIVE_ALERTS) {
+    return false
+  }
+  await ctx.answerCallbackQuery({
+    text: t(locale, 'bot.alerts.wizard.maxReached', {
+      max: MAX_ACTIVE_ALERTS,
+    }),
+    show_alert: true,
+  })
+  return true
+}
+
 /** Main callback_query dispatcher. */
 export async function handleCallbacks(ctx: BotContext): Promise<void> {
-  await ctx.answerCallbackQuery()
-
   const data = ctx.callbackQuery?.data ?? ''
   const parts = data.split(':')
   const screen = parts[0]
@@ -22,11 +46,23 @@ export async function handleCallbacks(ctx: BotContext): Promise<void> {
   const locale = getLocale(ctx)
 
   if (!user) {
+    await ctx.answerCallbackQuery()
     await ctx.editMessageText(t(locale, 'bot.notRegistered'), {
       parse_mode: 'HTML',
     })
     return
   }
+
+  if (
+    screen === 'al' &&
+    action === 't' &&
+    parts[2] &&
+    (await tryAnswerMaxAlertToggle(ctx, user.id, locale, parts[2]))
+  ) {
+    return
+  }
+
+  await ctx.answerCallbackQuery()
 
   if (screen === 'wz') {
     console.warn(
@@ -100,25 +136,11 @@ export async function handleCallbacks(ctx: BotContext): Promise<void> {
         reply_markup: keyboard,
       })
     } else if (action === 't') {
-      // Toggle alert active/inactive
+      // Toggle alert active/inactive (max-active guard handled before answerCallbackQuery)
       const alertId = parts[2]
       if (alertId) {
         const alert = await db.alert.findUnique({ where: { id: alertId } })
         if (alert && alert.userId === user.id) {
-          if (!alert.isActive) {
-            const activeCount = await db.alert.count({
-              where: { userId: user.id, isActive: true },
-            })
-            if (activeCount >= MAX_ACTIVE_ALERTS) {
-              await ctx.reply(
-                t(locale, 'bot.alerts.wizard.maxReached', {
-                  max: MAX_ACTIVE_ALERTS,
-                }),
-                { parse_mode: 'HTML' },
-              )
-              return
-            }
-          }
           await db.alert.update({
             where: { id: alertId },
             data: {

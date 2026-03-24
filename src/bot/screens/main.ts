@@ -8,13 +8,18 @@ import { buildPortfolioHomeCard } from './portfolio'
 export async function buildMainMenu(
   userId: string,
   locale: BotLocale,
+  options?: { showWelcome?: boolean },
 ): Promise<{
   text: string
   keyboard: InlineKeyboard
 }> {
   const card = await buildPortfolioHomeCard(userId, locale)
+  const body = `${t(locale, 'bot.mainMenu.title')}\n\n${card}`
+  const text = options?.showWelcome
+    ? `${t(locale, 'bot.welcome')}\n\n${body}`
+    : body
   return {
-    text: `${t(locale, 'bot.mainMenu.title')}\n\n${card}`,
+    text,
     keyboard: mainMenuKeyboard(locale),
   }
 }
