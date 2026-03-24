@@ -7,7 +7,7 @@ export function assetListFooterKeyboard(locale: BotLocale): InlineKeyboard {
   return new InlineKeyboard()
     .text(t(locale, 'bot.assets.addAsset'), CB.ASSET_ADD)
     .row()
-    .text(t(locale, 'bot.nav.back'), CB.PORTFOLIO_VIEW)
+    .text(t(locale, 'bot.nav.back'), CB.HOME)
 }
 
 export function assetDeleteConfirmKeyboard(

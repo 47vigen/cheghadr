@@ -5,7 +5,7 @@ const en = {
     notRegistered:
       '⚠️ Please sign in through the app first before using the bot.',
     mainMenu: {
-      title: '📱 <b>Cheghadr?</b>\nChoose a section:',
+      title: '📱 <b>Cheghadr?</b>',
     },
     nav: {
       portfolio: '💼 Portfolio',
@@ -20,8 +20,16 @@ const en = {
     portfolio: {
       title: '💼 <b>Portfolio</b>',
       noData: 'No data to display.\nAdd assets through the app to get started.',
-      total: 'Total value: <b>{value} Toman</b>',
-      delta: '24h change: <b>{sign}{pct}%</b>',
+      homeTotal: 'Total value: <b>{value}</b> Toman',
+      homeChangeHeading: '<b>Change</b> (vs snapshots):',
+      homeDeltaRow:
+        '{label}: <b>{signIrt}{irt}</b> ({signPct}{pct}{pctSuffix})',
+      homeStale: '⚠️ Quotes are about <b>{minutes}</b> minutes old.',
+      homeStaleUnknown: '⚠️ No recent price snapshot.',
+      window1D: '1D',
+      window1W: '1W',
+      window1M: '1M',
+      windowALL: 'All time',
       breakdownTitle: '📂 <b>Portfolio Breakdown</b>',
       assetsTitle: '🏦 <b>My Assets</b>',
       noAssetData: 'Asset prices are currently unavailable.',

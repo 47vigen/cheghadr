@@ -6,11 +6,7 @@ import { t } from '../i18n'
 import { getLocale } from '../middleware/locale'
 import { buildAlertDeleteConfirm, buildAlertList } from '../screens/alerts'
 import { buildMainMenu } from '../screens/main'
-import {
-  buildAssetList,
-  buildBreakdown,
-  buildPortfolioSummary,
-} from '../screens/portfolio'
+import { buildAssetList, buildBreakdown } from '../screens/portfolio'
 import { buildCategoryMenu, buildPricePage } from '../screens/prices'
 import { buildSettings } from '../screens/settings'
 
@@ -34,7 +30,7 @@ export async function handleCallbacks(ctx: BotContext): Promise<void> {
 
   // ── Home ────────────────────────────────────────────────────────────────
   if (screen === 'h') {
-    const { text, keyboard } = buildMainMenu(locale)
+    const { text, keyboard } = await buildMainMenu(user.id, locale)
     await ctx.editMessageText(text, {
       parse_mode: 'HTML',
       reply_markup: keyboard,
@@ -45,7 +41,7 @@ export async function handleCallbacks(ctx: BotContext): Promise<void> {
   // ── Portfolio ────────────────────────────────────────────────────────────
   if (screen === 'p') {
     if (action === 'v') {
-      const { text, keyboard } = await buildPortfolioSummary(user.id, locale)
+      const { text, keyboard } = await buildMainMenu(user.id, locale)
       await ctx.editMessageText(text, {
         parse_mode: 'HTML',
         reply_markup: keyboard,

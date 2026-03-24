@@ -77,7 +77,7 @@ export async function assetAddWizard(
     await ctx.editMessageText(t(locale, 'bot.assets.wizard.noPriceData'), {
       parse_mode: 'HTML',
     })
-    setTimeout(() => showMain(ctx, locale), 2000)
+    setTimeout(() => showMain(user.id, ctx, locale), 2000)
     return
   }
 
@@ -96,7 +96,7 @@ export async function assetAddWizard(
     await catCtx.editMessageText(t(locale, 'bot.assets.wizard.cancelled'), {
       parse_mode: 'HTML',
     })
-    setTimeout(() => showMain(catCtx, locale), 1500)
+    setTimeout(() => showMain(user.id, catCtx, locale), 1500)
     return
   }
 
@@ -143,7 +143,7 @@ export async function assetAddWizard(
       await assetCtx.editMessageText(t(locale, 'bot.assets.wizard.cancelled'), {
         parse_mode: 'HTML',
       })
-      setTimeout(() => showMain(assetCtx, locale), 1500)
+      setTimeout(() => showMain(user.id, assetCtx, locale), 1500)
       return
     }
 
@@ -221,8 +221,12 @@ export async function assetAddWizard(
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
-async function showMain(ctx: Context, locale: BotLocale) {
+async function showMain(
+  userId: string,
+  ctx: Pick<Context, 'reply'>,
+  locale: BotLocale,
+) {
   const { buildMainMenu } = await import('../screens/main')
-  const { text, keyboard } = buildMainMenu(locale)
+  const { text, keyboard } = await buildMainMenu(userId, locale)
   await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
 }

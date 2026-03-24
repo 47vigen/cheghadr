@@ -4,7 +4,7 @@ const fa = {
       '👋 به ربات <b>چه‌قدر؟</b> خوش آمدید.\nاز دکمه‌های زیر استفاده کنید:',
     notRegistered: '⚠️ برای استفاده از ربات ابتدا از طریق اپلیکیشن وارد شوید.',
     mainMenu: {
-      title: '📱 <b>چه‌قدر؟</b>\nیک بخش را انتخاب کنید:',
+      title: '📱 <b>چه‌قدر؟</b>',
     },
     nav: {
       portfolio: '💼 سبد دارایی',
@@ -20,8 +20,16 @@ const fa = {
       title: '💼 <b>سبد دارایی</b>',
       noData:
         'اطلاعاتی برای نمایش وجود ندارد.\nدارایی‌های خود را از طریق اپ اضافه کنید.',
-      total: 'ارزش کل: <b>{value} تومان</b>',
-      delta: 'تغییر ۲۴ ساعته: <b>{sign}{pct}٪</b>',
+      homeTotal: 'ارزش کل: <b>{value}</b> تومان',
+      homeChangeHeading: '<b>تغییر</b> (نسبت به اسنپ‌شات‌ها):',
+      homeDeltaRow:
+        '{label}: <b>{signIrt}{irt}</b> ({signPct}{pct}{pctSuffix})',
+      homeStale: '⚠️ قیمت‌ها حدود <b>{minutes}</b> دقیقه قدیمی هستند.',
+      homeStaleUnknown: '⚠️ اسنپ‌شات قیمت تازه‌ای در دسترس نیست.',
+      window1D: '۱ روز',
+      window1W: '۱ هفته',
+      window1M: '۱ ماه',
+      windowALL: 'کل دوره',
       breakdownTitle: '📂 <b>ترکیب سبد</b>',
       assetsTitle: '🏦 <b>دارایی‌ها</b>',
       noAssetData: 'قیمت دارایی‌ها در دسترس نیست.',

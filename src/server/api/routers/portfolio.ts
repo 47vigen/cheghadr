@@ -2,6 +2,7 @@ import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
 import { createPortfolioSnapshot } from '@/lib/portfolio'
+import { getPortfolioSnapshotDelta } from '@/lib/portfolio-snapshot-delta'
 import {
   findBySymbol,
   getSellPriceBySymbol,
@@ -18,25 +19,6 @@ import type { BreakdownItem } from '@/types/schemas'
 import { parseBreakdownJson } from '@/types/schemas'
 
 const MAX_PORTFOLIOS = 10
-
-function getComparisonDate(window: string): Date | null {
-  const now = new Date()
-  switch (window) {
-    case '1D':
-      now.setDate(now.getDate() - 1)
-      return now
-    case '1W':
-      now.setDate(now.getDate() - 7)
-      return now
-    case '1M':
-      now.setMonth(now.getMonth() - 1)
-      return now
-    case 'ALL':
-      return null
-    default:
-      return null
-  }
-}
 
 const portfolioIdInput = z.string().min(1).optional()
 
@@ -186,49 +168,14 @@ export const portfolioRouter = router({
         })
         .optional(),
     )
-    .query(async ({ ctx, input }) => {
+    .query(({ ctx, input }) => {
       const window = input?.window ?? '1D'
-
-      const portfolioFilter = await resolveOwnedPortfolioFilter(
+      return getPortfolioSnapshotDelta(
         ctx.db,
         ctx.user.id,
+        window,
         input?.portfolioId,
       )
-
-      const current = await ctx.db.portfolioSnapshot.findFirst({
-        where: { userId: ctx.user.id, ...portfolioFilter },
-        orderBy: { snapshotAt: 'desc' },
-        select: { id: true, snapshotAt: true, totalIRT: true },
-      })
-
-      if (!current) return null
-
-      const comparisonDate = getComparisonDate(window)
-
-      const previous = comparisonDate
-        ? await ctx.db.portfolioSnapshot.findFirst({
-            where: {
-              userId: ctx.user.id,
-              ...portfolioFilter,
-              snapshotAt: { lte: comparisonDate },
-            },
-            orderBy: { snapshotAt: 'desc' },
-            select: { id: true, snapshotAt: true, totalIRT: true },
-          })
-        : await ctx.db.portfolioSnapshot.findFirst({
-            where: { userId: ctx.user.id, ...portfolioFilter },
-            orderBy: { snapshotAt: 'asc' },
-            select: { id: true, snapshotAt: true, totalIRT: true },
-          })
-
-      if (!previous || previous.id === current.id) return null
-
-      const currentIRT = Number(current.totalIRT)
-      const previousIRT = Number(previous.totalIRT)
-      const deltaIRT = currentIRT - previousIRT
-      const deltaPct = previousIRT !== 0 ? (deltaIRT / previousIRT) * 100 : 0
-
-      return { currentIRT, previousIRT, deltaIRT, deltaPct }
     }),
 
   breakdown: protectedProcedure

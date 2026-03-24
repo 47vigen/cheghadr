@@ -1,10 +1,18 @@
 import type { InlineKeyboard } from 'grammy'
 
 import {
+  getPortfolioSnapshotDelta,
+  type PortfolioDeltaWindow,
+} from '@/lib/portfolio-snapshot-delta'
+import {
   findBySymbol,
   formatChange,
+  formatCompactCurrency,
   formatIRT,
+  getIntlLocale,
   getLocalizedItemName,
+  getSellPriceBySymbol,
+  getSnapshotStaleness,
   parsePriceSnapshot,
 } from '@/lib/prices'
 import { db } from '@/server/db'
@@ -12,57 +20,140 @@ import { db } from '@/server/db'
 import type { BotLocale } from '../i18n'
 import { t } from '../i18n'
 import { assetListFooterKeyboard } from '../keyboards/assets'
-import { portfolioKeyboard, portfolioSubKeyboard } from '../keyboards/portfolio'
+import { portfolioSubKeyboard } from '../keyboards/portfolio'
 
 interface ScreenResult {
   text: string
   keyboard: InlineKeyboard
 }
 
-export async function buildPortfolioSummary(
+const DELTA_WINDOWS: PortfolioDeltaWindow[] = ['1D', '1W', '1M', 'ALL']
+
+function windowLabel(locale: BotLocale, window: PortfolioDeltaWindow): string {
+  switch (window) {
+    case '1D':
+      return t(locale, 'bot.portfolio.window1D')
+    case '1W':
+      return t(locale, 'bot.portfolio.window1W')
+    case '1M':
+      return t(locale, 'bot.portfolio.window1M')
+    case 'ALL':
+      return t(locale, 'bot.portfolio.windowALL')
+    default:
+      return window
+  }
+}
+
+function formatHomeDeltaLine(
+  locale: BotLocale,
+  window: PortfolioDeltaWindow,
+  deltaIRT: number,
+  deltaPct: number,
+): string {
+  const label = windowLabel(locale, window)
+  const signIrt = deltaIRT > 0 ? '+' : deltaIRT < 0 ? '-' : ''
+  const signPct = deltaPct > 0 ? '+' : deltaPct < 0 ? '-' : ''
+  const irt = formatIRT(Math.abs(Math.round(deltaIRT)), locale)
+  const pct = new Intl.NumberFormat(getIntlLocale(locale), {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Math.abs(deltaPct))
+  const pctSuffix = locale === 'fa' ? '٪' : '%'
+  return t(locale, 'bot.portfolio.homeDeltaRow', {
+    label,
+    signIrt,
+    irt,
+    signPct,
+    pct,
+    pctSuffix,
+  })
+}
+
+/**
+ * Consolidated portfolio hero text (live total, FX, staleness, snapshot deltas).
+ * Main menu title is prepended by {@link buildMainMenu}.
+ */
+export async function buildPortfolioHomeCard(
   userId: string,
   locale: BotLocale,
-): Promise<ScreenResult> {
-  const keyboard = portfolioKeyboard(locale)
+): Promise<string> {
+  const [userAssets, snapshot] = await Promise.all([
+    db.userAsset.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'asc' },
+    }),
+    db.priceSnapshot.findFirst({ orderBy: { snapshotAt: 'desc' } }),
+  ])
 
-  // Latest consolidated snapshot (portfolioId: null)
-  const snapshot = await db.portfolioSnapshot.findFirst({
-    where: { userId, portfolioId: null },
-    orderBy: { snapshotAt: 'desc' },
-  })
+  if (userAssets.length === 0) {
+    return t(locale, 'bot.portfolio.noData')
+  }
 
-  if (!snapshot) {
-    return {
-      text: `${t(locale, 'bot.portfolio.title')}\n\n${t(locale, 'bot.portfolio.noData')}`,
-      keyboard,
+  const prices = snapshot ? parsePriceSnapshot(snapshot.data) : []
+  const { stale, minutesOld } = getSnapshotStaleness(snapshot?.snapshotAt)
+
+  let totalIRT = 0
+  for (const asset of userAssets) {
+    const sellPrice = getSellPriceBySymbol(asset.symbol, prices)
+    totalIRT += Number(asset.quantity) * sellPrice
+  }
+
+  const usdSellPrice = getSellPriceBySymbol('USD', prices)
+  const eurSellPrice = getSellPriceBySymbol('EUR', prices)
+  const showUsd = usdSellPrice > 0
+  const showEur = eurSellPrice > 0
+
+  const lines: string[] = []
+
+  lines.push(
+    t(locale, 'bot.portfolio.homeTotal', {
+      value: formatIRT(Math.round(totalIRT), locale),
+    }),
+  )
+
+  if (showUsd || showEur) {
+    const fxParts: string[] = []
+    if (showUsd) {
+      fxParts.push(formatCompactCurrency(totalIRT / usdSellPrice, 'USD'))
+    }
+    if (showEur) {
+      fxParts.push(formatCompactCurrency(totalIRT / eurSellPrice, 'EUR'))
+    }
+    lines.push(fxParts.join(' · '))
+  }
+
+  if (stale) {
+    if (Number.isFinite(minutesOld)) {
+      const mins = Math.max(1, Math.round(minutesOld))
+      lines.push(
+        t(locale, 'bot.portfolio.homeStale', {
+          minutes: String(mins),
+        }),
+      )
+    } else {
+      lines.push(t(locale, 'bot.portfolio.homeStaleUnknown'))
     }
   }
 
-  const totalValue = Number(snapshot.totalIRT)
-  const formatted = formatIRT(totalValue, locale)
+  const deltaResults = await Promise.all(
+    DELTA_WINDOWS.map((w) => getPortfolioSnapshotDelta(db, userId, w)),
+  )
 
-  // Calculate delta from 24h ago snapshot
-  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000)
-  const prevSnapshot = await db.portfolioSnapshot.findFirst({
-    where: { userId, portfolioId: null, snapshotAt: { lte: yesterday } },
-    orderBy: { snapshotAt: 'desc' },
-  })
-
-  let deltaLine = ''
-  if (prevSnapshot) {
-    const prev = Number(prevSnapshot.totalIRT)
-    if (prev > 0) {
-      const pct = ((totalValue - prev) / prev) * 100
-      const sign = pct >= 0 ? '+' : ''
-      const pctStr = Math.abs(pct).toFixed(2)
-      deltaLine = `\n${t(locale, 'bot.portfolio.delta', { sign, pct: pctStr })}`
-    }
+  const deltaLines: string[] = []
+  for (let i = 0; i < DELTA_WINDOWS.length; i++) {
+    const d = deltaResults[i]
+    const w = DELTA_WINDOWS[i]
+    if (!d) continue
+    deltaLines.push(formatHomeDeltaLine(locale, w, d.deltaIRT, d.deltaPct))
   }
 
-  const totalLine = t(locale, 'bot.portfolio.total', { value: formatted })
-  const text = `${t(locale, 'bot.portfolio.title')}\n\n${totalLine}${deltaLine}`
+  if (deltaLines.length > 0) {
+    lines.push('')
+    lines.push(t(locale, 'bot.portfolio.homeChangeHeading'))
+    lines.push(...deltaLines)
+  }
 
-  return { text, keyboard }
+  return lines.join('\n')
 }
 
 export async function buildBreakdown(

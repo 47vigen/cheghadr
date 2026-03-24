@@ -100,7 +100,7 @@ export async function priceAlertWizard(
     await catCtx.editMessageText(t(locale, 'bot.alerts.wizard.cancelled'), {
       parse_mode: 'HTML',
     })
-    setTimeout(() => showMain(catCtx, locale), 1500)
+    setTimeout(() => showMain(user.id, catCtx, locale), 1500)
     return
   }
 
@@ -146,7 +146,7 @@ export async function priceAlertWizard(
       await assetCtx.editMessageText(t(locale, 'bot.alerts.wizard.cancelled'), {
         parse_mode: 'HTML',
       })
-      setTimeout(() => showMain(assetCtx, locale), 1500)
+      setTimeout(() => showMain(user.id, assetCtx, locale), 1500)
       return
     }
 
@@ -182,7 +182,7 @@ export async function priceAlertWizard(
     await dirCtx.editMessageText(t(locale, 'bot.alerts.wizard.cancelled'), {
       parse_mode: 'HTML',
     })
-    setTimeout(() => showMain(dirCtx, locale), 1500)
+    setTimeout(() => showMain(user.id, dirCtx, locale), 1500)
     return
   }
 
@@ -284,7 +284,7 @@ export async function portfolioAlertWizard(
     await dirCtx.editMessageText(t(locale, 'bot.alerts.wizard.cancelled'), {
       parse_mode: 'HTML',
     })
-    setTimeout(() => showMain(dirCtx, locale), 1500)
+    setTimeout(() => showMain(user.id, dirCtx, locale), 1500)
     return
   }
 
@@ -342,8 +342,12 @@ export async function portfolioAlertWizard(
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
-async function showMain(ctx: Context, locale: BotLocale) {
+async function showMain(
+  userId: string,
+  ctx: Pick<Context, 'reply'>,
+  locale: BotLocale,
+) {
   const { buildMainMenu } = await import('../screens/main')
-  const { text, keyboard } = buildMainMenu(locale)
+  const { text, keyboard } = await buildMainMenu(userId, locale)
   await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
 }
