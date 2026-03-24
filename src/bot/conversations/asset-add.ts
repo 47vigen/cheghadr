@@ -19,6 +19,7 @@ import type { BotContext } from '../context'
 import { type BotLocale, t, tCategory } from '../i18n'
 import { buildAssetList } from '../screens/portfolio'
 import { loadBotUserAndLocale } from './context'
+import { waitForPositiveNumberOrExit } from './wait-positive-number-input'
 
 const PAGE_SIZE = 10
 
@@ -174,21 +175,23 @@ export async function assetAddWizard(
     parse_mode: 'HTML',
   })
 
-  let quantity: string | undefined
+  const anchorChatId = ctx.chat?.id
+  const anchorMessageId = ctx.callbackQuery?.message?.message_id
+  if (anchorChatId === undefined || anchorMessageId === undefined) return
 
-  while (!quantity) {
-    const msgCtx = await conversation.waitFor('message:text')
-    const raw = msgCtx.message.text.trim().replace(/,/g, '').replace(/٬/g, '')
-    const n = Number(raw)
-    if (!Number.isNaN(n) && n > 0) {
-      quantity = String(n)
-      await msgCtx.deleteMessage().catch(() => null)
-    } else {
-      await msgCtx.reply(t(locale, 'bot.assets.wizard.invalidQuantity'), {
-        parse_mode: 'HTML',
-      })
-    }
-  }
+  const quantity = await waitForPositiveNumberOrExit({
+    conversation,
+    replyCtx: ctx,
+    userId: user.id,
+    locale,
+    anchorChatId,
+    anchorMessageId,
+    cancelledHtml: t(locale, 'bot.assets.wizard.cancelled'),
+    invalidHtml: t(locale, 'bot.assets.wizard.invalidQuantity'),
+    cancelButtonLabel: t(locale, 'bot.assets.wizard.cancel'),
+    helperHintHtml: t(locale, 'bot.wizard.numberInputHint'),
+  })
+  if (quantity === null) return
 
   // ── Step 4: Save (upsert) ─────────────────────────────────────────────────
   const portfolio = await conversation.external(() =>
@@ -222,10 +225,16 @@ export async function assetAddWizard(
   const successChatId = ctx.chat?.id
   const successMsgId = successMsg.message_id
   setTimeout(async () => {
-    const { text, keyboard } = await buildAssetList(user.id, locale)
-    await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
-    if (successChatId)
-      await ctx.api.deleteMessage(successChatId, successMsgId).catch(() => null)
+    try {
+      const { text, keyboard } = await buildAssetList(user.id, locale)
+      await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
+      if (successChatId)
+        await ctx.api
+          .deleteMessage(successChatId, successMsgId)
+          .catch(() => null)
+    } catch (e) {
+      console.error('[bot/assetAddWizard] success follow-up failed', e)
+    }
   }, 1000)
 }
 

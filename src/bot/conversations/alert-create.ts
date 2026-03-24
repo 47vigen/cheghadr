@@ -16,6 +16,7 @@ import type { BotContext } from '../context'
 import { type BotLocale, t, tCategory } from '../i18n'
 import { buildAlertList } from '../screens/alerts'
 import { loadBotUserAndLocale } from './context'
+import { waitForPositiveNumberOrExit } from './wait-positive-number-input'
 
 const PAGE_SIZE = 10
 
@@ -83,9 +84,13 @@ export async function priceAlertWizard(
   )
 
   if (activeCount >= MAX_ACTIVE_ALERTS) {
+    const homeKb = new InlineKeyboard().text(
+      t(locale, 'bot.wizard.home'),
+      CB.HOME,
+    )
     await ctx.editMessageText(
       t(locale, 'bot.alerts.wizard.maxReached', { max: MAX_ACTIVE_ALERTS }),
-      { parse_mode: 'HTML' },
+      { parse_mode: 'HTML', reply_markup: homeKb },
     )
     return
   }
@@ -203,22 +208,23 @@ export async function priceAlertWizard(
     parse_mode: 'HTML',
   })
 
-  let thresholdIRT: string | undefined
+  const anchorChatId = ctx.chat?.id
+  const anchorMessageId = ctx.callbackQuery?.message?.message_id
+  if (anchorChatId === undefined || anchorMessageId === undefined) return
 
-  while (!thresholdIRT) {
-    const msgCtx = await conversation.waitFor('message:text')
-    const raw = msgCtx.message.text.trim().replace(/,/g, '').replace(/٬/g, '')
-    const n = Number(raw)
-    if (!Number.isNaN(n) && n > 0) {
-      thresholdIRT = String(n)
-      // Delete the user's message to keep chat clean
-      await msgCtx.deleteMessage().catch(() => null)
-    } else {
-      await msgCtx.reply(t(locale, 'bot.alerts.wizard.invalidNumber'), {
-        parse_mode: 'HTML',
-      })
-    }
-  }
+  const thresholdIRT = await waitForPositiveNumberOrExit({
+    conversation,
+    replyCtx: ctx,
+    userId: user.id,
+    locale,
+    anchorChatId,
+    anchorMessageId,
+    cancelledHtml: t(locale, 'bot.alerts.wizard.cancelled'),
+    invalidHtml: t(locale, 'bot.alerts.wizard.invalidNumber'),
+    cancelButtonLabel: t(locale, 'bot.alerts.wizard.cancel'),
+    helperHintHtml: t(locale, 'bot.wizard.numberInputHint'),
+  })
+  if (thresholdIRT === null) return
 
   // ── Step 5: Save ──────────────────────────────────────────────────────────
   await conversation.external(() =>
@@ -241,10 +247,16 @@ export async function priceAlertWizard(
   const successMsgId = successMsg.message_id
   // Show alert list after 1 second
   setTimeout(async () => {
-    const { text, keyboard } = await buildAlertList(user.id, locale)
-    await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
-    if (successChatId)
-      await ctx.api.deleteMessage(successChatId, successMsgId).catch(() => null)
+    try {
+      const { text, keyboard } = await buildAlertList(user.id, locale)
+      await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
+      if (successChatId)
+        await ctx.api
+          .deleteMessage(successChatId, successMsgId)
+          .catch(() => null)
+    } catch (e) {
+      console.error('[bot/priceAlertWizard] success follow-up failed', e)
+    }
   }, 1000)
 }
 
@@ -264,9 +276,13 @@ export async function portfolioAlertWizard(
   )
 
   if (activeCount >= MAX_ACTIVE_ALERTS) {
+    const homeKb = new InlineKeyboard().text(
+      t(locale, 'bot.wizard.home'),
+      CB.HOME,
+    )
     await ctx.editMessageText(
       t(locale, 'bot.alerts.wizard.maxReached', { max: MAX_ACTIVE_ALERTS }),
-      { parse_mode: 'HTML' },
+      { parse_mode: 'HTML', reply_markup: homeKb },
     )
     return
   }
@@ -305,21 +321,23 @@ export async function portfolioAlertWizard(
     parse_mode: 'HTML',
   })
 
-  let thresholdIRT: string | undefined
+  const anchorChatIdPf = ctx.chat?.id
+  const anchorMessageIdPf = ctx.callbackQuery?.message?.message_id
+  if (anchorChatIdPf === undefined || anchorMessageIdPf === undefined) return
 
-  while (!thresholdIRT) {
-    const msgCtx = await conversation.waitFor('message:text')
-    const raw = msgCtx.message.text.trim().replace(/,/g, '').replace(/٬/g, '')
-    const n = Number(raw)
-    if (!Number.isNaN(n) && n > 0) {
-      thresholdIRT = String(n)
-      await msgCtx.deleteMessage().catch(() => null)
-    } else {
-      await msgCtx.reply(t(locale, 'bot.alerts.wizard.invalidNumber'), {
-        parse_mode: 'HTML',
-      })
-    }
-  }
+  const thresholdIRT = await waitForPositiveNumberOrExit({
+    conversation,
+    replyCtx: ctx,
+    userId: user.id,
+    locale,
+    anchorChatId: anchorChatIdPf,
+    anchorMessageId: anchorMessageIdPf,
+    cancelledHtml: t(locale, 'bot.alerts.wizard.cancelled'),
+    invalidHtml: t(locale, 'bot.alerts.wizard.invalidNumber'),
+    cancelButtonLabel: t(locale, 'bot.alerts.wizard.cancel'),
+    helperHintHtml: t(locale, 'bot.wizard.numberInputHint'),
+  })
+  if (thresholdIRT === null) return
 
   // ── Step 3: Save ──────────────────────────────────────────────────────────
   await conversation.external(() =>
@@ -341,12 +359,16 @@ export async function portfolioAlertWizard(
   const successChatId2 = ctx.chat?.id
   const successMsgId2 = successMsg.message_id
   setTimeout(async () => {
-    const { text, keyboard } = await buildAlertList(user.id, locale)
-    await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
-    if (successChatId2)
-      await ctx.api
-        .deleteMessage(successChatId2, successMsgId2)
-        .catch(() => null)
+    try {
+      const { text, keyboard } = await buildAlertList(user.id, locale)
+      await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
+      if (successChatId2)
+        await ctx.api
+          .deleteMessage(successChatId2, successMsgId2)
+          .catch(() => null)
+    } catch (e) {
+      console.error('[bot/portfolioAlertWizard] success follow-up failed', e)
+    }
   }, 1000)
 }
 

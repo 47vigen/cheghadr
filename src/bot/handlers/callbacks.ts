@@ -65,10 +65,20 @@ export async function handleCallbacks(ctx: BotContext): Promise<void> {
   await ctx.answerCallbackQuery()
 
   if (screen === 'wz') {
-    console.warn(
-      '[bot/callbacks] Wizard callback with no active conversation:',
-      data,
-    )
+    const expiredLine = t(locale, 'bot.sessionExpired')
+    const { text, keyboard } = await buildMainMenu(user.id, locale)
+    const combined = `${expiredLine}\n\n${text}`
+    try {
+      await ctx.editMessageText(combined, {
+        parse_mode: 'HTML',
+        reply_markup: keyboard,
+      })
+    } catch {
+      await ctx.reply(combined, {
+        parse_mode: 'HTML',
+        reply_markup: keyboard,
+      })
+    }
     return
   }
 

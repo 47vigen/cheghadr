@@ -7,7 +7,7 @@ type NestedRecord = { [key: string]: string | NestedRecord }
 
 /**
  * Resolve a dot-separated key path inside a nested object.
- * e.g. t('fa', 'bot.nav.back') → '↩️ بازگشت'
+ * e.g. t('fa', 'bot.nav.back') → '🔙 بازگشت'
  */
 export function t(
   locale: BotLocale,
