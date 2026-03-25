@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 
+import { Skeleton } from '@heroui/react'
 import { useSession } from 'next-auth/react'
 import { useLocale, useTranslations } from 'next-intl'
 
@@ -16,7 +17,7 @@ import {
 } from '@/lib/prices'
 import { api } from '@/trpc/react'
 
-/* ─── Featured symbols ───────────────────────────────────── */
+/* ─── Featured symbols (priority order) ─────────────────── */
 
 const FEATURED_SYMBOLS = [
   'USD',
@@ -31,32 +32,44 @@ const FEATURED_SYMBOLS = [
   'SOL',
 ]
 
-/* ─── Ticker item ────────────────────────────────────────── */
+/* ─── Ticker row ─────────────────────────────────────────── */
 
-function TickerItem({ item, locale }: { item: PriceItem; locale: string }) {
+function TickerItem({
+  item,
+  locale,
+  tomanAbbr,
+}: {
+  item: PriceItem
+  locale: string
+  tomanAbbr: string
+}) {
   const name = getLocalizedItemName(item, locale)
   const sellPrice = Number.parseFloat(item.sell_price ?? '0')
   const change = formatChange(item.change, locale)
+  const sym =
+    item.base_currency?.symbol?.slice(0, 4) ??
+    item.symbol?.split('-')[0]?.slice(0, 4) ??
+    '—'
 
   return (
-    <div className="flex items-center justify-between border-border border-b px-4 py-3">
-      {/* Left: symbol avatar + name */}
+    <div className="flex cursor-default items-center justify-between border-border border-b px-4 py-3 transition-colors hover:bg-card">
+      {/* Symbol avatar + name */}
       <div className="flex items-center gap-3">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center border border-border bg-card font-bold font-display text-muted-foreground text-xs">
-          {item.base_currency?.symbol?.slice(0, 3) ??
-            item.symbol?.split('-')[0]?.slice(0, 3) ??
-            '—'}
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center border border-border bg-card font-bold font-display text-[0.6rem] text-muted-foreground uppercase tracking-tight">
+          {sym}
         </div>
         <span className="font-medium text-sm leading-none">{name}</span>
       </div>
 
-      {/* Right: price + change */}
+      {/* Price + change */}
       <div className="flex flex-col items-end gap-0.5">
         <span
           className="font-display font-semibold text-sm tabular-nums"
           dir="ltr"
         >
-          {Number.isNaN(sellPrice) ? '—' : formatIRT(sellPrice, locale)}
+          {Number.isNaN(sellPrice)
+            ? '—'
+            : `${formatIRT(sellPrice, locale)} ${tomanAbbr}`}
         </span>
         {change && (
           <span
@@ -73,47 +86,84 @@ function TickerItem({ item, locale }: { item: PriceItem; locale: string }) {
   )
 }
 
-/* ─── Live price ticker ──────────────────────────────────── */
+/* ─── Skeleton rows while loading ────────────────────────── */
 
-function LiveTicker({ items, locale }: { items: PriceItem[]; locale: string }) {
+function TickerSkeleton() {
+  return (
+    <div className="flex flex-col">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div
+          key={i}
+          className="flex items-center justify-between border-border border-b px-4 py-3"
+        >
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-9 w-9" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-2.5 w-12" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/* ─── Infinite vertical ticker ───────────────────────────── */
+
+function LiveTicker({
+  items,
+  locale,
+  tomanAbbr,
+}: {
+  items: PriceItem[]
+  locale: string
+  tomanAbbr: string
+}) {
   if (items.length === 0) return null
 
-  // Duplicate for seamless loop
+  // Duplicate list for seamless infinite scroll
   const doubled = [...items, ...items]
+  const visibleRows = Math.min(items.length, 7)
+  const rowH = 57 // px per row (py-3 top+bottom = 24px + content ~33px)
 
   return (
     <div
-      className="relative overflow-hidden"
-      style={{ height: `${Math.min(items.length, 6) * 57}px` }}
+      role="region"
       aria-label="Live market prices"
+      className="relative overflow-hidden"
+      style={{ height: `${visibleRows * rowH}px` }}
     >
-      {/* Fade top / bottom */}
+      {/* Edge fades */}
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 z-10 h-8"
+        className="pointer-events-none absolute inset-x-0 top-0 z-10 h-10"
         style={{
           background:
             'linear-gradient(to bottom, var(--background), transparent)',
         }}
+        aria-hidden
       />
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-8"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-10"
         style={{
           background: 'linear-gradient(to top, var(--background), transparent)',
         }}
+        aria-hidden
       />
 
+      {/* Scrolling track */}
       <div
         className="ticker-track"
-        style={{
-          animationDuration: `${items.length * 2.5}s`,
-        }}
+        style={{ animationDuration: `${items.length * 2.8}s` }}
       >
         {doubled.map((item, idx) => (
           <TickerItem
-            // biome-ignore lint/suspicious/noArrayIndexKey: duplicated list for loop
+            // biome-ignore lint/suspicious/noArrayIndexKey: duplicated list for seamless loop
             key={`${item.symbol}-${idx}`}
             item={item}
             locale={locale}
+            tomanAbbr={tomanAbbr}
           />
         ))}
       </div>
@@ -121,7 +171,7 @@ function LiveTicker({ items, locale }: { items: PriceItem[]; locale: string }) {
   )
 }
 
-/* ─── Feature card ───────────────────────────────────────── */
+/* ─── Feature list item ──────────────────────────────────── */
 
 function FeatureCard({
   number,
@@ -133,11 +183,11 @@ function FeatureCard({
   sub: string
 }) {
   return (
-    <div className="flex gap-4 border-border border-b py-5 last:border-b-0">
+    <div className="flex gap-5 border-border border-b py-5 last:border-b-0">
       <span className="shrink-0 font-display font-medium text-muted-foreground text-xs">
         {number}
       </span>
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1.5">
         <h3 className="font-display font-semibold text-sm">{title}</h3>
         <p className="text-muted-foreground text-sm leading-relaxed">{sub}</p>
       </div>
@@ -145,7 +195,7 @@ function FeatureCard({
   )
 }
 
-/* ─── Main page ──────────────────────────────────────────── */
+/* ─── Landing page ───────────────────────────────────────── */
 
 export default function LandingPage() {
   const t = useTranslations('landing')
@@ -166,65 +216,80 @@ export default function LandingPage() {
     })
   }, [pricesQuery.data])
 
+  const tomanAbbr = t('tomanAbbr')
   const appHref = session ? '/app' : '/login'
 
   return (
     <div className="flex min-h-svh flex-col bg-background text-foreground">
       {/* ── Hero ──────────────────────────────────────────── */}
       <section className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden px-6 py-16">
-        {/* Decorative grid */}
+        {/* Dot grid texture */}
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.03]"
+          className="pointer-events-none absolute inset-0"
           aria-hidden
           style={{
             backgroundImage:
-              'repeating-linear-gradient(0deg, var(--foreground) 0px, transparent 1px, transparent 48px), repeating-linear-gradient(90deg, var(--foreground) 0px, transparent 1px, transparent 48px)',
-            backgroundSize: '48px 48px',
+              'radial-gradient(circle, var(--border) 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+            opacity: 0.6,
           }}
         />
 
+        {/* Decorative large "؟" */}
+        <div
+          className="pointer-events-none absolute top-1/2 right-[-0.1em] -translate-y-1/2 select-none font-bold font-display text-foreground leading-none"
+          style={{
+            fontSize: 'clamp(16rem, 55vw, 28rem)',
+            opacity: 0.025,
+            userSelect: 'none',
+          }}
+          aria-hidden
+        >
+          ؟
+        </div>
+
+        {/* Hero content */}
         <div
           className="relative z-10 flex w-full max-w-sm flex-col items-center gap-6 text-center"
-          style={{ animation: 'fade-in 600ms ease-out both' }}
+          style={{ animation: 'fade-in 500ms ease-out both' }}
         >
           {/* App name */}
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col items-center gap-1">
             <h1
-              className="font-bold font-display text-[clamp(2.5rem,12vw,5rem)] leading-none tracking-tight"
+              className="font-bold font-display leading-none tracking-tight"
               lang="fa"
+              style={{ fontSize: 'clamp(2.75rem, 14vw, 5.5rem)' }}
             >
               چه‌قدر؟
             </h1>
-            <span className="font-display text-muted-foreground text-xs uppercase tracking-[0.2em]">
+            <span className="font-display text-muted-foreground text-xs uppercase tracking-[0.25em]">
               Cheghadr
             </span>
           </div>
 
           {/* Tagline */}
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             <p className="font-medium text-base leading-snug">{t('tagline')}</p>
             <p className="text-muted-foreground text-sm leading-relaxed">
               {t('subTagline')}
             </p>
           </div>
 
-          {/* CTA */}
+          {/* CTAs */}
           <div
-            className="flex w-full flex-col gap-2.5"
-            style={{ animation: 'fade-in 600ms 200ms ease-out both' }}
+            className="flex w-full flex-col gap-2"
+            style={{ animation: 'fade-in 500ms 180ms ease-out both' }}
           >
             <Link
               href={appHref}
-              className="label-compact flex w-full items-center justify-center border border-foreground bg-foreground py-4 text-background transition-opacity hover:opacity-80 active:opacity-60"
-              style={{ borderRadius: 0 }}
+              className="label-compact flex h-12 w-full items-center justify-center border border-foreground bg-foreground text-background transition-opacity hover:opacity-80 active:opacity-60"
             >
               {t('openApp')}
             </Link>
             {!session && (
               <Link
                 href="/login"
-                className="label-compact flex w-full items-center justify-center border border-border py-4 text-foreground transition-all hover:border-foreground active:opacity-60"
-                style={{ borderRadius: 0 }}
+                className="label-compact flex h-12 w-full items-center justify-center border border-border text-foreground transition-all hover:border-foreground active:opacity-60"
               >
                 {t('loginCta')}
               </Link>
@@ -232,41 +297,35 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Scroll hint */}
+        {/* Scroll indicator */}
         <div
           className="absolute bottom-8 left-1/2 -translate-x-1/2"
-          style={{ animation: 'fade-in 800ms 600ms ease-out both' }}
+          style={{ animation: 'fade-in 500ms 700ms ease-out both' }}
           aria-hidden
         >
-          <div className="flex flex-col items-center gap-1.5">
+          <div className="flex flex-col items-center gap-2">
             <div className="h-8 w-px bg-foreground/20" />
-            <span className="label-compact text-[0.55rem] text-muted-foreground/60">
-              scroll
+            <span className="label-compact text-[0.5rem] text-muted-foreground/50 tracking-[0.15em]">
+              SCROLL
             </span>
           </div>
         </div>
       </section>
 
       {/* ── Live Price Ticker ─────────────────────────────── */}
-      <section
-        className="px-0 py-8"
-        style={{ animation: 'fade-in 500ms 100ms ease-out both' }}
-      >
-        <div className="mb-4 flex items-center justify-between px-4">
+      <section className="py-8">
+        <div className="mb-3 flex items-center justify-between px-4">
           <h2 className="label-compact text-muted-foreground">
             {t('tickerTitle')}
           </h2>
-          {pricesQuery.data && !pricesQuery.data.stale && (
+          {pricesQuery.data?.stale === false && (
             <span
               className="label-compact flex items-center gap-1.5"
               style={{ color: 'var(--success)' }}
             >
               <span
-                className="block h-1.5 w-1.5 rounded-full"
-                style={{
-                  background: 'var(--success)',
-                  animation: 'pulse-soft 2s ease-in-out infinite',
-                }}
+                className="block h-1.5 w-1.5 rounded-full bg-[--success]"
+                style={{ animation: 'pulse-soft 2s ease-in-out infinite' }}
               />
               LIVE
             </span>
@@ -275,32 +334,22 @@ export default function LandingPage() {
 
         <div className="border-border border-t">
           {pricesQuery.isLoading ? (
-            <div className="flex flex-col">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between border-border border-b px-4 py-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 bg-card" />
-                    <div className="h-3 w-24 bg-card" />
-                  </div>
-                  <div className="h-3 w-16 bg-card" />
-                </div>
-              ))}
-            </div>
+            <TickerSkeleton />
           ) : (
-            <LiveTicker items={featuredItems} locale={locale} />
+            <LiveTicker
+              items={featuredItems}
+              locale={locale}
+              tomanAbbr={tomanAbbr}
+            />
           )}
         </div>
       </section>
 
       {/* ── Features ─────────────────────────────────────── */}
-      <section
-        className="px-4 py-8"
-        style={{ animation: 'fade-in 500ms 200ms ease-out both' }}
-      >
-        <h2 className="label-compact mb-4 text-muted-foreground">Features</h2>
+      <section className="px-4 pt-4 pb-6">
+        <h2 className="label-compact mb-3 text-muted-foreground">
+          {t('featuresTitle')}
+        </h2>
         <div className="border-border border-t">
           <FeatureCard
             number="01"
@@ -320,8 +369,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Footer CTA ───────────────────────────────────── */}
-      <section className="border-border border-t px-4 py-10">
+      {/* ── Footer ───────────────────────────────────────── */}
+      <footer className="border-border border-t px-4 py-10">
         <div className="flex flex-col items-center gap-5 text-center">
           <div className="flex flex-col gap-0.5">
             <span className="font-bold font-display text-lg" lang="fa">
@@ -333,15 +382,14 @@ export default function LandingPage() {
           </div>
           <Link
             href={appHref}
-            className="label-compact flex items-center justify-center border border-foreground bg-foreground px-8 py-3 text-background transition-opacity hover:opacity-80 active:opacity-60"
-            style={{ borderRadius: 0 }}
+            className="label-compact flex h-10 items-center justify-center border border-foreground bg-foreground px-8 text-background transition-opacity hover:opacity-80 active:opacity-60"
           >
             {t('openApp')}
           </Link>
         </div>
-      </section>
+      </footer>
 
-      {/* Ticker animation */}
+      {/* Ticker CSS */}
       <style>{`
         .ticker-track {
           animation: ticker-up linear infinite;
