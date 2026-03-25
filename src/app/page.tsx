@@ -235,7 +235,7 @@ export default function LandingPage() {
           }}
         />
 
-        {/* Decorative large "؟" */}
+        {/* Decorative large glyph */}
         <div
           className="pointer-events-none absolute top-1/2 right-[-0.1em] -translate-y-1/2 select-none font-bold font-display text-foreground leading-none"
           style={{
@@ -245,7 +245,7 @@ export default function LandingPage() {
           }}
           aria-hidden
         >
-          ؟
+          {locale === 'fa' ? '؟' : '?'}
         </div>
 
         {/* Hero content */}
@@ -257,14 +257,16 @@ export default function LandingPage() {
           <div className="flex flex-col items-center gap-1">
             <h1
               className="font-bold font-display leading-none tracking-tight"
-              lang="fa"
+              lang={locale === 'fa' ? 'fa' : undefined}
               style={{ fontSize: 'clamp(2.75rem, 14vw, 5.5rem)' }}
             >
-              چه‌قدر؟
+              {locale === 'fa' ? 'چه‌قدر؟' : 'Cheghadr?'}
             </h1>
-            <span className="font-display text-muted-foreground text-xs uppercase tracking-[0.25em]">
-              Cheghadr
-            </span>
+            {locale !== 'fa' && (
+              <span className="font-display text-muted-foreground text-xs uppercase tracking-[0.25em]">
+                چه‌قدر؟
+              </span>
+            )}
           </div>
 
           {/* Tagline */}
@@ -373,8 +375,11 @@ export default function LandingPage() {
       <footer className="border-border border-t px-4 py-10">
         <div className="flex flex-col items-center gap-5 text-center">
           <div className="flex flex-col gap-0.5">
-            <span className="font-bold font-display text-lg" lang="fa">
-              چه‌قدر؟
+            <span
+              className="font-bold font-display text-lg"
+              lang={locale === 'fa' ? 'fa' : undefined}
+            >
+              {locale === 'fa' ? 'چه‌قدر؟' : 'Cheghadr?'}
             </span>
             <span className="label-compact text-muted-foreground">
               Personal net worth tracker
