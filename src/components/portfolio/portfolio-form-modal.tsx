@@ -114,7 +114,12 @@ export function PortfolioFormModal({
                 maxLength={4}
               >
                 <Label>{t('emoji')}</Label>
-                <Input type="text" placeholder="💼" dir="ltr" className="py-3" />
+                <Input
+                  type="text"
+                  placeholder="💼"
+                  dir="ltr"
+                  className="py-3"
+                />
               </TextField>
             </Modal.Body>
             <Modal.Footer>

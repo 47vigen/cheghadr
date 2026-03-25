@@ -16,11 +16,11 @@ export default function LoginPage() {
   const router = useRouter()
   const t = useTranslations('login')
   const searchParams = useSearchParams()
-  const rawCallback = searchParams.get('callbackUrl') ?? '/'
+  const rawCallback = searchParams.get('callbackUrl') ?? '/app'
   // Validate callbackUrl to prevent open redirect — only allow same-origin relative paths
   const isSafeCallback =
     rawCallback.startsWith('/') && !rawCallback.startsWith('//')
-  const callbackUrl = (isSafeCallback ? rawCallback : '/') as Route
+  const callbackUrl = (isSafeCallback ? rawCallback : '/app') as Route
   const widgetContainerRef = useRef<HTMLDivElement>(null)
   const [mode, setMode] = useState<'loading' | 'miniapp' | 'standalone'>(
     'loading',
@@ -28,7 +28,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const attemptedRef = useRef(false)
 
-  const isFromAssets = callbackUrl === '/'
+  const isFromAssets = callbackUrl === '/app'
   const subtitleKey = isFromAssets ? 'subtitlePortfolio' : 'subtitle'
 
   useEffect(() => {

@@ -15,7 +15,7 @@ export const userRouter = router({
   getSettings: protectedProcedure.query(({ ctx }) => {
     return ctx.db.user.findUniqueOrThrow({
       where: { id: ctx.user.id },
-      select: { dailyDigestEnabled: true },
+      select: { dailyDigestEnabled: true, isOnboarded: true },
     })
   }),
 
@@ -25,6 +25,18 @@ export const userRouter = router({
       return ctx.db.user.update({
         where: { id: ctx.user.id },
         data: { dailyDigestEnabled: input.enabled },
+      })
+    }),
+
+  completeOnboarding: protectedProcedure
+    .input(z.object({ locale: z.enum(['en', 'fa']).optional() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.user.update({
+        where: { id: ctx.user.id },
+        data: {
+          isOnboarded: true,
+          ...(input.locale ? { preferredLocale: input.locale } : {}),
+        },
       })
     }),
 })

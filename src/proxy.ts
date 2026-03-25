@@ -13,8 +13,10 @@ export default auth((req) => {
   const isLoginPage = pathname === '/login'
   const isApiRoute = pathname.startsWith('/api/')
   const isGuestPage = pathname === '/prices' || pathname === '/calculator'
+  const isLandingPage = pathname === '/'
 
-  if (isLoginPage || isApiRoute || isGuestPage) return NextResponse.next()
+  if (isLoginPage || isApiRoute || isGuestPage || isLandingPage)
+    return NextResponse.next()
 
   if (isDevTelegramBypassAllowed()) {
     return NextResponse.next()

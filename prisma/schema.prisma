@@ -30,6 +30,7 @@ model User {
   id                   String              @id @default(cuid())
   telegramUserId       BigInt              @unique
   dailyDigestEnabled   Boolean             @default(false)
+  isOnboarded          Boolean             @default(false)
   preferredLocale      PreferredLocale     @default(en)
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt

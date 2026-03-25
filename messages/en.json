@@ -190,6 +190,36 @@
     "empty": "No data to export",
     "error": "Export error"
   },
+  "onboard": {
+    "skip": "Skip",
+    "next": "Next",
+    "slide0Title": "Welcome to Cheghadr?",
+    "slide0Sub": "Your personal net worth tracker",
+    "slide1Title": "Track Everything",
+    "slide1Sub": "Stocks, crypto, gold, currency — all in one place",
+    "slide2Title": "Live Prices & Alerts",
+    "slide2Sub": "Real-time Iranian market prices and smart notifications",
+    "slide3Title": "Choose Your Language",
+    "slide3Sub": "You can change this later in settings",
+    "cta": "Add Your First Asset",
+    "langEn": "English",
+    "langFa": "فارسی"
+  },
+  "landing": {
+    "tagline": "Your personal net worth, at a glance",
+    "subTagline": "Track assets, follow live prices, and get alerts — in Persian or English",
+    "openApp": "Open App",
+    "loginCta": "Log in with Telegram",
+    "feature1Title": "💼 All Your Assets",
+    "feature1Sub": "Crypto, currency, gold, stocks — unified portfolio view",
+    "feature2Title": "📈 Live Prices",
+    "feature2Sub": "Real-time Iranian market data, always up to date",
+    "feature3Title": "🔔 Smart Alerts",
+    "feature3Sub": "Get notified when prices hit your target",
+    "tickerTitle": "📊 Live Market Prices",
+    "featuresTitle": "Features",
+    "tomanAbbr": "T"
+  },
   "categories": {
     "CURRENCY": "Currency",
     "CRYPTOCURRENCY": "Cryptocurrency",

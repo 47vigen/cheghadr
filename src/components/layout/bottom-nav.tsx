@@ -9,7 +9,7 @@ import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 
 import { usePathname, useRouter } from '@/i18n/navigation'
 
-type AppRoute = '/' | '/prices' | '/calculator'
+type AppRoute = '/app' | '/prices' | '/calculator'
 
 const tabs: Array<{
   id: string
@@ -17,7 +17,7 @@ const tabs: Array<{
   labelKey: string
   Icon: ComponentType<{ size: number }>
 }> = [
-  { id: 'assets', path: '/', labelKey: 'assets', Icon: IconCoins },
+  { id: 'assets', path: '/app', labelKey: 'assets', Icon: IconCoins },
   { id: 'prices', path: '/prices', labelKey: 'prices', Icon: IconChartLine },
   {
     id: 'calculator',
