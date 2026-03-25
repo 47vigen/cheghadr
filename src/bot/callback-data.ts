@@ -3,11 +3,6 @@ export function cb(...parts: (string | number)[]): string {
   return parts.join(':')
 }
 
-/** Decode callback_data back into parts. */
-export function parseCb(data: string): string[] {
-  return data.split(':')
-}
-
 // Callback data constants
 export const CB = {
   HOME: 'h',
