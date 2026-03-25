@@ -28,6 +28,8 @@ interface AssetSelectorProps {
   onChange: (symbol: string) => void
   items: PriceItem[]
   cellClassName?: string
+  /** When true, removes the border from the trigger cell (for use inside a card) */
+  noBorder?: boolean
 }
 
 function getCurrentDisplay(
@@ -60,6 +62,7 @@ export function AssetSelector({
   onChange,
   items,
   cellClassName,
+  noBorder = false,
 }: AssetSelectorProps) {
   const tPicker = useTranslations('picker')
   const locale = useLocale()
@@ -85,7 +88,8 @@ export function AssetSelector({
         </span>
         <Cell
           className={clsx(
-            'rounded-xl border border-border bg-default/40 px-1 transition-colors hover:bg-default/55',
+            'rounded-xl bg-default/40 transition-colors hover:bg-default/55',
+            noBorder ? 'px-3' : 'border border-border px-1',
             cellClassName,
           )}
           before={
