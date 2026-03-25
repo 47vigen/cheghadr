@@ -20,6 +20,7 @@ import { ErrorState, RefreshIndicator } from '@/components/ui/async-states'
 
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
 
+import { useRouter } from '@/i18n/navigation'
 import { downloadCSV } from '@/lib/csv-download'
 import { computeBiggestMover } from '@/lib/portfolio-utils'
 import { TRPC_REFETCH_INTERVAL_MS } from '@/trpc/constants'
@@ -29,6 +30,7 @@ export default function AssetsPage() {
   const locale = useLocale()
   const t = useTranslations('assets')
   const tExport = useTranslations('export')
+  const router = useRouter()
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(
@@ -42,6 +44,14 @@ export default function AssetsPage() {
     name: string
     assetCount: number
   } | null>(null)
+
+  const settingsQuery = api.user.getSettings.useQuery()
+
+  useEffect(() => {
+    if (settingsQuery.data && !settingsQuery.data.isOnboarded) {
+      router.replace('/onboard')
+    }
+  }, [settingsQuery.data, router])
 
   const portfoliosQuery = api.portfolio.list.useQuery()
 
