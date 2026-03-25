@@ -93,7 +93,7 @@ export default function CalculatorPage() {
               variant="primary"
               onPress={handleSwap}
               aria-label={t('swap')}
-              className="absolute inset-e-0 top-1/2 -translate-y-1/2"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
             >
               <IconArrowsExchange size={24} className="rotate-90" />
             </Button>
