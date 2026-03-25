@@ -4,7 +4,10 @@ import { Button } from '@heroui/react'
 import { IconDownload, IconPencil, IconTrash } from '@tabler/icons-react'
 import { useTranslations } from 'next-intl'
 
-import { PortfolioDelta } from '@/components/portfolio/portfolio-delta'
+import {
+  PortfolioDelta,
+  type DeltaWindow,
+} from '@/components/portfolio/portfolio-delta'
 import { PortfolioSelector } from '@/components/portfolio/portfolio-selector'
 import { PortfolioTotal } from '@/components/portfolio/portfolio-total'
 import { StalenessBanner } from '@/components/prices/staleness-banner'
@@ -28,6 +31,8 @@ export interface AssetsHeroSectionProps {
   onRefreshStale: () => void
   onExport: () => void
   exportFetching: boolean
+  deltaWindow: DeltaWindow
+  onDeltaWindowChange: (window: DeltaWindow) => void
 }
 
 export function AssetsHeroSection({
@@ -46,6 +51,8 @@ export function AssetsHeroSection({
   onRefreshStale,
   onExport,
   exportFetching,
+  deltaWindow,
+  onDeltaWindowChange,
 }: AssetsHeroSectionProps) {
   const tNav = useTranslations('nav')
   const tExport = useTranslations('export')
@@ -106,7 +113,11 @@ export function AssetsHeroSection({
           usdSellPrice={usdSellPrice}
           eurSellPrice={eurSellPrice}
         />
-        <PortfolioDelta portfolioId={selectedPortfolioId ?? undefined} />
+        <PortfolioDelta
+          portfolioId={selectedPortfolioId ?? undefined}
+          window={deltaWindow}
+          onWindowChange={onDeltaWindowChange}
+        />
         {stale && (
           <div className="mt-2">
             <StalenessBanner

@@ -39,10 +39,14 @@ function ChartTooltip({
   if (!active || !payload?.length) return null
   const point = payload[0]
   if (!point) return null
+  const d =
+    point.payload.date instanceof Date
+      ? point.payload.date
+      : new Date(point.payload.date)
   return (
     <div className="border border-border bg-surface px-1.5 py-1 font-display text-xs shadow-[0_2px_8px_oklch(0_0_0/0.12)]">
       <div className="text-muted-foreground text-xs">
-        {formatChartDate(point.payload.date, locale)}
+        {formatChartDate(d, locale)}
       </div>
       <div className="font-semibold tabular-nums">
         {formatIRT(point.value, locale)}
@@ -71,8 +75,11 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
 
   const chartData = data.map((d) => {
     const date = d.date instanceof Date ? d.date : new Date(d.date)
-    return { date, totalIRT: d.totalIRT, label: formatChartDate(date, locale) }
+    return { date, dateMillis: date.getTime(), totalIRT: d.totalIRT }
   })
+
+  const minTime = Math.min(...chartData.map((d) => d.dateMillis))
+  const maxTime = Math.max(...chartData.map((d) => d.dateMillis))
 
   const gradientId = 'portfolio-chart-gradient'
 
@@ -87,7 +94,13 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
             </linearGradient>
           </defs>
           <XAxis
-            dataKey="label"
+            type="number"
+            dataKey="dateMillis"
+            domain={[minTime, maxTime]}
+            scale="time"
+            tickFormatter={(ms) =>
+              formatChartDate(new Date(ms as number), locale)
+            }
             tick={{
               fontSize: 12,
               fill: 'var(--muted-foreground)',
@@ -96,6 +109,7 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
             tickLine={false}
             axisLine={false}
             interval="preserveStartEnd"
+            minTickGap={28}
           />
           <YAxis hide domain={['auto', 'auto']} />
           <Tooltip

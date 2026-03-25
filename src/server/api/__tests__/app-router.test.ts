@@ -481,34 +481,67 @@ describe('appRouter — portfolio', () => {
     })
   })
 
-  it('history returns numeric totals for snapshots', async () => {
-    const day = new Date('2026-02-01T00:00:00Z')
+  it('history returns daily series with forward-filled totals', async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-03-25T12:00:00Z'))
+
+    vi.mocked(db.portfolioSnapshot.findFirst)
+      .mockResolvedValueOnce({
+        snapshotAt: new Date('2026-03-01T00:00:00Z'),
+      } as never)
+      .mockResolvedValueOnce({ totalIRT: '1000000' } as never)
+
     vi.mocked(db.portfolioSnapshot.findMany).mockResolvedValue([
-      { snapshotAt: day, totalIRT: '1500000' },
+      { snapshotAt: new Date('2026-03-22T10:00:00Z'), totalIRT: '1500000' },
     ] as never)
+
     const caller = createCaller(db)
 
-    const result = await caller.portfolio.history({ days: 7 })
+    const result = await caller.portfolio.history({ window: '1W' })
 
-    expect(result).toEqual([{ date: day, totalIRT: 1_500_000 }])
+    expect(result).toHaveLength(7)
+    expect(result[0]?.totalIRT).toBe(1_000_000)
+    expect(result[1]?.totalIRT).toBe(1_000_000)
+    expect(result[2]?.totalIRT).toBe(1_000_000)
+    expect(result[3]?.totalIRT).toBe(1_500_000)
+    expect(result[4]?.totalIRT).toBe(1_500_000)
+    expect(result[6]?.totalIRT).toBe(1_500_000)
+
     expect(db.portfolioSnapshot.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
           userId: 'user-1',
           portfolioId: null,
-          snapshotAt: { gte: expect.any(Date) as Date },
+          snapshotAt: {
+            gte: expect.any(Date) as Date,
+            lt: expect.any(Date) as Date,
+          },
         }),
       }),
     )
+
+    vi.useRealTimers()
   })
 
-  it('history returns empty array when no snapshots exist', async () => {
+  it('history returns empty array when no snapshots exist in range and no carry', async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-03-25T12:00:00Z'))
+
+    vi.mocked(db.portfolioSnapshot.findFirst)
+      .mockResolvedValueOnce({
+        snapshotAt: new Date('2026-03-01T00:00:00Z'),
+      } as never)
+      .mockResolvedValueOnce(null)
+
     vi.mocked(db.portfolioSnapshot.findMany).mockResolvedValue([])
+
     const caller = createCaller(db)
 
-    const result = await caller.portfolio.history({ days: 30 })
+    const result = await caller.portfolio.history({ window: '1M' })
 
     expect(result).toEqual([])
+
+    vi.useRealTimers()
   })
 
   it('delete succeeds when user has more than one portfolio', async () => {
