@@ -1,21 +1,7 @@
-import type { Alert } from '@prisma/client'
 import { InlineKeyboard } from 'grammy'
 
 import { CB } from '../callback-data'
 import { type BotLocale, t } from '../i18n'
-
-export function alertRowKeyboard(
-  locale: BotLocale,
-  alert: Pick<Alert, 'id' | 'isActive'>,
-): InlineKeyboard {
-  const toggleLabel = alert.isActive
-    ? t(locale, 'bot.alerts.statusActive')
-    : t(locale, 'bot.alerts.statusPaused')
-
-  return new InlineKeyboard()
-    .text(toggleLabel, CB.alertToggle(alert.id))
-    .text(t(locale, 'bot.alerts.deleteBtn'), CB.alertDeleteConfirm(alert.id))
-}
 
 export function alertListFooterKeyboard(locale: BotLocale): InlineKeyboard {
   return new InlineKeyboard()

@@ -1,33 +1,19 @@
-import type { InlineKeyboard } from 'grammy'
-
 import {
   formatChange,
   formatIRT,
   getLocalizedItemName,
   groupByCategory,
-  parsePriceSnapshot,
   sortedGroupEntries,
 } from '@/lib/prices'
-import { db } from '@/server/db'
 
 import { escapeTelegramHtml } from '../html-escape'
 import type { BotLocale } from '../i18n'
 import { t, tCategory } from '../i18n'
 import { categoryKeyboard, pricePageKeyboard } from '../keyboards/prices'
+import { getLatestPrices } from '../shared/prices'
+import type { ScreenResult } from './types'
 
 const PAGE_SIZE = 10
-
-interface ScreenResult {
-  text: string
-  keyboard: InlineKeyboard
-}
-
-async function getLatestPrices() {
-  const snap = await db.priceSnapshot.findFirst({
-    orderBy: { snapshotAt: 'desc' },
-  })
-  return snap ? parsePriceSnapshot(snap.data) : []
-}
 
 export async function buildCategoryMenu(
   locale: BotLocale,

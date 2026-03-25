@@ -1,11 +1,6 @@
 import { InlineKeyboard } from 'grammy'
 
-import {
-  findBySymbol,
-  formatIRT,
-  getLocalizedItemName,
-  parsePriceSnapshot,
-} from '@/lib/prices'
+import { findBySymbol, formatIRT, getLocalizedItemName } from '@/lib/prices'
 import { db } from '@/server/db'
 
 import { CB } from '../callback-data'
@@ -16,13 +11,8 @@ import {
   alertDeleteConfirmKeyboard,
   alertListFooterKeyboard,
 } from '../keyboards/alerts'
-
-interface ScreenResult {
-  text: string
-  keyboard: InlineKeyboard
-  /** When true, caller should send separate messages per alert row (complex layout). */
-  multiMessage?: boolean
-}
+import { getLatestPrices } from '../shared/prices'
+import type { ScreenResult } from './types'
 
 function formatThreshold(threshold: string, locale: BotLocale): string {
   const n = Number(threshold)
@@ -47,10 +37,7 @@ export async function buildAlertList(
   }
 
   // Get price names for PRICE alerts
-  const snap = await db.priceSnapshot.findFirst({
-    orderBy: { snapshotAt: 'desc' },
-  })
-  const prices = snap ? parsePriceSnapshot(snap.data) : []
+  const prices = await getLatestPrices()
 
   const dirAbove = t(locale, 'bot.alerts.dirAbove')
   const dirBelow = t(locale, 'bot.alerts.dirBelow')

@@ -1,11 +1,8 @@
 import type { Conversation } from '@grammyjs/conversations'
-import type { Context } from 'grammy'
-import { InlineKeyboard } from 'grammy'
 
 import {
   getLocalizedItemName,
   groupByCategory,
-  parsePriceSnapshot,
   sortedGroupEntries,
 } from '@/lib/prices'
 import {
@@ -16,60 +13,19 @@ import { db } from '@/server/db'
 
 import { CB } from '../callback-data'
 import type { BotContext } from '../context'
-import { type BotLocale, t, tCategory } from '../i18n'
+import { t } from '../i18n'
 import { buildAssetList } from '../screens/portfolio'
+import { getLatestPrices } from '../shared/prices'
+import {
+  assetPageKeyboard,
+  categorySelectionKeyboard,
+  scheduleSuccessFollowUp,
+  showMain,
+} from '../shared/wizard'
 import { loadBotUserAndLocale } from './context'
 import { waitForPositiveNumberOrExit } from './wait-positive-number-input'
 
 const PAGE_SIZE = 10
-
-async function getLatestPrices() {
-  const snap = await db.priceSnapshot.findFirst({
-    orderBy: { snapshotAt: 'desc' },
-  })
-  return snap ? parsePriceSnapshot(snap.data) : []
-}
-
-function categorySelectionKeyboard(categories: string[], locale: BotLocale) {
-  const kb = new InlineKeyboard()
-  for (let i = 0; i < categories.length; i += 2) {
-    const a = categories[i]
-    const b = categories[i + 1]
-    if (a) kb.text(tCategory(locale, a), CB.wizardCategory(a))
-    if (b) kb.text(tCategory(locale, b), CB.wizardCategory(b))
-    kb.row()
-  }
-  kb.text(t(locale, 'bot.assets.wizard.cancel'), CB.WIZARD_CANCEL)
-  return kb
-}
-
-function assetPageKeyboard(
-  items: Array<{ symbol: string; name: string }>,
-  category: string,
-  page: number,
-  totalPages: number,
-  locale: BotLocale,
-) {
-  const kb = new InlineKeyboard()
-  for (const item of items) {
-    kb.text(item.name, CB.wizardAsset(item.symbol)).row()
-  }
-  if (page > 0) {
-    kb.text(
-      t(locale, 'bot.wizard.pagePrev'),
-      CB.wizardPagePrev(category, page - 1),
-    )
-  }
-  if (page < totalPages - 1) {
-    kb.text(
-      t(locale, 'bot.wizard.pageNext'),
-      CB.wizardPageNext(category, page + 1),
-    )
-  }
-  if (page > 0 || page < totalPages - 1) kb.row()
-  kb.text(t(locale, 'bot.assets.wizard.cancel'), CB.WIZARD_CANCEL)
-  return kb
-}
 
 export async function assetAddWizard(
   conversation: Conversation<BotContext>,
@@ -94,7 +50,11 @@ export async function assetAddWizard(
 
   await ctx.editMessageText(t(locale, 'bot.assets.wizard.selectCategory'), {
     parse_mode: 'HTML',
-    reply_markup: categorySelectionKeyboard(categories, locale),
+    reply_markup: categorySelectionKeyboard(
+      categories,
+      locale,
+      'bot.assets.wizard.cancel',
+    ),
   })
 
   const catCtx = await conversation.waitForCallbackQuery([
@@ -137,6 +97,7 @@ export async function assetAddWizard(
         page,
         totalPages,
         locale,
+        'bot.assets.wizard.cancel',
       ),
     })
 
@@ -221,31 +182,12 @@ export async function assetAddWizard(
   const successMsg = await ctx.reply(t(locale, 'bot.assets.wizard.created'), {
     parse_mode: 'HTML',
   })
-
-  const successChatId = ctx.chat?.id
-  const successMsgId = successMsg.message_id
-  setTimeout(async () => {
-    try {
-      const { text, keyboard } = await buildAssetList(user.id, locale)
-      await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
-      if (successChatId)
-        await ctx.api
-          .deleteMessage(successChatId, successMsgId)
-          .catch(() => null)
-    } catch (e) {
-      console.error('[bot/assetAddWizard] success follow-up failed', e)
-    }
-  }, 1000)
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────────
-
-async function showMain(
-  userId: string,
-  ctx: Pick<Context, 'reply'>,
-  locale: BotLocale,
-) {
-  const { buildMainMenu } = await import('../screens/main')
-  const { text, keyboard } = await buildMainMenu(userId, locale)
-  await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
+  scheduleSuccessFollowUp(
+    ctx,
+    user.id,
+    locale,
+    buildAssetList,
+    successMsg.message_id,
+    'assetAddWizard',
+  )
 }

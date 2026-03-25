@@ -1,13 +1,7 @@
-import type { InlineKeyboard } from 'grammy'
-
 import type { BotLocale } from '../i18n'
 import { t } from '../i18n'
 import { settingsKeyboard } from '../keyboards/settings'
-
-interface ScreenResult {
-  text: string
-  keyboard: InlineKeyboard
-}
+import type { ScreenResult } from './types'
 
 export function buildSettings(
   locale: BotLocale,

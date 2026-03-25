@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 
 import { webhookCallback } from 'grammy'
 
-import { createBot } from '@/bot/index'
+import { getBot } from '@/bot/singleton'
 
 export async function POST(request: NextRequest): Promise<Response> {
   const secret = request.headers.get('x-telegram-bot-api-secret-token')
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest): Promise<Response> {
   }
 
   try {
-    const bot = createBot()
+    const bot = getBot()
     const handler = webhookCallback(bot, 'std/http')
     return await handler(request)
   } catch (err) {

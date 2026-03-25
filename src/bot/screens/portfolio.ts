@@ -1,5 +1,3 @@
-import type { InlineKeyboard } from 'grammy'
-
 import {
   getPortfolioSnapshotDelta,
   type PortfolioDeltaWindow,
@@ -25,11 +23,7 @@ import type { BotLocale } from '../i18n'
 import { t, tCategory } from '../i18n'
 import { assetListFooterKeyboard } from '../keyboards/assets'
 import { portfolioSubKeyboard } from '../keyboards/portfolio'
-
-interface ScreenResult {
-  text: string
-  keyboard: InlineKeyboard
-}
+import type { ScreenResult } from './types'
 
 const DELTA_WINDOWS: PortfolioDeltaWindow[] = ['1D', '1W', '1M', 'ALL']
 

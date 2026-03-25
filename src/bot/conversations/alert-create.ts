@@ -1,72 +1,29 @@
 import type { Conversation } from '@grammyjs/conversations'
-import type { Context } from 'grammy'
 import { InlineKeyboard } from 'grammy'
 
 import { MAX_ACTIVE_ALERTS } from '@/lib/alerts/utils'
 import {
   getLocalizedItemName,
   groupByCategory,
-  parsePriceSnapshot,
   sortedGroupEntries,
 } from '@/lib/prices'
 import { db } from '@/server/db'
 
 import { CB } from '../callback-data'
 import type { BotContext } from '../context'
-import { type BotLocale, t, tCategory } from '../i18n'
+import { t } from '../i18n'
 import { buildAlertList } from '../screens/alerts'
+import { getLatestPrices } from '../shared/prices'
+import {
+  assetPageKeyboard,
+  categorySelectionKeyboard,
+  scheduleSuccessFollowUp,
+  showMain,
+} from '../shared/wizard'
 import { loadBotUserAndLocale } from './context'
 import { waitForPositiveNumberOrExit } from './wait-positive-number-input'
 
 const PAGE_SIZE = 10
-
-async function getLatestPrices() {
-  const snap = await db.priceSnapshot.findFirst({
-    orderBy: { snapshotAt: 'desc' },
-  })
-  return snap ? parsePriceSnapshot(snap.data) : []
-}
-
-function categorySelectionKeyboard(categories: string[], locale: BotLocale) {
-  const kb = new InlineKeyboard()
-  for (let i = 0; i < categories.length; i += 2) {
-    const a = categories[i]
-    const b = categories[i + 1]
-    if (a) kb.text(tCategory(locale, a), CB.wizardCategory(a))
-    if (b) kb.text(tCategory(locale, b), CB.wizardCategory(b))
-    kb.row()
-  }
-  kb.text(t(locale, 'bot.alerts.wizard.cancel'), CB.WIZARD_CANCEL)
-  return kb
-}
-
-function assetPageKeyboard(
-  items: Array<{ symbol: string; name: string }>,
-  category: string,
-  page: number,
-  totalPages: number,
-  locale: BotLocale,
-) {
-  const kb = new InlineKeyboard()
-  for (const item of items) {
-    kb.text(item.name, CB.wizardAsset(item.symbol)).row()
-  }
-  if (page > 0) {
-    kb.text(
-      t(locale, 'bot.wizard.pagePrev'),
-      CB.wizardPagePrev(category, page - 1),
-    )
-  }
-  if (page < totalPages - 1) {
-    kb.text(
-      t(locale, 'bot.wizard.pageNext'),
-      CB.wizardPageNext(category, page + 1),
-    )
-  }
-  if (page > 0 || page < totalPages - 1) kb.row()
-  kb.text(t(locale, 'bot.alerts.wizard.cancel'), CB.WIZARD_CANCEL)
-  return kb
-}
 
 // ── Price Alert Wizard ────────────────────────────────────────────────────
 
@@ -102,7 +59,11 @@ export async function priceAlertWizard(
 
   await ctx.editMessageText(t(locale, 'bot.alerts.wizard.selectCategory'), {
     parse_mode: 'HTML',
-    reply_markup: categorySelectionKeyboard(categories, locale),
+    reply_markup: categorySelectionKeyboard(
+      categories,
+      locale,
+      'bot.alerts.wizard.cancel',
+    ),
   })
 
   const catCtx = await conversation.waitForCallbackQuery([
@@ -144,6 +105,7 @@ export async function priceAlertWizard(
         page,
         totalPages,
         locale,
+        'bot.alerts.wizard.cancel',
       ),
     })
 
@@ -242,22 +204,14 @@ export async function priceAlertWizard(
   const successMsg = await ctx.reply(t(locale, 'bot.alerts.wizard.created'), {
     parse_mode: 'HTML',
   })
-
-  const successChatId = ctx.chat?.id
-  const successMsgId = successMsg.message_id
-  // Show alert list after 1 second
-  setTimeout(async () => {
-    try {
-      const { text, keyboard } = await buildAlertList(user.id, locale)
-      await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
-      if (successChatId)
-        await ctx.api
-          .deleteMessage(successChatId, successMsgId)
-          .catch(() => null)
-    } catch (e) {
-      console.error('[bot/priceAlertWizard] success follow-up failed', e)
-    }
-  }, 1000)
+  scheduleSuccessFollowUp(
+    ctx,
+    user.id,
+    locale,
+    buildAlertList,
+    successMsg.message_id,
+    'priceAlertWizard',
+  )
 }
 
 // ── Portfolio Alert Wizard ────────────────────────────────────────────────
@@ -355,31 +309,12 @@ export async function portfolioAlertWizard(
   const successMsg = await ctx.reply(t(locale, 'bot.alerts.wizard.created'), {
     parse_mode: 'HTML',
   })
-
-  const successChatId2 = ctx.chat?.id
-  const successMsgId2 = successMsg.message_id
-  setTimeout(async () => {
-    try {
-      const { text, keyboard } = await buildAlertList(user.id, locale)
-      await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
-      if (successChatId2)
-        await ctx.api
-          .deleteMessage(successChatId2, successMsgId2)
-          .catch(() => null)
-    } catch (e) {
-      console.error('[bot/portfolioAlertWizard] success follow-up failed', e)
-    }
-  }, 1000)
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────────
-
-async function showMain(
-  userId: string,
-  ctx: Pick<Context, 'reply'>,
-  locale: BotLocale,
-) {
-  const { buildMainMenu } = await import('../screens/main')
-  const { text, keyboard } = await buildMainMenu(userId, locale)
-  await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
+  scheduleSuccessFollowUp(
+    ctx,
+    user.id,
+    locale,
+    buildAlertList,
+    successMsg.message_id,
+    'portfolioAlertWizard',
+  )
 }

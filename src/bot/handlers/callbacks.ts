@@ -10,30 +10,42 @@ import { buildAssetList, buildBreakdown } from '../screens/portfolio'
 import { buildCategoryMenu, buildPricePage } from '../screens/prices'
 import { buildSettings } from '../screens/settings'
 
-/** When re-activating an alert would exceed the cap, show a Telegram alert and return true. */
-async function tryAnswerMaxAlertToggle(
+/**
+ * When re-activating a paused alert would exceed the cap, show a Telegram
+ * popup alert and return `{ blocked: true }`. Otherwise return the fetched
+ * alert so the caller can reuse it (avoids a second DB query).
+ */
+async function guardAlertToggle(
   ctx: BotContext,
   userId: string,
   locale: BotLocale,
   alertId: string,
-): Promise<boolean> {
+): Promise<
+  | { blocked: true }
+  | {
+      blocked: false
+      alert: NonNullable<Awaited<ReturnType<typeof db.alert.findUnique>>>
+    }
+> {
   const alert = await db.alert.findUnique({ where: { id: alertId } })
-  if (!alert || alert.userId !== userId || alert.isActive) {
-    return false
+  if (!alert || alert.userId !== userId) {
+    return { blocked: true }
   }
-  const activeCount = await db.alert.count({
-    where: { userId, isActive: true },
-  })
-  if (activeCount < MAX_ACTIVE_ALERTS) {
-    return false
+  if (!alert.isActive) {
+    const activeCount = await db.alert.count({
+      where: { userId, isActive: true },
+    })
+    if (activeCount >= MAX_ACTIVE_ALERTS) {
+      await ctx.answerCallbackQuery({
+        text: t(locale, 'bot.alerts.wizard.maxReached', {
+          max: MAX_ACTIVE_ALERTS,
+        }),
+        show_alert: true,
+      })
+      return { blocked: true }
+    }
   }
-  await ctx.answerCallbackQuery({
-    text: t(locale, 'bot.alerts.wizard.maxReached', {
-      max: MAX_ACTIVE_ALERTS,
-    }),
-    show_alert: true,
-  })
-  return true
+  return { blocked: false, alert }
 }
 
 /** Main callback_query dispatcher. */
@@ -53,13 +65,12 @@ export async function handleCallbacks(ctx: BotContext): Promise<void> {
     return
   }
 
-  if (
-    screen === 'al' &&
-    action === 't' &&
-    parts[2] &&
-    (await tryAnswerMaxAlertToggle(ctx, user.id, locale, parts[2]))
-  ) {
-    return
+  // Pre-fetch alert for toggle action (avoids double DB query)
+  let toggleAlert: Awaited<ReturnType<typeof db.alert.findUnique>> | undefined
+  if (screen === 'al' && action === 't' && parts[2]) {
+    const result = await guardAlertToggle(ctx, user.id, locale, parts[2])
+    if (result.blocked) return
+    toggleAlert = result.alert
   }
 
   await ctx.answerCallbackQuery()
@@ -146,19 +157,15 @@ export async function handleCallbacks(ctx: BotContext): Promise<void> {
         reply_markup: keyboard,
       })
     } else if (action === 't') {
-      // Toggle alert active/inactive (max-active guard handled before answerCallbackQuery)
-      const alertId = parts[2]
-      if (alertId) {
-        const alert = await db.alert.findUnique({ where: { id: alertId } })
-        if (alert && alert.userId === user.id) {
-          await db.alert.update({
-            where: { id: alertId },
-            data: {
-              isActive: !alert.isActive,
-              ...(alert.isActive ? {} : { triggeredAt: null }),
-            },
-          })
-        }
+      // Toggle alert active/inactive (guard + fetch already done before answerCallbackQuery)
+      if (toggleAlert) {
+        await db.alert.update({
+          where: { id: toggleAlert.id },
+          data: {
+            isActive: !toggleAlert.isActive,
+            ...(toggleAlert.isActive ? {} : { triggeredAt: null }),
+          },
+        })
         const { text, keyboard } = await buildAlertList(user.id, locale)
         await ctx.editMessageText(text, {
           parse_mode: 'HTML',
