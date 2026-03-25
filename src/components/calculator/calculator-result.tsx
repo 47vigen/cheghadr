@@ -2,9 +2,7 @@
 
 import { useLocale, useTranslations } from 'next-intl'
 
-import { Cell } from '@/components/ui/cell'
 import { Placeholder } from '@/components/ui/placeholder'
-import { Section } from '@/components/ui/section'
 
 import type { PriceItem } from '@/lib/prices'
 import {
@@ -32,14 +30,6 @@ export function CalculatorResult({
   const locale = useLocale()
   const intlLocale = getIntlLocale(locale)
 
-  if (!result) {
-    return (
-      <Section header={t('resultTitle')}>
-        <Placeholder header={t('resultPlaceholder')} />
-      </Section>
-    )
-  }
-
   const toItem =
     toSymbol === 'IRT'
       ? {
@@ -58,22 +48,38 @@ export function CalculatorResult({
             : null
         })()
 
-  const numResult = Number(result)
+  const numResult = result ? Number(result) : null
   const formattedResult =
-    toSymbol === 'IRT'
-      ? formatIRT(numResult, locale)
-      : new Intl.NumberFormat(intlLocale, {
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 4,
-        }).format(numResult)
+    numResult !== null
+      ? toSymbol === 'IRT'
+        ? formatIRT(numResult, locale)
+        : new Intl.NumberFormat(intlLocale, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 4,
+          }).format(numResult)
+      : null
 
   return (
-    <Section header={t('resultTitle')}>
-      <Cell subtitle={toItem?.displayName ?? toSymbol}>
-        <span className="font-display font-semibold tabular-nums">
-          {formattedResult}
-        </span>
-      </Cell>
-    </Section>
+    <div>
+      <div className="mb-1.5 px-2">
+        <h2 className="section-header">{t('resultTitle')}</h2>
+      </div>
+      <div className="overflow-hidden rounded-2xl bg-card">
+        {!formattedResult ? (
+          <Placeholder header={t('resultPlaceholder')} />
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-1.5 px-4 py-8">
+            <span className="font-display font-semibold text-[1.75rem] tabular-nums leading-tight tracking-tight">
+              {formattedResult}
+            </span>
+            {toItem && (
+              <span className="text-muted-foreground text-sm">
+                {toItem.displayName}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   )
 }

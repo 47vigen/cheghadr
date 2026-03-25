@@ -15,7 +15,6 @@ import {
   ErrorState,
   RefreshIndicator,
 } from '@/components/ui/async-states'
-import { Section } from '@/components/ui/section'
 
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
@@ -79,54 +78,71 @@ export default function CalculatorPage() {
     <>
       <RefreshIndicator isRefreshing={isRefreshing} />
       <PageShell>
-        <Section header={t('title')} variant="hero">
-          <AssetSelector
-            label={t('from')}
-            value={fromSymbol}
-            onChange={setFromSymbol}
-            items={prices}
-          />
-          <div className="relative my-2 h-px w-full bg-border">
-            <Button
-              size="md"
-              isIconOnly
-              variant="primary"
-              onPress={handleSwap}
-              aria-label={t('swap')}
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-            >
-              <IconArrowsExchange size={24} className="rotate-90" />
-            </Button>
-          </div>
-          <AssetSelector
-            items={prices}
-            label={t('to')}
-            value={toSymbol}
-            onChange={setToSymbol}
-          />
-          <TextField
-            fullWidth
-            value={amount}
-            className="mt-6"
-            onChange={setAmount}
-          >
-            <Label>{t('amount')}</Label>
-            <Input
-              type="number"
-              inputMode="decimal"
-              placeholder={t('amountPlaceholder')}
-              className="py-3"
-            />
-          </TextField>
-        </Section>
-
+        {/* Converter card */}
         <div>
-          <CalculatorResult
-            result={result}
-            toSymbol={toSymbol}
-            items={prices}
-          />
+          <div className="mb-1.5 px-2">
+            <h2 className="section-header">{t('title')}</h2>
+          </div>
+          <div className="overflow-hidden rounded-2xl bg-card-elevated">
+            {/* From selector */}
+            <div className="px-3 pt-3 pb-2">
+              <AssetSelector
+                label={t('from')}
+                value={fromSymbol}
+                onChange={setFromSymbol}
+                items={prices}
+                noBorder
+              />
+            </div>
+
+            {/* Swap row */}
+            <div className="flex items-center px-4 py-0.5">
+              <div className="h-px flex-1 bg-border/40" />
+              <Button
+                size="sm"
+                isIconOnly
+                variant="ghost"
+                onPress={handleSwap}
+                aria-label={t('swap')}
+                className="mx-3 shrink-0 text-muted-foreground hover:text-foreground"
+              >
+                <IconArrowsExchange size={18} className="rotate-90" />
+              </Button>
+              <div className="h-px flex-1 bg-border/40" />
+            </div>
+
+            {/* To selector */}
+            <div className="px-3 pt-2 pb-3">
+              <AssetSelector
+                items={prices}
+                label={t('to')}
+                value={toSymbol}
+                onChange={setToSymbol}
+                noBorder
+              />
+            </div>
+
+            {/* Divider */}
+            <div className="mx-3 border-border/40 border-t" />
+
+            {/* Amount input */}
+            <div className="px-3 pt-3 pb-4">
+              <TextField fullWidth value={amount} onChange={setAmount}>
+                <Label className="section-header mb-1.5 block">
+                  {t('amount')}
+                </Label>
+                <Input
+                  type="number"
+                  inputMode="decimal"
+                  placeholder={t('amountPlaceholder')}
+                  className="py-3"
+                />
+              </TextField>
+            </div>
+          </div>
         </div>
+
+        <CalculatorResult result={result} toSymbol={toSymbol} items={prices} />
       </PageShell>
     </>
   )
