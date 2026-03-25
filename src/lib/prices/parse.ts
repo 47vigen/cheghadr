@@ -95,8 +95,23 @@ export function makeIrtPriceItem(): PriceItem {
     created_at: new Date().toISOString(),
     png: null,
     price_source: { name: 'synthetic' } as never,
-    name: { symbol: 'IRT', fa: 'تومان', en: 'Toman', category: { symbol: 'CURRENCY' } as never },
-    base_currency: { symbol: 'IRT', fa: 'تومان', en: 'Toman', category: { symbol: 'CURRENCY' } as never },
-    quote_currency: { symbol: 'IRT', fa: 'تومان', en: 'Toman', category: { symbol: 'CURRENCY' } as never },
+    name: {
+      symbol: 'IRT',
+      fa: 'تومان',
+      en: 'Toman',
+      category: { symbol: 'CURRENCY' } as never,
+    },
+    base_currency: {
+      symbol: 'IRT',
+      fa: 'تومان',
+      en: 'Toman',
+      category: { symbol: 'CURRENCY' } as never,
+    },
+    quote_currency: {
+      symbol: 'IRT',
+      fa: 'تومان',
+      en: 'Toman',
+      category: { symbol: 'CURRENCY' } as never,
+    },
   } as PriceItem
 }
