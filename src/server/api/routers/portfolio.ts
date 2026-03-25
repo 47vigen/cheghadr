@@ -1,13 +1,12 @@
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
+import { computeLivePortfolioBreakdown } from '@/lib/portfolio-breakdown'
 import { createPortfolioSnapshot } from '@/lib/portfolio'
 import { getPortfolioSnapshotDelta } from '@/lib/portfolio-snapshot-delta'
 import {
-  findBySymbol,
   getSellPriceBySymbol,
   parsePriceSnapshot,
-  sortedGroupEntries,
 } from '@/lib/prices'
 import {
   ensureDefaultPortfolio,
@@ -15,8 +14,6 @@ import {
   resolveOwnedPortfolioFilter,
 } from '@/server/api/helpers'
 import { protectedProcedure, router } from '@/server/api/trpc'
-import type { BreakdownItem } from '@/types/schemas'
-import { parseBreakdownJson } from '@/types/schemas'
 
 const MAX_PORTFOLIOS = 10
 
@@ -187,61 +184,28 @@ export const portfolioRouter = router({
         .optional(),
     )
     .query(async ({ ctx, input }) => {
-      const portfolioFilter = await resolveOwnedPortfolioFilter(
-        ctx.db,
-        ctx.user.id,
-        input?.portfolioId,
-      )
+      if (input?.portfolioId) {
+        await requireOwnedPortfolio(ctx.db, input.portfolioId, ctx.user.id)
+      }
 
-      const [latestSnap, priceSnap] = await Promise.all([
-        ctx.db.portfolioSnapshot.findFirst({
-          where: { userId: ctx.user.id, ...portfolioFilter },
-          orderBy: { snapshotAt: 'desc' },
-          select: { totalIRT: true, breakdown: true },
+      const whereClause = input?.portfolioId
+        ? { userId: ctx.user.id, portfolioId: input.portfolioId }
+        : { userId: ctx.user.id }
+
+      const [userAssets, priceSnap] = await Promise.all([
+        ctx.db.userAsset.findMany({
+          where: whereClause,
+          orderBy: { createdAt: 'asc' },
         }),
         ctx.db.priceSnapshot.findFirst({
           orderBy: { snapshotAt: 'desc' },
         }),
       ])
 
-      if (!latestSnap) return null
+      if (userAssets.length === 0) return null
 
       const prices = parsePriceSnapshot(priceSnap?.data)
-      const totalIRT = Number(latestSnap.totalIRT)
-      if (totalIRT === 0) return null
-
-      const items: BreakdownItem[] = parseBreakdownJson(latestSnap.breakdown)
-
-      const categoryMap = new Map<
-        string,
-        { valueIRT: number; assets: BreakdownItem[] }
-      >()
-
-      for (const item of items) {
-        const priceItem = findBySymbol(prices, item.symbol)
-        const category = priceItem?.base_currency.category?.symbol ?? 'OTHER'
-        const existing = categoryMap.get(category) ?? {
-          valueIRT: 0,
-          assets: [],
-        }
-        existing.valueIRT += item.valueIRT
-        existing.assets.push(item)
-        categoryMap.set(category, existing)
-      }
-
-      const categories = sortedGroupEntries(categoryMap).map(
-        ([category, bucket]) => ({
-          category,
-          valueIRT: bucket.valueIRT,
-          percentage: (bucket.valueIRT / totalIRT) * 100,
-          assets: bucket.assets.map((a) => ({
-            ...a,
-            percentage: (a.valueIRT / totalIRT) * 100,
-          })),
-        }),
-      )
-
-      return { totalIRT, categories }
+      return computeLivePortfolioBreakdown(userAssets, prices)
     }),
 
   export: protectedProcedure

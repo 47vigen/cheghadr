@@ -1,3 +1,4 @@
+import { computeLivePortfolioBreakdown } from '@/lib/portfolio-breakdown'
 import {
   getPortfolioSnapshotDelta,
   type PortfolioDeltaWindow,
@@ -11,12 +12,9 @@ import {
   getLocalizedItemName,
   getSellPriceBySymbol,
   getSnapshotStaleness,
-  type PriceItem,
   parsePriceSnapshot,
-  sortedGroupEntries,
 } from '@/lib/prices'
 import { db } from '@/server/db'
-import { type BreakdownItem, parseBreakdownJson } from '@/types/schemas'
 
 import { escapeTelegramHtml } from '../html-escape'
 import type { BotLocale } from '../i18n'
@@ -154,56 +152,31 @@ export async function buildPortfolioHomeCard(
   return lines.join('\n')
 }
 
-function categoryForSymbol(symbol: string, prices: PriceItem[]): string {
-  const item = findBySymbol(prices, symbol)
-  return item?.base_currency?.category?.symbol ?? 'OTHER'
-}
-
 export async function buildBreakdown(
   userId: string,
   locale: BotLocale,
 ): Promise<ScreenResult> {
   const keyboard = portfolioSubKeyboard(locale)
 
-  const [snapshot, priceSnap] = await Promise.all([
-    db.portfolioSnapshot.findFirst({
-      where: { userId, portfolioId: null },
-      orderBy: { snapshotAt: 'desc' },
+  const [userAssets, priceSnap] = await Promise.all([
+    db.userAsset.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'asc' },
     }),
     db.priceSnapshot.findFirst({ orderBy: { snapshotAt: 'desc' } }),
   ])
 
-  if (!snapshot) {
-    return {
-      text: `${t(locale, 'bot.portfolio.breakdownTitle')}\n\n${t(locale, 'bot.portfolio.noData')}`,
-      keyboard,
-    }
-  }
-
-  const total = Number(snapshot.totalIRT)
-  const breakdown = parseBreakdownJson(snapshot.breakdown)
-
-  if (breakdown.length === 0 || total <= 0) {
-    return {
-      text: `${t(locale, 'bot.portfolio.breakdownTitle')}\n\n${t(locale, 'bot.portfolio.noData')}`,
-      keyboard,
-    }
-  }
-
   const prices = priceSnap ? parsePriceSnapshot(priceSnap.data) : []
-  const byCategory = new Map<string, BreakdownItem[]>()
+  const live = computeLivePortfolioBreakdown(userAssets, prices)
 
-  for (const item of breakdown) {
-    const cat =
-      prices.length > 0 ? categoryForSymbol(item.symbol, prices) : 'OTHER'
-    const bucket = byCategory.get(cat) ?? []
-    bucket.push(item)
-    byCategory.set(cat, bucket)
+  if (!live) {
+    return {
+      text: `${t(locale, 'bot.portfolio.breakdownTitle')}\n\n${t(locale, 'bot.portfolio.noData')}`,
+      keyboard,
+    }
   }
 
-  for (const items of byCategory.values()) {
-    items.sort((a, b) => b.valueIRT - a.valueIRT)
-  }
+  const { totalIRT: total, categories } = live
 
   const blocks: string[] = [
     t(locale, 'bot.portfolio.breakdownTitle'),
@@ -213,7 +186,7 @@ export async function buildBreakdown(
     }),
   ]
 
-  for (const [cat, items] of sortedGroupEntries(byCategory)) {
+  for (const { category: cat, assets: items } of categories) {
     const catLabel = escapeTelegramHtml(tCategory(locale, cat))
     const lines: string[] = [`<b>${catLabel}</b>`]
     for (const item of items) {
