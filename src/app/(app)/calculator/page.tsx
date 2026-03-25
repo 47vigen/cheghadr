@@ -113,7 +113,7 @@ export default function CalculatorPage() {
               <Button
                 size="sm"
                 isIconOnly
-                variant="flat"
+                variant="outline"
                 onPress={handleSwap}
                 aria-label={t('swap')}
                 className="mx-3 shrink-0"
