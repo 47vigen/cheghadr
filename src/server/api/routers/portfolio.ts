@@ -1,13 +1,20 @@
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
+import {
+  buildDailyPortfolioHistorySeries,
+  exclusiveEndAfterRange,
+  getPortfolioHistoryRange,
+} from '@/lib/portfolio-history'
 import { computeLivePortfolioBreakdown } from '@/lib/portfolio-breakdown'
 import { createPortfolioSnapshot } from '@/lib/portfolio'
 import { getPortfolioSnapshotDelta } from '@/lib/portfolio-snapshot-delta'
+import type { PortfolioDeltaWindow } from '@/lib/portfolio-snapshot-delta'
 import {
   getSellPriceBySymbol,
   parsePriceSnapshot,
 } from '@/lib/prices'
+import { portfolioHistoryTimezoneSchema } from '@/lib/timezone-schema'
 import {
   ensureDefaultPortfolio,
   requireOwnedPortfolio,
@@ -121,39 +128,82 @@ export const portfolioRouter = router({
     .input(
       z
         .object({
-          days: z.number().int().min(1).max(365).default(30),
+          window: z.enum(['1D', '1W', '1M', 'ALL']).optional(),
+          timezone: portfolioHistoryTimezoneSchema,
           portfolioId: portfolioIdInput,
         })
         .optional(),
     )
     .query(async ({ ctx, input }) => {
-      const days = input?.days ?? 30
-      const since = new Date()
-      since.setDate(since.getDate() - days)
-
       const portfolioFilter = await resolveOwnedPortfolioFilter(
         ctx.db,
         ctx.user.id,
         input?.portfolioId,
       )
 
-      const snapshots = await ctx.db.portfolioSnapshot.findMany({
-        where: {
-          userId: ctx.user.id,
-          ...portfolioFilter,
-          snapshotAt: { gte: since },
-        },
+      const chartWindow: PortfolioDeltaWindow = input?.window ?? '1D'
+      const timeZone = input?.timezone ?? 'UTC'
+
+      const firstSnapshot = await ctx.db.portfolioSnapshot.findFirst({
+        where: { userId: ctx.user.id, ...portfolioFilter },
         orderBy: { snapshotAt: 'asc' },
-        select: {
-          snapshotAt: true,
-          totalIRT: true,
-        },
+        select: { snapshotAt: true },
       })
 
-      return snapshots.map((s) => ({
-        date: s.snapshotAt,
-        totalIRT: Number(s.totalIRT),
-      }))
+      const range = getPortfolioHistoryRange(
+        chartWindow,
+        firstSnapshot?.snapshotAt ?? null,
+        timeZone,
+      )
+
+      if (!range) {
+        return []
+      }
+
+      const { rangeStart, rangeEnd } = range
+      const rangeEndExclusive = exclusiveEndAfterRange(rangeEnd, timeZone)
+
+      const [carrySnapshot, snapshots] = await Promise.all([
+        ctx.db.portfolioSnapshot.findFirst({
+          where: {
+            userId: ctx.user.id,
+            ...portfolioFilter,
+            snapshotAt: { lt: rangeStart },
+          },
+          orderBy: { snapshotAt: 'desc' },
+          select: { totalIRT: true },
+        }),
+        ctx.db.portfolioSnapshot.findMany({
+          where: {
+            userId: ctx.user.id,
+            ...portfolioFilter,
+            snapshotAt: {
+              gte: rangeStart,
+              lt: rangeEndExclusive,
+            },
+          },
+          orderBy: { snapshotAt: 'asc' },
+          select: {
+            snapshotAt: true,
+            totalIRT: true,
+          },
+        }),
+      ])
+
+      const carryBeforeRange = carrySnapshot
+        ? Number(carrySnapshot.totalIRT)
+        : null
+
+      return buildDailyPortfolioHistorySeries(
+        rangeStart,
+        rangeEnd,
+        snapshots.map((s) => ({
+          snapshotAt: s.snapshotAt,
+          totalIRT: Number(s.totalIRT),
+        })),
+        carryBeforeRange,
+        timeZone,
+      )
     }),
 
   delta: protectedProcedure

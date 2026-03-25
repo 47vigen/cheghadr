@@ -11,16 +11,25 @@ import { formatIRT, getIntlLocale } from '@/lib/prices'
 import { TRPC_REFETCH_INTERVAL_MS } from '@/trpc/constants'
 import { api } from '@/trpc/react'
 
-type DeltaWindow = '1D' | '1W' | '1M' | 'ALL'
+export type DeltaWindow = '1D' | '1W' | '1M' | 'ALL'
 
 const WINDOWS: DeltaWindow[] = ['1D', '1W', '1M', 'ALL']
 
 interface PortfolioDeltaProps {
   portfolioId?: string
+  /** When both `window` and `onWindowChange` are set, selection is controlled by the parent. */
+  window?: DeltaWindow
+  onWindowChange?: (window: DeltaWindow) => void
 }
 
-export function PortfolioDelta({ portfolioId }: PortfolioDeltaProps = {}) {
-  const [window, setWindow] = useState<DeltaWindow>('1D')
+export function PortfolioDelta({
+  portfolioId,
+  window: windowProp,
+  onWindowChange,
+}: PortfolioDeltaProps = {}) {
+  const [uncontrolledWindow, setUncontrolledWindow] =
+    useState<DeltaWindow>('1D')
+  const window = windowProp ?? uncontrolledWindow
   const t = useTranslations('delta')
   const locale = useLocale()
   const { selectionChanged } = useTelegramHaptics()
@@ -70,7 +79,11 @@ export function PortfolioDelta({ portfolioId }: PortfolioDeltaProps = {}) {
   }
 
   const handleWindowChange = (w: DeltaWindow) => {
-    setWindow(w)
+    if (onWindowChange) {
+      onWindowChange(w)
+    } else {
+      setUncontrolledWindow(w)
+    }
     selectionChanged()
   }
 

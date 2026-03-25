@@ -69,7 +69,7 @@ export async function getPortfolioSnapshotDelta(
 
   const comparisonDate = getComparisonDateForWindow(window)
 
-  const previous = comparisonDate
+  const atOrBefore = comparisonDate
     ? await db.portfolioSnapshot.findFirst({
         where: {
           userId,
@@ -79,11 +79,15 @@ export async function getPortfolioSnapshotDelta(
         orderBy: { snapshotAt: 'desc' },
         select: { id: true, snapshotAt: true, totalIRT: true },
       })
-    : await db.portfolioSnapshot.findFirst({
-        where: { userId, ...portfolioFilter },
-        orderBy: { snapshotAt: 'asc' },
-        select: { id: true, snapshotAt: true, totalIRT: true },
-      })
+    : null
+
+  const earliest = await db.portfolioSnapshot.findFirst({
+    where: { userId, ...portfolioFilter },
+    orderBy: { snapshotAt: 'asc' },
+    select: { id: true, snapshotAt: true, totalIRT: true },
+  })
+
+  const previous = atOrBefore ?? earliest
 
   if (!previous) return null
 

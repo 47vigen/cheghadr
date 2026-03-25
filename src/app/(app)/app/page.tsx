@@ -14,6 +14,7 @@ import { AssetsHeroSection } from '@/components/assets/assets-hero-section'
 import { AssetsListSection } from '@/components/assets/assets-list-section'
 import { PageShell } from '@/components/layout/page-shell'
 import { PortfolioDeleteModal } from '@/components/portfolio/portfolio-delete-modal'
+import type { DeltaWindow } from '@/components/portfolio/portfolio-delta'
 import { PortfolioFormModal } from '@/components/portfolio/portfolio-form-modal'
 import { AssetsSkeleton } from '@/components/skeletons/assets-skeleton'
 import { ErrorState, RefreshIndicator } from '@/components/ui/async-states'
@@ -44,6 +45,15 @@ export default function AssetsPage() {
     name: string
     assetCount: number
   } | null>(null)
+  const [deltaWindow, setDeltaWindow] = useState<DeltaWindow>('1D')
+
+  const chartTimeZone = useMemo(() => {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone ?? 'UTC'
+    } catch {
+      return 'UTC'
+    }
+  }, [])
 
   const settingsQuery = api.user.getSettings.useQuery()
 
@@ -65,8 +75,12 @@ export default function AssetsPage() {
 
   const historyQuery = api.portfolio.history.useQuery(
     selectedPortfolioId
-      ? { days: 30, portfolioId: selectedPortfolioId }
-      : { days: 30 },
+      ? {
+          window: deltaWindow,
+          timezone: chartTimeZone,
+          portfolioId: selectedPortfolioId,
+        }
+      : { window: deltaWindow, timezone: chartTimeZone },
     {
       refetchInterval: TRPC_REFETCH_INTERVAL_MS,
       refetchOnWindowFocus: true,
@@ -208,6 +222,8 @@ export default function AssetsPage() {
           }
           onExport={handleExport}
           exportFetching={exportQuery.isFetching}
+          deltaWindow={deltaWindow}
+          onDeltaWindowChange={setDeltaWindow}
         />
 
         <AssetsChartSection historyData={historyQuery.data} />
