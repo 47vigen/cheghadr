@@ -1,3 +1,7 @@
+import { TZDate } from '@date-fns/tz'
+import { addDays } from 'date-fns'
+import { formatInTimeZone, fromZonedTime } from 'date-fns-tz'
+
 import type { PortfolioDeltaWindow } from '@/lib/portfolio-snapshot-delta'
 
 export type PortfolioHistoryWindow = PortfolioDeltaWindow
@@ -19,35 +23,19 @@ export function getHistoryWindowDayCount(
   }
 }
 
-export function startOfUtcDay(d: Date): Date {
-  return new Date(
-    Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()),
-  )
+/** Start of calendar day in `timeZone` as a UTC `Date` (instant). */
+export function startOfDayInTimeZone(instant: Date, timeZone: string): Date {
+  const ymd = formatInTimeZone(instant, timeZone, 'yyyy-MM-dd')
+  return fromZonedTime(`${ymd}T00:00:00`, timeZone)
 }
 
-export function addUtcDays(d: Date, days: number): Date {
-  const x = new Date(d)
-  x.setUTCDate(x.getUTCDate() + days)
-  return x
+/** Noon on that calendar day in `timeZone` (stable chart x-position). */
+export function noonInTimeZoneForYmd(ymd: string, timeZone: string): Date {
+  return fromZonedTime(`${ymd}T12:00:00`, timeZone)
 }
 
-function dayKeyUtc(d: Date): string {
-  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`
-}
-
-/** Noon UTC for chart x-values (stable tick positioning). */
-function utcNoonForDay(dayStart: Date): Date {
-  return new Date(
-    Date.UTC(
-      dayStart.getUTCFullYear(),
-      dayStart.getUTCMonth(),
-      dayStart.getUTCDate(),
-      12,
-      0,
-      0,
-      0,
-    ),
-  )
+function dayKeyInTimeZone(instant: Date, timeZone: string): string {
+  return formatInTimeZone(instant, timeZone, 'yyyy-MM-dd')
 }
 
 export interface PortfolioSnapshotPoint {
@@ -56,14 +44,15 @@ export interface PortfolioSnapshotPoint {
 }
 
 /**
- * One point per calendar day (UTC), forward-filled from the last known snapshot.
- * `rangeStart` and `rangeEnd` are inclusive day starts (UTC).
+ * One point per calendar day in `timeZone`, forward-filled from the last known snapshot.
+ * `rangeStart` / `rangeEnd` are UTC instants at start-of-day for first/last inclusive day.
  */
 export function buildDailyPortfolioHistorySeries(
   rangeStart: Date,
   rangeEnd: Date,
   snapshotsInRange: PortfolioSnapshotPoint[],
   carryBeforeRange: number | null,
+  timeZone: string,
 ): Array<{ date: Date; totalIRT: number }> {
   const sorted = [...snapshotsInRange].sort(
     (a, b) => a.snapshotAt.getTime() - b.snapshotAt.getTime(),
@@ -71,25 +60,29 @@ export function buildDailyPortfolioHistorySeries(
 
   const lastByDay = new Map<string, number>()
   for (const s of sorted) {
-    lastByDay.set(dayKeyUtc(s.snapshotAt), s.totalIRT)
+    lastByDay.set(dayKeyInTimeZone(s.snapshotAt, timeZone), s.totalIRT)
   }
 
   let carry = carryBeforeRange ?? undefined
 
+  const endKey = formatInTimeZone(rangeEnd, timeZone, 'yyyy-MM-dd')
+
   const out: Array<{ date: Date; totalIRT: number }> = []
-  const end = startOfUtcDay(rangeEnd)
 
   for (
-    let day = startOfUtcDay(rangeStart);
-    day.getTime() <= end.getTime();
-    day = addUtcDays(day, 1)
+    let d = new TZDate(rangeStart, timeZone);
+    formatInTimeZone(d, timeZone, 'yyyy-MM-dd') <= endKey;
+    d = addDays(d, 1)
   ) {
-    const key = dayKeyUtc(day)
+    const key = formatInTimeZone(d, timeZone, 'yyyy-MM-dd')
     if (lastByDay.has(key)) {
       carry = lastByDay.get(key)
     }
     if (carry !== undefined) {
-      out.push({ date: utcNoonForDay(day), totalIRT: carry })
+      out.push({
+        date: noonInTimeZoneForYmd(key, timeZone),
+        totalIRT: carry,
+      })
     }
   }
 
@@ -97,22 +90,35 @@ export function buildDailyPortfolioHistorySeries(
 }
 
 /**
- * Inclusive UTC day range for the chart. `rangeEnd` is the start of the last
- * calendar day in the window (same as `startOfUtcDay` for "today").
+ * Inclusive day range as UTC instants (start of first/last calendar day in `timeZone`).
  */
 export function getPortfolioHistoryRange(
   window: PortfolioHistoryWindow,
   firstSnapshotAt: Date | null,
+  timeZone: string,
 ): { rangeStart: Date; rangeEnd: Date } | null {
-  const todayStart = startOfUtcDay(new Date())
+  const nowInZone = new TZDate(Date.now(), timeZone)
+  const todayStart = startOfDayInTimeZone(nowInZone, timeZone)
+
   if (window === 'ALL') {
     if (!firstSnapshotAt) return null
     return {
-      rangeStart: startOfUtcDay(firstSnapshotAt),
+      rangeStart: startOfDayInTimeZone(firstSnapshotAt, timeZone),
       rangeEnd: todayStart,
     }
   }
+
   const n = getHistoryWindowDayCount(window) ?? 7
-  const rangeStart = addUtcDays(todayStart, -(n - 1))
+  const startAnchor = addDays(nowInZone, -(n - 1))
+  const rangeStart = startOfDayInTimeZone(startAnchor, timeZone)
+
   return { rangeStart, rangeEnd: todayStart }
+}
+
+/** Start of the calendar day after `rangeEnd` (exclusive upper bound for DB queries). */
+export function exclusiveEndAfterRange(
+  rangeEnd: Date,
+  timeZone: string,
+): Date {
+  return startOfDayInTimeZone(addDays(new TZDate(rangeEnd, timeZone), 1), timeZone)
 }

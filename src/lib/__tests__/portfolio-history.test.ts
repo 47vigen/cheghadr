@@ -5,13 +5,15 @@ import {
   getPortfolioHistoryRange,
 } from '@/lib/portfolio-history'
 
+const TZ = 'UTC'
+
 describe('getPortfolioHistoryRange', () => {
-  it('returns 7 inclusive UTC days for 1D and 1W from a fixed "today"', () => {
+  it('returns 7 inclusive days for 1D and 1W from a fixed "today"', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-03-25T15:00:00Z'))
 
-    const r1 = getPortfolioHistoryRange('1D', new Date('2026-01-01'))
-    const r2 = getPortfolioHistoryRange('1W', new Date('2026-01-01'))
+    const r1 = getPortfolioHistoryRange('1D', new Date('2026-01-01'), TZ)
+    const r2 = getPortfolioHistoryRange('1W', new Date('2026-01-01'), TZ)
     expect(r1).toEqual(r2)
     expect(r1?.rangeStart.toISOString()).toBe('2026-03-19T00:00:00.000Z')
     expect(r1?.rangeEnd.toISOString()).toBe('2026-03-25T00:00:00.000Z')
@@ -23,7 +25,7 @@ describe('getPortfolioHistoryRange', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-03-25T12:00:00Z'))
 
-    const r = getPortfolioHistoryRange('1M', null)
+    const r = getPortfolioHistoryRange('1M', null, TZ)
     expect(r?.rangeStart.toISOString()).toBe('2026-02-24T00:00:00.000Z')
     expect(r?.rangeEnd.toISOString()).toBe('2026-03-25T00:00:00.000Z')
 
@@ -31,7 +33,7 @@ describe('getPortfolioHistoryRange', () => {
   })
 
   it('returns null for ALL when there is no first snapshot', () => {
-    expect(getPortfolioHistoryRange('ALL', null)).toBeNull()
+    expect(getPortfolioHistoryRange('ALL', null, TZ)).toBeNull()
   })
 
   it('ALL spans from first snapshot day through today', () => {
@@ -41,6 +43,7 @@ describe('getPortfolioHistoryRange', () => {
     const r = getPortfolioHistoryRange(
       'ALL',
       new Date('2026-03-20T08:30:00Z'),
+      TZ,
     )
     expect(r?.rangeStart.toISOString()).toBe('2026-03-20T00:00:00.000Z')
     expect(r?.rangeEnd.toISOString()).toBe('2026-03-25T00:00:00.000Z')
@@ -67,6 +70,7 @@ describe('buildDailyPortfolioHistorySeries', () => {
         },
       ],
       1_000_000,
+      TZ,
     )
 
     expect(series).toHaveLength(3)

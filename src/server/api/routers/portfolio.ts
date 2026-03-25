@@ -3,8 +3,8 @@ import { z } from 'zod'
 
 import {
   buildDailyPortfolioHistorySeries,
+  exclusiveEndAfterRange,
   getPortfolioHistoryRange,
-  addUtcDays,
 } from '@/lib/portfolio-history'
 import { computeLivePortfolioBreakdown } from '@/lib/portfolio-breakdown'
 import { createPortfolioSnapshot } from '@/lib/portfolio'
@@ -14,6 +14,7 @@ import {
   getSellPriceBySymbol,
   parsePriceSnapshot,
 } from '@/lib/prices'
+import { portfolioHistoryTimezoneSchema } from '@/lib/timezone-schema'
 import {
   ensureDefaultPortfolio,
   requireOwnedPortfolio,
@@ -127,9 +128,8 @@ export const portfolioRouter = router({
     .input(
       z
         .object({
-          /** @deprecated Use `window` instead; kept for older clients. */
-          days: z.number().int().min(1).max(365).optional(),
           window: z.enum(['1D', '1W', '1M', 'ALL']).optional(),
+          timezone: portfolioHistoryTimezoneSchema,
           portfolioId: portfolioIdInput,
         })
         .optional(),
@@ -141,11 +141,8 @@ export const portfolioRouter = router({
         input?.portfolioId,
       )
 
-      let chartWindow: PortfolioDeltaWindow = input?.window ?? '1D'
-      if (!input?.window && input?.days != null) {
-        chartWindow =
-          input.days <= 7 ? '1W' : input.days <= 30 ? '1M' : 'ALL'
-      }
+      const chartWindow: PortfolioDeltaWindow = input?.window ?? '1D'
+      const timeZone = input?.timezone ?? 'UTC'
 
       const firstSnapshot = await ctx.db.portfolioSnapshot.findFirst({
         where: { userId: ctx.user.id, ...portfolioFilter },
@@ -156,6 +153,7 @@ export const portfolioRouter = router({
       const range = getPortfolioHistoryRange(
         chartWindow,
         firstSnapshot?.snapshotAt ?? null,
+        timeZone,
       )
 
       if (!range) {
@@ -163,7 +161,7 @@ export const portfolioRouter = router({
       }
 
       const { rangeStart, rangeEnd } = range
-      const rangeEndExclusive = addUtcDays(rangeEnd, 1)
+      const rangeEndExclusive = exclusiveEndAfterRange(rangeEnd, timeZone)
 
       const [carrySnapshot, snapshots] = await Promise.all([
         ctx.db.portfolioSnapshot.findFirst({
@@ -204,6 +202,7 @@ export const portfolioRouter = router({
           totalIRT: Number(s.totalIRT),
         })),
         carryBeforeRange,
+        timeZone,
       )
     }),
 

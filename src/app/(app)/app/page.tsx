@@ -47,6 +47,14 @@ export default function AssetsPage() {
   } | null>(null)
   const [deltaWindow, setDeltaWindow] = useState<DeltaWindow>('1D')
 
+  const chartTimeZone = useMemo(() => {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone ?? 'UTC'
+    } catch {
+      return 'UTC'
+    }
+  }, [])
+
   const settingsQuery = api.user.getSettings.useQuery()
 
   useEffect(() => {
@@ -67,8 +75,12 @@ export default function AssetsPage() {
 
   const historyQuery = api.portfolio.history.useQuery(
     selectedPortfolioId
-      ? { window: deltaWindow, portfolioId: selectedPortfolioId }
-      : { window: deltaWindow },
+      ? {
+          window: deltaWindow,
+          timezone: chartTimeZone,
+          portfolioId: selectedPortfolioId,
+        }
+      : { window: deltaWindow, timezone: chartTimeZone },
     {
       refetchInterval: TRPC_REFETCH_INTERVAL_MS,
       refetchOnWindowFocus: true,
