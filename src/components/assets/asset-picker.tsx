@@ -2,11 +2,11 @@
 
 import { useState } from 'react'
 
-import { Button, Input, Label, Modal, Spinner, TextField } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 import { AssetSearchPanel } from '@/components/assets/asset-search-panel'
+import { QuantityModal } from '@/components/assets/quantity-modal'
 
 import { useAssetSearchGroups } from '@/hooks/use-asset-search-groups'
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
@@ -15,7 +15,7 @@ import type { PriceItem } from '@/lib/prices'
 import {
   formatIRT,
   getBaseSymbol,
-  getLocalizedItemName,
+  makeIrtPriceItem,
   parsePriceSnapshot,
 } from '@/lib/prices'
 import { api } from '@/trpc/react'
@@ -57,7 +57,7 @@ export function AssetPicker({
     },
   })
 
-  const items = parsePriceSnapshot(priceData)
+  const items = [makeIrtPriceItem(), ...parsePriceSnapshot(priceData)]
   const groups = useAssetSearchGroups(items, search)
 
   const closeModal = () => {
@@ -107,56 +107,15 @@ export function AssetPicker({
         wrapSearchInSection
       />
 
-      <Modal>
-        <Modal.Backdrop
-          isOpen={modalOpen}
-          onOpenChange={(v: boolean) => {
-            if (!v) closeModal()
-            else setModalOpen(true)
-          }}
-        >
-          <Modal.Container placement="auto" size="md">
-            <Modal.Dialog
-              className="sm:max-w-[360px]"
-              dir={locale === 'fa' ? 'rtl' : 'ltr'}
-            >
-              <Modal.CloseTrigger />
-              <Modal.Header>
-                <Modal.Heading>
-                  {modalItem
-                    ? `${getLocalizedItemName(modalItem, locale)} — ${tPicker('enterQuantity')}`
-                    : tPicker('enterQuantity')}
-                </Modal.Heading>
-              </Modal.Header>
-              <Modal.Body className="flex flex-col gap-4 p-4">
-                <TextField value={quantity} onChange={setQuantity} fullWidth>
-                  <Label>{tPicker('enterQuantity')}</Label>
-                  <Input
-                    type="number"
-                    inputMode="decimal"
-                    placeholder={tPicker('enterQuantity')}
-                    dir={locale === 'fa' ? 'rtl' : 'ltr'}
-                  />
-                </TextField>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button
-                  variant="primary"
-                  fullWidth
-                  onPress={handleSave}
-                  isDisabled={addMutation.isPending}
-                >
-                  {addMutation.isPending ? (
-                    <Spinner size="sm" color="current" />
-                  ) : (
-                    tPicker('save')
-                  )}
-                </Button>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      <QuantityModal
+        isOpen={modalOpen}
+        item={modalItem}
+        quantity={quantity}
+        onQuantityChange={setQuantity}
+        onClose={closeModal}
+        onSave={handleSave}
+        isPending={addMutation.isPending}
+      />
     </>
   )
 }

@@ -26,6 +26,7 @@ export {
   getBaseSymbol,
   getSellPriceBySymbol,
   IRT_ENTRY,
+  makeIrtPriceItem,
   parsePriceSnapshot,
 } from './parse'
 export { getSnapshotStaleness, STALE_AFTER_MINUTES } from './staleness'

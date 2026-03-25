@@ -142,12 +142,11 @@ export default function AddAssetPage() {
           </Section>
         </div>
       )}
-      <div>
-        <Section header={inTelegram ? t('title') : undefined}>
-          <p className="px-2 py-0.5 text-muted-foreground text-xs">
-            {t('subtitle')}
-          </p>
-        </Section>
+      <div className="px-3 pt-2 pb-1">
+        {inTelegram && (
+          <h2 className="section-header mb-0.5">{t('title')}</h2>
+        )}
+        <p className="text-muted-foreground text-xs">{t('subtitle')}</p>
       </div>
       <div>
         <AssetPicker

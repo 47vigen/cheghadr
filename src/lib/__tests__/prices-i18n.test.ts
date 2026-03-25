@@ -106,22 +106,22 @@ describe('getLocalizedItemName', () => {
 })
 
 describe('getAssetListSubtitle', () => {
-  it('for fa locale returns English secondary line', () => {
+  it('for fa locale returns symbol as secondary line', () => {
     const pi = item(
       'USD',
       { fa: 'دلار آمریکا', en: 'US Dollar' },
       { fa: 'دلار', en: 'Dollar' },
     )
-    expect(getAssetListSubtitle(pi, 'fa', 'USD')).toBe('US Dollar')
+    expect(getAssetListSubtitle(pi, 'fa', 'USD')).toBe('USD')
   })
 
-  it('for en locale returns Persian when distinct from primary', () => {
+  it('for en locale returns symbol as secondary line', () => {
     const pi = item(
       'AED',
       { fa: 'درهم امارات', en: 'UAE Dirham' },
       { fa: 'درهم', en: 'Dirham' },
     )
-    expect(getAssetListSubtitle(pi, 'en', 'AED')).toBe('درهم امارات')
+    expect(getAssetListSubtitle(pi, 'en', 'AED')).toBe('AED')
   })
 
   it('for en locale falls back to symbol when names match', () => {

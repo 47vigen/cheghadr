@@ -16,6 +16,17 @@ import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 import { getCategoryColor } from '@/lib/category-colors'
 import { formatIRT, getIntlLocale } from '@/lib/prices'
 
+function formatPercentage(value: number, intlLocale: string): string {
+  if (value < 0.1) {
+    return new Intl.NumberFormat(intlLocale, {
+      maximumSignificantDigits: 2,
+    }).format(value)
+  }
+  return new Intl.NumberFormat(intlLocale, {
+    maximumFractionDigits: 1,
+  }).format(value)
+}
+
 interface BreakdownCategory {
   category: string
   valueIRT: number
@@ -45,9 +56,7 @@ function DonutTooltip({
   const entry = payload[0]
   if (!entry) return null
 
-  const pct = new Intl.NumberFormat(intlLocale, {
-    maximumFractionDigits: 1,
-  }).format(entry.payload.percentage)
+  const pct = formatPercentage(entry.payload.percentage, intlLocale)
 
   return (
     <div className="border border-border bg-surface px-2 py-1.5 font-display text-xs shadow-[0_2px_8px_oklch(0_0_0/0.12)]">
@@ -98,6 +107,7 @@ export function PortfolioBreakdown({
                 outerRadius={85}
                 paddingAngle={data.length > 1 ? 2 : 0}
                 strokeWidth={0}
+                minAngle={3}
               >
                 {data.map((entry) => {
                   const color = getCategoryColor(entry.category)
@@ -133,9 +143,7 @@ export function PortfolioBreakdown({
             const isOtherSelected =
               selectedCategory !== null && selectedCategory !== entry.category
 
-            const pct = new Intl.NumberFormat(intlLocale, {
-              maximumFractionDigits: 1,
-            }).format(entry.percentage)
+            const pct = formatPercentage(entry.percentage, intlLocale)
 
             return (
               <button

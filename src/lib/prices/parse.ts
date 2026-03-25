@@ -82,3 +82,21 @@ export const IRT_ENTRY = {
   en: 'Toman',
   png: null as string | null,
 }
+
+/** Synthetic PriceItem for Iranian Toman (IRT) cash holdings */
+export function makeIrtPriceItem(): PriceItem {
+  return {
+    symbol: 'IRT',
+    sell_price: '1',
+    buy_price: '1',
+    change: '0',
+    is_tradable: false,
+    is_up_to_date: true,
+    created_at: new Date().toISOString(),
+    png: null,
+    price_source: { name: 'synthetic' } as never,
+    name: { symbol: 'IRT', fa: 'تومان', en: 'Toman', category: { symbol: 'CURRENCY' } as never },
+    base_currency: { symbol: 'IRT', fa: 'تومان', en: 'Toman', category: { symbol: 'CURRENCY' } as never },
+    quote_currency: { symbol: 'IRT', fa: 'تومان', en: 'Toman', category: { symbol: 'CURRENCY' } as never },
+  } as PriceItem
+}

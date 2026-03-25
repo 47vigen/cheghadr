@@ -4,8 +4,10 @@ import { useMemo, useState } from 'react'
 
 import { Input, TextField } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
+import { toast } from 'sonner'
 
 import { PageShell } from '@/components/layout/page-shell'
+import { QuantityModal } from '@/components/assets/quantity-modal'
 import { PriceCategoryNav } from '@/components/prices/price-category-nav'
 import { PriceSection } from '@/components/prices/price-section'
 import { StalenessBanner } from '@/components/prices/staleness-banner'
@@ -19,9 +21,12 @@ import { Section } from '@/components/ui/section'
 
 import { usePriceCategoryScrollSpy } from '@/hooks/use-price-category-scroll-spy'
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
+import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 
+import type { PriceItem } from '@/lib/prices'
 import {
   filterPriceItems,
+  getBaseSymbol,
   groupByCategory,
   parsePriceSnapshot,
   sortedGroupEntries,
@@ -32,10 +37,62 @@ import { api } from '@/trpc/react'
 
 export default function PricesPage() {
   const t = useTranslations('prices')
+  const tAssets = useTranslations('assets')
   const tCommon = useTranslations('common')
   const tNav = useTranslations('nav')
   const locale = useLocale()
   const [search, setSearch] = useState('')
+  const [modalOpen, setModalOpen] = useState(false)
+  const [modalItem, setModalItem] = useState<PriceItem | null>(null)
+  const [quantity, setQuantity] = useState('')
+
+  const { notificationOccurred } = useTelegramHaptics()
+  const utils = api.useUtils()
+
+  const portfoliosQuery = api.portfolio.list.useQuery()
+  const portfolioId = portfoliosQuery.data?.[0]?.id ?? ''
+
+  const addMutation = api.assets.add.useMutation({
+    onSuccess: () => {
+      notificationOccurred('success')
+      void utils.assets.list.invalidate()
+      toast.success(tAssets('toastAdded'))
+      setModalOpen(false)
+      setModalItem(null)
+      setQuantity('')
+    },
+    onError: (err) => {
+      notificationOccurred('error')
+      toast.error(err.message || tAssets('toastAddError'))
+    },
+  })
+
+  const openModal = (item: PriceItem) => {
+    setModalItem(item)
+    setQuantity('')
+    setModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setModalOpen(false)
+    setModalItem(null)
+    setQuantity('')
+  }
+
+  const handleSave = () => {
+    if (!modalItem || addMutation.isPending) return
+    const qty = Number(quantity)
+    if (!quantity || Number.isNaN(qty) || qty <= 0) {
+      toast.error(tAssets('toastInvalidQuantity'))
+      return
+    }
+    const sym = getBaseSymbol(modalItem)
+    if (!sym || !portfolioId) {
+      toast.error(tAssets('toastAddError'))
+      return
+    }
+    addMutation.mutate({ symbol: sym, quantity, portfolioId })
+  }
 
   const { data, isLoading, isError, error, refetch } =
     api.prices.latest.useQuery(undefined, {
@@ -93,6 +150,7 @@ export default function PricesPage() {
               <Input
                 placeholder={t('search')}
                 type="search"
+                className="py-3"
                 dir={locale === 'fa' ? 'rtl' : 'ltr'}
               />
             </TextField>
@@ -134,11 +192,25 @@ export default function PricesPage() {
               id={priceCategorySectionId(category)}
               className="scroll-mt-[4.5rem]"
             >
-              <PriceSection category={category} items={items} />
+              <PriceSection
+                category={category}
+                items={items}
+                onPress={openModal}
+              />
             </div>
           ))
         )}
       </PageShell>
+
+      <QuantityModal
+        isOpen={modalOpen}
+        item={modalItem}
+        quantity={quantity}
+        onQuantityChange={setQuantity}
+        onClose={closeModal}
+        onSave={handleSave}
+        isPending={addMutation.isPending}
+      />
     </>
   )
 }

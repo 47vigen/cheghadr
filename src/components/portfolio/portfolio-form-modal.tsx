@@ -104,6 +104,7 @@ export function PortfolioFormModal({
                   type="text"
                   placeholder={t('namePlaceholder')}
                   dir={locale === 'fa' ? 'rtl' : 'ltr'}
+                  className="py-3"
                 />
               </TextField>
               <TextField
@@ -113,12 +114,13 @@ export function PortfolioFormModal({
                 maxLength={4}
               >
                 <Label>{t('emoji')}</Label>
-                <Input type="text" placeholder="💼" dir="ltr" />
+                <Input type="text" placeholder="💼" dir="ltr" className="py-3" />
               </TextField>
             </Modal.Body>
             <Modal.Footer>
               <Button
                 variant="ghost"
+                size="lg"
                 onPress={() => onOpenChange(false)}
                 isDisabled={isPending}
               >
@@ -126,6 +128,7 @@ export function PortfolioFormModal({
               </Button>
               <Button
                 variant="primary"
+                size="lg"
                 onPress={handleSave}
                 isDisabled={!name.trim() || isPending}
               >
