@@ -68,7 +68,7 @@ export function CalculatorResult({
         {!formattedResult ? (
           <Placeholder header={t('resultPlaceholder')} />
         ) : (
-          <div className="flex flex-col items-center justify-center gap-1.5 px-4 py-8">
+          <div className="flex flex-col items-center justify-center gap-1.5 px-4 py-5">
             <span className="font-display font-semibold text-[1.75rem] tabular-nums leading-tight tracking-tight">
               {formattedResult}
             </span>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { Button, Input, Label, TextField } from '@heroui/react'
 import { IconArrowsExchange } from '@tabler/icons-react'
@@ -35,6 +35,7 @@ export default function CalculatorPage() {
   const [fromSymbol, setFromSymbol] = useState('USD')
   const [toSymbol, setToSymbol] = useState('IRT')
   const [amount, setAmount] = useState('')
+  const amountRowRef = useRef<HTMLDivElement>(null)
 
   const { isRefreshing } = usePullToRefresh(async () => {
     await refetch()
@@ -51,6 +52,17 @@ export default function CalculatorPage() {
     selectionChanged()
     setFromSymbol(toSymbol)
     setToSymbol(fromSymbol)
+  }
+
+  // When the soft keyboard opens, scroll the amount row to center so
+  // it clears both the keyboard and the fixed bottom nav bar.
+  const handleAmountFocus = () => {
+    setTimeout(() => {
+      amountRowRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+    }, 320)
   }
 
   if (isLoading) {
@@ -85,7 +97,7 @@ export default function CalculatorPage() {
           </div>
           <div className="overflow-hidden rounded-2xl bg-card-elevated">
             {/* From selector */}
-            <div className="px-3 pt-3 pb-2">
+            <div className="px-3 pt-2.5 pb-1.5">
               <AssetSelector
                 label={t('from')}
                 value={fromSymbol}
@@ -96,23 +108,23 @@ export default function CalculatorPage() {
             </div>
 
             {/* Swap row */}
-            <div className="flex items-center px-4 py-0.5">
+            <div className="flex items-center px-4">
               <div className="h-px flex-1 bg-border/40" />
               <Button
                 size="sm"
                 isIconOnly
-                variant="ghost"
+                variant="outline"
                 onPress={handleSwap}
                 aria-label={t('swap')}
-                className="mx-3 shrink-0 text-muted-foreground hover:text-foreground"
+                className="mx-3 shrink-0"
               >
-                <IconArrowsExchange size={18} className="rotate-90" />
+                <IconArrowsExchange size={16} className="rotate-90" />
               </Button>
               <div className="h-px flex-1 bg-border/40" />
             </div>
 
             {/* To selector */}
-            <div className="px-3 pt-2 pb-3">
+            <div className="px-3 pt-1.5 pb-2.5">
               <AssetSelector
                 items={prices}
                 label={t('to')}
@@ -126,7 +138,7 @@ export default function CalculatorPage() {
             <div className="mx-3 border-border/40 border-t" />
 
             {/* Amount input */}
-            <div className="px-3 pt-3 pb-4">
+            <div ref={amountRowRef} className="px-3 pt-2.5 pb-3">
               <TextField fullWidth value={amount} onChange={setAmount}>
                 <Label className="section-header mb-1.5 block">
                   {t('amount')}
@@ -136,6 +148,7 @@ export default function CalculatorPage() {
                   inputMode="decimal"
                   placeholder={t('amountPlaceholder')}
                   className="py-3"
+                  onFocus={handleAmountFocus}
                 />
               </TextField>
             </div>
