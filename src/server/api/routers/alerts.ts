@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { MAX_ACTIVE_ALERTS } from '@/lib/alerts/utils'
 import { findBySymbol, parsePriceSnapshot } from '@/lib/prices'
 import {
+  fetchLatestPriceSnapshot,
   positiveDecimalStringSchema,
   requireOwnedAlert,
 } from '@/server/api/helpers'
@@ -50,9 +51,7 @@ export const alertsRouter = router({
       }
 
       if (input.type === 'PRICE' && input.symbol) {
-        const latestSnapshot = await ctx.db.priceSnapshot.findFirst({
-          orderBy: { snapshotAt: 'desc' },
-        })
+        const latestSnapshot = await fetchLatestPriceSnapshot(ctx.db)
 
         if (latestSnapshot) {
           const prices = parsePriceSnapshot(latestSnapshot.data)
