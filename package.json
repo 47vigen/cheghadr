@@ -60,7 +60,6 @@
     "@vercel/speed-insights": "^2.0.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "date-fns-tz": "^3.2.0",
     "dotenv": "^17.3.1",
     "grammy": "^1.41.1",
     "jotai": "^2.18.1",

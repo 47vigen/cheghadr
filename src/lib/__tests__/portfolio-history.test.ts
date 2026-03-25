@@ -7,6 +7,10 @@ import {
 
 const TZ = 'UTC'
 
+function expectSameInstant(d: Date | undefined, isoUtc: string) {
+  expect(d?.getTime()).toBe(Date.parse(isoUtc))
+}
+
 describe('getPortfolioHistoryRange', () => {
   it('returns 7 inclusive days for 1D and 1W from a fixed "today"', () => {
     vi.useFakeTimers()
@@ -15,8 +19,8 @@ describe('getPortfolioHistoryRange', () => {
     const r1 = getPortfolioHistoryRange('1D', new Date('2026-01-01'), TZ)
     const r2 = getPortfolioHistoryRange('1W', new Date('2026-01-01'), TZ)
     expect(r1).toEqual(r2)
-    expect(r1?.rangeStart.toISOString()).toBe('2026-03-19T00:00:00.000Z')
-    expect(r1?.rangeEnd.toISOString()).toBe('2026-03-25T00:00:00.000Z')
+    expectSameInstant(r1?.rangeStart, '2026-03-19T00:00:00.000Z')
+    expectSameInstant(r1?.rangeEnd, '2026-03-25T00:00:00.000Z')
 
     vi.useRealTimers()
   })
@@ -26,8 +30,8 @@ describe('getPortfolioHistoryRange', () => {
     vi.setSystemTime(new Date('2026-03-25T12:00:00Z'))
 
     const r = getPortfolioHistoryRange('1M', null, TZ)
-    expect(r?.rangeStart.toISOString()).toBe('2026-02-24T00:00:00.000Z')
-    expect(r?.rangeEnd.toISOString()).toBe('2026-03-25T00:00:00.000Z')
+    expectSameInstant(r?.rangeStart, '2026-02-24T00:00:00.000Z')
+    expectSameInstant(r?.rangeEnd, '2026-03-25T00:00:00.000Z')
 
     vi.useRealTimers()
   })
@@ -45,8 +49,8 @@ describe('getPortfolioHistoryRange', () => {
       new Date('2026-03-20T08:30:00Z'),
       TZ,
     )
-    expect(r?.rangeStart.toISOString()).toBe('2026-03-20T00:00:00.000Z')
-    expect(r?.rangeEnd.toISOString()).toBe('2026-03-25T00:00:00.000Z')
+    expectSameInstant(r?.rangeStart, '2026-03-20T00:00:00.000Z')
+    expectSameInstant(r?.rangeEnd, '2026-03-25T00:00:00.000Z')
 
     vi.useRealTimers()
   })
@@ -77,7 +81,7 @@ describe('buildDailyPortfolioHistorySeries', () => {
     expect(series[0]?.totalIRT).toBe(1_000_000)
     expect(series[1]?.totalIRT).toBe(2_000_000)
     expect(series[2]?.totalIRT).toBe(2_000_000)
-    expect(series[0]?.date.toISOString()).toBe('2026-03-23T12:00:00.000Z')
+    expectSameInstant(series[0]?.date, '2026-03-23T12:00:00.000Z')
 
     vi.useRealTimers()
   })

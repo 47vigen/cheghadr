@@ -1,6 +1,5 @@
 import { TZDate } from '@date-fns/tz'
-import { addDays } from 'date-fns'
-import { formatInTimeZone, fromZonedTime } from 'date-fns-tz'
+import { addDays, format } from 'date-fns'
 
 import type { PortfolioDeltaWindow } from '@/lib/portfolio-snapshot-delta'
 
@@ -23,19 +22,19 @@ export function getHistoryWindowDayCount(
   }
 }
 
+function dayKeyInTimeZone(instant: Date, timeZone: string): string {
+  return format(new TZDate(instant, timeZone), 'yyyy-MM-dd')
+}
+
 /** Start of calendar day in `timeZone` as a UTC `Date` (instant). */
 export function startOfDayInTimeZone(instant: Date, timeZone: string): Date {
-  const ymd = formatInTimeZone(instant, timeZone, 'yyyy-MM-dd')
-  return fromZonedTime(`${ymd}T00:00:00`, timeZone)
+  const ymd = dayKeyInTimeZone(instant, timeZone)
+  return TZDate.tz(timeZone, `${ymd}T00:00:00`)
 }
 
 /** Noon on that calendar day in `timeZone` (stable chart x-position). */
 export function noonInTimeZoneForYmd(ymd: string, timeZone: string): Date {
-  return fromZonedTime(`${ymd}T12:00:00`, timeZone)
-}
-
-function dayKeyInTimeZone(instant: Date, timeZone: string): string {
-  return formatInTimeZone(instant, timeZone, 'yyyy-MM-dd')
+  return TZDate.tz(timeZone, `${ymd}T12:00:00`)
 }
 
 export interface PortfolioSnapshotPoint {
@@ -65,16 +64,16 @@ export function buildDailyPortfolioHistorySeries(
 
   let carry = carryBeforeRange ?? undefined
 
-  const endKey = formatInTimeZone(rangeEnd, timeZone, 'yyyy-MM-dd')
+  const endKey = dayKeyInTimeZone(rangeEnd, timeZone)
 
   const out: Array<{ date: Date; totalIRT: number }> = []
 
   for (
     let d = new TZDate(rangeStart, timeZone);
-    formatInTimeZone(d, timeZone, 'yyyy-MM-dd') <= endKey;
+    dayKeyInTimeZone(d, timeZone) <= endKey;
     d = addDays(d, 1)
   ) {
-    const key = formatInTimeZone(d, timeZone, 'yyyy-MM-dd')
+    const key = dayKeyInTimeZone(d, timeZone)
     if (lastByDay.has(key)) {
       carry = lastByDay.get(key)
     }
@@ -120,5 +119,8 @@ export function exclusiveEndAfterRange(
   rangeEnd: Date,
   timeZone: string,
 ): Date {
-  return startOfDayInTimeZone(addDays(new TZDate(rangeEnd, timeZone), 1), timeZone)
+  return startOfDayInTimeZone(
+    addDays(new TZDate(rangeEnd, timeZone), 1),
+    timeZone,
+  )
 }
