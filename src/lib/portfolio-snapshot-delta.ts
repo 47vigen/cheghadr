@@ -1,5 +1,6 @@
 import type { PrismaClient } from '@prisma/client'
 
+import { getSellPriceBySymbol, parsePriceSnapshot } from '@/lib/prices'
 import { resolveOwnedPortfolioFilter } from '@/server/api/helpers'
 
 export type PortfolioDeltaWindow = '1D' | '1W' | '1M' | 'ALL'
@@ -33,8 +34,8 @@ export interface PortfolioSnapshotDeltaResult {
 }
 
 /**
- * Delta between latest portfolio snapshot and a comparison point (same logic as
- * `portfolio.delta` tRPC).
+ * Delta between live portfolio value (current holdings × latest prices) and a
+ * historical snapshot comparison point (`portfolio.delta` tRPC).
  */
 export async function getPortfolioSnapshotDelta(
   db: PrismaClient,
@@ -48,13 +49,23 @@ export async function getPortfolioSnapshotDelta(
     portfolioId,
   )
 
-  const current = await db.portfolioSnapshot.findFirst({
-    where: { userId, ...portfolioFilter },
-    orderBy: { snapshotAt: 'desc' },
-    select: { id: true, snapshotAt: true, totalIRT: true },
-  })
+  const whereClause = portfolioId
+    ? { userId, portfolioId }
+    : { userId }
 
-  if (!current) return null
+  const [userAssets, priceSnapshot] = await Promise.all([
+    db.userAsset.findMany({ where: whereClause }),
+    db.priceSnapshot.findFirst({ orderBy: { snapshotAt: 'desc' } }),
+  ])
+
+  if (userAssets.length === 0 || !priceSnapshot) return null
+
+  const prices = parsePriceSnapshot(priceSnapshot.data)
+  let currentIRT = 0
+  for (const asset of userAssets) {
+    const sellPrice = getSellPriceBySymbol(asset.symbol, prices)
+    currentIRT += Number(asset.quantity) * sellPrice
+  }
 
   const comparisonDate = getComparisonDateForWindow(window)
 
@@ -74,9 +85,8 @@ export async function getPortfolioSnapshotDelta(
         select: { id: true, snapshotAt: true, totalIRT: true },
       })
 
-  if (!previous || previous.id === current.id) return null
+  if (!previous) return null
 
-  const currentIRT = Number(current.totalIRT)
   const previousIRT = Number(previous.totalIRT)
   const deltaIRT = currentIRT - previousIRT
   const deltaPct = previousIRT !== 0 ? (deltaIRT / previousIRT) * 100 : 0
