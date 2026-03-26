@@ -3,8 +3,8 @@ import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
 import { MAX_ACTIVE_ALERTS } from '@/lib/alerts/utils'
-import type { PriceItem } from '@/lib/prices'
 import { createPortfolioSnapshot } from '@/lib/portfolio'
+import type { PriceItem } from '@/lib/prices'
 import { getCachedPriceSnapshot } from '@/server/price-cache'
 
 /** Maximum number of portfolios a user may own. */

@@ -4,8 +4,8 @@ import {
   computeAssetValueIRT,
   findBySymbol,
   getBilingualAssetLabels,
-  getSnapshotStaleness,
   getSellPriceBySymbol,
+  getSnapshotStaleness,
 } from '@/lib/prices'
 import {
   loadAssetsWithPrices,

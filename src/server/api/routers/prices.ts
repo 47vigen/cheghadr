@@ -1,6 +1,6 @@
 import { getSnapshotStaleness } from '@/lib/prices'
-import { getCachedPriceSnapshot } from '@/server/price-cache'
 import { publicProcedure, router } from '@/server/api/trpc'
+import { getCachedPriceSnapshot } from '@/server/price-cache'
 
 export const pricesRouter = router({
   latest: publicProcedure.query(async ({ ctx }) => {

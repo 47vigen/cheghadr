@@ -4,6 +4,7 @@ import {
   type PortfolioDeltaWindow,
 } from '@/lib/portfolio-snapshot-delta'
 import {
+  computeAssetValueIRT,
   findBySymbol,
   formatChange,
   formatCompactCurrency,
@@ -12,9 +13,9 @@ import {
   getLocalizedItemName,
   getSellPriceBySymbol,
   getSnapshotStaleness,
-  parsePriceSnapshot,
 } from '@/lib/prices'
 import { db } from '@/server/db'
+import { getCachedPriceSnapshot } from '@/server/price-cache'
 
 import { escapeTelegramHtml } from '../html-escape'
 import type { BotLocale } from '../i18n'
@@ -73,25 +74,25 @@ export async function buildPortfolioHomeCard(
   userId: string,
   locale: BotLocale,
 ): Promise<string> {
-  const [userAssets, snapshot] = await Promise.all([
+  const [userAssets, cached] = await Promise.all([
     db.userAsset.findMany({
       where: { userId },
       orderBy: { createdAt: 'asc' },
     }),
-    db.priceSnapshot.findFirst({ orderBy: { snapshotAt: 'desc' } }),
+    getCachedPriceSnapshot(db),
   ])
 
   if (userAssets.length === 0) {
     return t(locale, 'bot.portfolio.noData')
   }
 
-  const prices = snapshot ? parsePriceSnapshot(snapshot.data) : []
-  const { stale, minutesOld } = getSnapshotStaleness(snapshot?.snapshotAt)
+  const prices = cached?.prices ?? []
+  const { stale, minutesOld } = getSnapshotStaleness(cached?.snapshotAt)
 
   let totalIRT = 0
   for (const asset of userAssets) {
     const sellPrice = getSellPriceBySymbol(asset.symbol, prices)
-    totalIRT += Number(asset.quantity) * sellPrice
+    totalIRT += computeAssetValueIRT(Number(asset.quantity), sellPrice)
   }
 
   const usdSellPrice = getSellPriceBySymbol('USD', prices)
@@ -158,15 +159,15 @@ export async function buildBreakdown(
 ): Promise<ScreenResult> {
   const keyboard = portfolioSubKeyboard(locale)
 
-  const [userAssets, priceSnap] = await Promise.all([
+  const [userAssets, cached] = await Promise.all([
     db.userAsset.findMany({
       where: { userId },
       orderBy: { createdAt: 'asc' },
     }),
-    db.priceSnapshot.findFirst({ orderBy: { snapshotAt: 'desc' } }),
+    getCachedPriceSnapshot(db),
   ])
 
-  const prices = priceSnap ? parsePriceSnapshot(priceSnap.data) : []
+  const prices = cached?.prices ?? []
   const live = computeLivePortfolioBreakdown(userAssets, prices)
 
   if (!live) {
@@ -232,11 +233,8 @@ export async function buildAssetList(
     }
   }
 
-  const priceSnap = await db.priceSnapshot.findFirst({
-    orderBy: { snapshotAt: 'desc' },
-  })
-
-  const prices = priceSnap ? parsePriceSnapshot(priceSnap.data) : []
+  const cached = await getCachedPriceSnapshot(db)
+  const prices = cached?.prices ?? []
 
   const lines: string[] = []
   for (const asset of assets) {
@@ -245,14 +243,14 @@ export async function buildAssetList(
     const name = escapeTelegramHtml(rawName)
     const symbol = escapeTelegramHtml(asset.symbol)
     const qty = Number(asset.quantity)
-    const price = item ? Number(item.sell_price ?? 0) : 0
-    const value = qty * price
+    const sellPrice = getSellPriceBySymbol(asset.symbol, prices)
+    const value = computeAssetValueIRT(qty, sellPrice)
 
     const changeInfo = item ? formatChange(item.change, locale) : null
     const changeStr = changeInfo ? ` (${changeInfo.text})` : ''
 
     lines.push(
-      `• <b>${name}</b> (${symbol})\n  ${qty.toFixed(4)} × ${formatIRT(price, locale)} = <b>${formatIRT(value, locale)}</b>${changeStr}`,
+      `• <b>${name}</b> (${symbol})\n  ${qty.toFixed(4)} × ${formatIRT(sellPrice, locale)} = <b>${formatIRT(value, locale)}</b>${changeStr}`,
     )
   }
 

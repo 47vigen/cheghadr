@@ -7,8 +7,8 @@ import {
   positiveDecimalStringSchema,
   requireOwnedAlert,
 } from '@/server/api/helpers'
-import { getCachedPriceSnapshot } from '@/server/price-cache'
 import { protectedProcedure, router } from '@/server/api/trpc'
+import { getCachedPriceSnapshot } from '@/server/price-cache'
 
 const thresholdSchema = positiveDecimalStringSchema(
   'Threshold must be a positive number',

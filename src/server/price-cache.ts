@@ -1,6 +1,6 @@
 import type { PrismaClient } from '@prisma/client'
 
-import { parsePriceSnapshot, type PriceItem } from '@/lib/prices'
+import { type PriceItem, parsePriceSnapshot } from '@/lib/prices'
 
 export interface CachedPriceSnapshot {
   snapshotAt: Date

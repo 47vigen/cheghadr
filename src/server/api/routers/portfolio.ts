@@ -1,29 +1,29 @@
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
+import { createPortfolioSnapshot } from '@/lib/portfolio'
+import { computeLivePortfolioBreakdown } from '@/lib/portfolio-breakdown'
 import {
   buildDailyPortfolioHistorySeries,
   exclusiveEndAfterRange,
   getPortfolioHistoryRange,
 } from '@/lib/portfolio-history'
-import { computeLivePortfolioBreakdown } from '@/lib/portfolio-breakdown'
-import { createPortfolioSnapshot } from '@/lib/portfolio'
+import type { PortfolioDeltaWindow } from '@/lib/portfolio-snapshot-delta'
 import {
   getComparisonInstantForWindowInTimeZone,
   getPortfolioSnapshotDelta,
 } from '@/lib/portfolio-snapshot-delta'
-import type { PortfolioDeltaWindow } from '@/lib/portfolio-snapshot-delta'
+import {
+  computeBiggestMoverFromAssetRows,
+  computeBiggestMoverFromHistoricalBreakdown,
+  shouldUseLivePriceChangeForBiggestMover,
+} from '@/lib/portfolio-utils'
 import {
   computeAssetValueIRT,
   findBySymbol,
   getBilingualAssetLabels,
   getSellPriceBySymbol,
 } from '@/lib/prices'
-import {
-  computeBiggestMoverFromAssetRows,
-  computeBiggestMoverFromHistoricalBreakdown,
-  shouldUseLivePriceChangeForBiggestMover,
-} from '@/lib/portfolio-utils'
 import { portfolioHistoryTimezoneSchema } from '@/lib/timezone-schema'
 import {
   ensureDefaultPortfolio,
@@ -32,9 +32,9 @@ import {
   requireOwnedPortfolio,
   resolveOwnedPortfolioFilter,
 } from '@/server/api/helpers'
-import { parseBreakdownJson } from '@/types/schemas'
-import { getCachedPriceSnapshot } from '@/server/price-cache'
 import { protectedProcedure, router } from '@/server/api/trpc'
+import { getCachedPriceSnapshot } from '@/server/price-cache'
+import { parseBreakdownJson } from '@/types/schemas'
 
 const portfolioIdInput = z.string().min(1).optional()
 
@@ -254,8 +254,9 @@ export const portfolioRouter = router({
       )
     }),
 
-  biggestMover: protectedProcedure.input(biggestMoverInput).query(
-    async ({ ctx, input }) => {
+  biggestMover: protectedProcedure
+    .input(biggestMoverInput)
+    .query(async ({ ctx, input }) => {
       const window = input?.window ?? '1D'
       const timeZone = input?.timezone ?? 'UTC'
       const locale = input?.locale ?? 'en'
@@ -322,8 +323,7 @@ export const portfolioRouter = router({
         assetRows,
         locale,
       )
-    },
-  ),
+    }),
 
   breakdown: protectedProcedure
     .input(

@@ -10,6 +10,7 @@ vi.mock('@/server/db', () => ({
 }))
 
 import { appRouter } from '@/server/api/root'
+import { invalidatePriceCache } from '@/server/price-cache'
 
 vi.mock('@/lib/portfolio', () => ({
   createPortfolioSnapshot: vi.fn().mockResolvedValue(null),
@@ -69,6 +70,11 @@ function createCaller(
 ) {
   return appRouter.createCaller({ db, telegramUserId })
 }
+
+// Clear the module-level price cache before every test so no state bleeds across tests.
+beforeEach(() => {
+  invalidatePriceCache()
+})
 
 describe('appRouter — prices', () => {
   let db: PrismaClient
@@ -324,6 +330,10 @@ describe('appRouter — alerts', () => {
   it('create accepts PRICE alert with symbol', async () => {
     vi.mocked(db.alert.count).mockResolvedValue(0)
     vi.mocked(db.alert.create).mockResolvedValue({ id: 'alert-new' } as never)
+    vi.mocked(db.priceSnapshot.findFirst).mockResolvedValue({
+      snapshotAt: new Date(),
+      data: { data: [{ base_currency: { symbol: 'USD' }, sell_price: '500000' }] },
+    } as never)
     const caller = createCaller(db)
 
     const result = await caller.alerts.create({

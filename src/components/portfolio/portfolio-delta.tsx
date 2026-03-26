@@ -38,9 +38,7 @@ export function PortfolioDelta({
   const { selectionChanged } = useTelegramHaptics()
 
   const { data, isLoading } = api.portfolio.delta.useQuery(
-    portfolioId
-      ? { window, portfolioId, timezone }
-      : { window, timezone },
+    portfolioId ? { window, portfolioId, timezone } : { window, timezone },
     { refetchInterval: TRPC_REFETCH_INTERVAL_MS },
   )
 

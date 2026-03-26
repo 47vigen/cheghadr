@@ -1,5 +1,4 @@
 import type { PortfolioDeltaWindow } from '@/lib/portfolio-snapshot-delta'
-
 import type { BilingualDisplayNames, PriceItem } from '@/lib/prices'
 import {
   computeAssetValueIRT,
@@ -127,11 +126,7 @@ export function computeBiggestMoverFromHistoricalBreakdown(
       const changePct = pctFromDelta(prevIRT, deltaIRT)
       biggest = {
         symbol,
-        assetName: pickDisplayName(
-          asset?.displayNames,
-          locale,
-          symbol,
-        ),
+        assetName: pickDisplayName(asset?.displayNames, locale, symbol),
         deltaIRT,
         changePct,
         isPositive: deltaIRT > 0,

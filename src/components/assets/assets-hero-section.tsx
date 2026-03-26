@@ -5,8 +5,8 @@ import { IconDownload, IconPencil, IconTrash } from '@tabler/icons-react'
 import { useTranslations } from 'next-intl'
 
 import {
-  PortfolioDelta,
   type DeltaWindow,
+  PortfolioDelta,
 } from '@/components/portfolio/portfolio-delta'
 import { PortfolioSelector } from '@/components/portfolio/portfolio-selector'
 import { PortfolioTotal } from '@/components/portfolio/portfolio-total'

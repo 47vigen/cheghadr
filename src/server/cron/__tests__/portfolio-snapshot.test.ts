@@ -13,6 +13,7 @@ vi.mock('@/lib/telegram-bot', () => ({
 
 import { createPortfolioSnapshot } from '@/lib/portfolio'
 import { runPortfolioCron } from '@/server/cron/portfolio-snapshot'
+import { invalidatePriceCache } from '@/server/price-cache'
 
 function createMockDb() {
   return {
@@ -45,6 +46,7 @@ afterEach(() => {
   delete process.env.TELEGRAM_BOT_TOKEN
   vi.restoreAllMocks()
   vi.useRealTimers()
+  invalidatePriceCache()
 })
 
 describe('runPortfolioCron', () => {
@@ -72,8 +74,8 @@ describe('runPortfolioCron', () => {
       },
     ] as never)
     vi.mocked(db.portfolio.findMany).mockResolvedValue([
-      { id: 'pf-1' },
-      { id: 'pf-2' },
+      { id: 'pf-1', userId: 'user-1' },
+      { id: 'pf-2', userId: 'user-1' },
     ] as never)
     // Per-portfolio snapshots: 2 portfolios + 1 aggregate (portfolioId: null)
     vi.mocked(createPortfolioSnapshot)
@@ -100,7 +102,7 @@ describe('runPortfolioCron', () => {
       },
     ] as never)
     vi.mocked(db.portfolio.findMany).mockResolvedValue([
-      { id: 'pf-1' },
+      { id: 'pf-1', userId: 'user-1' },
     ] as never)
 
     // null means "recent snapshot already exists, skipped"
