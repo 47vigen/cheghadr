@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from 'react'
 
-import { Input, TextField } from '@heroui/react'
+import { InputGroup, TextField } from '@heroui/react'
+import { IconSearch } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
@@ -147,12 +148,17 @@ export default function PricesPage() {
         <div>
           <Section header={tNav('prices')} variant="hero">
             <TextField value={search} onChange={setSearch} fullWidth>
-              <Input
-                placeholder={t('search')}
-                type="search"
-                className="py-3"
-                dir={locale === 'fa' ? 'rtl' : 'ltr'}
-              />
+              <InputGroup>
+                <InputGroup.Prefix>
+                  <IconSearch size={16} className="text-muted-foreground" />
+                </InputGroup.Prefix>
+                <InputGroup.Input
+                  placeholder={t('search')}
+                  type="search"
+                  className="py-3"
+                  dir={locale === 'fa' ? 'rtl' : 'ltr'}
+                />
+              </InputGroup>
             </TextField>
             {data?.stale && (
               <div className="mt-2">

@@ -12,7 +12,9 @@ export function AssetAvatar({ alt, symbol, src }: AssetAvatarProps) {
   return (
     <Avatar size="sm" className="avatar-fallback-default">
       {src ? <Avatar.Image alt={alt} src={src} /> : null}
-      <Avatar.Fallback>{symbol.slice(0, 2)}</Avatar.Fallback>
+      <Avatar.Fallback>
+        {symbol === 'IRT' ? '🇮🇷' : symbol.slice(0, 2)}
+      </Avatar.Fallback>
     </Avatar>
   )
 }
