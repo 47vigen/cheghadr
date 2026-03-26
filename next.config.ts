@@ -7,16 +7,12 @@ import type { NextConfig } from 'next'
 import './src/env.js'
 
 const nextConfig: NextConfig = {
+  compress: true,
   typedRoutes: true,
   reactCompiler: true,
   devIndicators: false,
   reactStrictMode: true,
   cacheComponents: true,
-
-  // Build optimizations
-  compress: true,
-  generateEtags: false,
-  poweredByHeader: false,
 
   // Logging
   logging: {
