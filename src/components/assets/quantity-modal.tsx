@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 
 import { Button, Drawer, Label, NumberField, Spinner } from '@heroui/react'
-import { IconArrowsUpDown } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
@@ -35,12 +34,13 @@ export function QuantityModal({
   const [quantityNum, setQuantityNum] = useState<number | undefined>(undefined)
   const [valueIRTNum, setValueIRTNum] = useState<number | undefined>(undefined)
 
-  // Reset both fields when drawer opens or the asset changes
+  // Reset both fields when drawer opens or the selected asset changes
   useEffect(() => {
     if (!isOpen) return
     setQuantityNum(undefined)
     setValueIRTNum(undefined)
-  }, [isOpen])
+    // biome-ignore lint/correctness/useExhaustiveDependencies: must clear when `item` changes while open
+  }, [isOpen, item])
 
   // Typing in quantity → update Toman value only
   const handleQuantityChange = (num: number | undefined) => {
@@ -89,9 +89,12 @@ export function QuantityModal({
         }}
       >
         <Drawer.Content placement="bottom">
-          <Drawer.Dialog dir={locale === 'fa' ? 'rtl' : 'ltr'}>
+          <Drawer.Dialog
+            dir={locale === 'fa' ? 'rtl' : 'ltr'}
+            className="max-h-[min(92dvh,var(--visual-viewport-height,100dvh)*0.92)] px-0 pt-5 pb-0 sm:max-h-[min(90dvh,var(--visual-viewport-height,100dvh)*0.9)]"
+          >
             <Drawer.Handle />
-            <Drawer.Header>
+            <Drawer.Header className="px-3">
               <Drawer.Heading>
                 {item
                   ? `${assetName} — ${tPicker('enterQuantity')}`
@@ -104,7 +107,7 @@ export function QuantityModal({
               )}
             </Drawer.Header>
 
-            <Drawer.Body className="flex flex-col gap-5 px-4 py-4">
+            <Drawer.Body className="flex flex-col gap-5 px-3 py-4">
               {/* Asset quantity */}
               <NumberField
                 value={quantityNum}
@@ -115,64 +118,57 @@ export function QuantityModal({
                 autoFocus
               >
                 <Label>{tPicker('assetAmount')}</Label>
-                <div className="mt-1 flex items-center gap-2">
-                  <NumberField.Group className="flex-1">
+                <div className="mt-1 flex min-w-0 items-stretch gap-2">
+                  <NumberField.Group className="!grid-cols-[minmax(0,1fr)] !h-auto min-h-11 min-w-0 flex-1 items-center overflow-visible">
                     <NumberField.Input
                       dir="ltr"
                       placeholder="0"
-                      className="py-3"
+                      className="min-h-11 py-2.5 leading-normal"
                     />
                   </NumberField.Group>
                   {symbol && (
-                    <span className="shrink-0 font-medium text-muted-foreground text-sm">
+                    <span className="max-w-[36%] shrink-0 self-center break-all text-end font-medium text-muted-foreground text-sm">
                       {symbol}
                     </span>
                   )}
                 </div>
               </NumberField>
 
-              {/* Swap icon + Toman value — non-IRT only */}
+              {/* Toman value — non-IRT only (linked to quantity; no swap control) */}
               {!isIRT && (
-                <>
-                  <div className="flex items-center justify-center">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-muted-foreground/60">
-                      <IconArrowsUpDown size={16} />
+                <NumberField
+                  value={valueIRTNum}
+                  onChange={handleValueChange}
+                  fullWidth
+                  minValue={0}
+                  formatOptions={{
+                    maximumFractionDigits: 0,
+                    useGrouping: true,
+                  }}
+                >
+                  <Label>{tPicker('valueInToman')}</Label>
+                  <div className="mt-1 flex min-w-0 items-stretch gap-2">
+                    <NumberField.Group className="!grid-cols-[minmax(0,1fr)] !h-auto min-h-11 min-w-0 flex-1 items-center overflow-visible">
+                      <NumberField.Input
+                        dir="ltr"
+                        placeholder="0"
+                        className="min-h-11 py-2.5 leading-normal"
+                      />
+                    </NumberField.Group>
+                    <span className="shrink-0 self-center font-medium text-muted-foreground text-sm">
+                      {tAssets('tomanAbbr')}
                     </span>
                   </div>
-
-                  <NumberField
-                    value={valueIRTNum}
-                    onChange={handleValueChange}
-                    fullWidth
-                    minValue={0}
-                    formatOptions={{
-                      maximumFractionDigits: 0,
-                      useGrouping: true,
-                    }}
-                  >
-                    <Label>{tPicker('valueInToman')}</Label>
-                    <div className="mt-1 flex items-center gap-2">
-                      <NumberField.Group className="flex-1">
-                        <NumberField.Input
-                          dir="ltr"
-                          placeholder="0"
-                          className="py-3"
-                        />
-                      </NumberField.Group>
-                      <span className="shrink-0 font-medium text-muted-foreground text-sm">
-                        {tAssets('tomanAbbr')}
-                      </span>
-                    </div>
-                  </NumberField>
-                </>
+                </NumberField>
               )}
             </Drawer.Body>
 
-            <Drawer.Footer>
+            <Drawer.Footer className="px-0">
               <Button
                 variant="secondary"
                 fullWidth
                 size="lg"
+                className="rounded-none"
                 onPress={handleSave}
                 isDisabled={isPending}
               >
