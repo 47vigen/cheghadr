@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { connection } from 'next/server'
 
 import type { PriceItem } from '@/lib/prices'
@@ -8,9 +7,10 @@ import {
   formatIRT,
   getLocalizedItemName,
 } from '@/lib/prices'
-import { auth } from '@/server/auth/config'
 import { db } from '@/server/db'
 import { getCachedPriceSnapshot } from '@/server/price-cache'
+
+import { LandingCta } from './_landing-cta'
 
 /* ─── Featured symbols (priority order) ─────────────────── */
 
@@ -144,10 +144,7 @@ function FeatureCard({
 
 export default async function LandingPage() {
   await connection()
-  const [session, snapshot] = await Promise.all([
-    auth(),
-    getCachedPriceSnapshot(db),
-  ])
+  const snapshot = await getCachedPriceSnapshot(db)
 
   const featuredItems: PriceItem[] = snapshot
     ? FEATURED_SYMBOLS.flatMap((sym) => {
@@ -155,8 +152,6 @@ export default async function LandingPage() {
         return found ? [found] : []
       })
     : []
-
-  const appHref = session ? '/app' : '/login'
 
   return (
     <div className="flex min-h-svh flex-col bg-background text-foreground">
@@ -221,20 +216,7 @@ export default async function LandingPage() {
             className="flex w-full flex-col gap-2"
             style={{ animation: 'fade-in 500ms 180ms ease-out both' }}
           >
-            <Link
-              href={appHref}
-              className="label-compact flex h-12 w-full items-center justify-center border border-foreground bg-foreground text-background transition-opacity hover:opacity-80 active:opacity-60"
-            >
-              Open App
-            </Link>
-            {!session && (
-              <Link
-                href="/login"
-                className="label-compact flex h-12 w-full items-center justify-center border border-border text-foreground transition-all hover:border-foreground active:opacity-60"
-              >
-                Login with Telegram
-              </Link>
-            )}
+            <LandingCta />
           </div>
         </div>
 
@@ -297,12 +279,7 @@ export default async function LandingPage() {
               Personal net worth tracker
             </span>
           </div>
-          <Link
-            href={appHref}
-            className="label-compact flex h-10 items-center justify-center border border-foreground bg-foreground px-8 text-background transition-opacity hover:opacity-80 active:opacity-60"
-          >
-            Open App
-          </Link>
+          <LandingCta footer />
         </div>
       </footer>
 
