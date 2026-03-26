@@ -29,7 +29,7 @@ export function Section({
       {(header != null || trailing != null) && (
         <div
           className={clsx(
-            'mb-0.5 flex items-center justify-between px-2 py-0.5',
+            'mb-1 flex items-center justify-between px-2 py-1',
             headerRowClassName,
           )}
         >

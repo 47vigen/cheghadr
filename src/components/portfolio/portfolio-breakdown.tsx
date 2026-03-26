@@ -94,7 +94,7 @@ export function PortfolioBreakdown({
           locale === 'fa' && 'flex-row-reverse',
         )}
       >
-        <div dir="ltr" className="chart-mount w-[200px] shrink-0">
+        <div dir="ltr" className="chart-mount relative w-[200px] shrink-0">
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
               <Pie
@@ -134,6 +134,31 @@ export function PortfolioBreakdown({
               />
             </PieChart>
           </ResponsiveContainer>
+          {/* Center label: shows selected category % or total count */}
+          <div
+            className="pointer-events-none absolute inset-0 flex items-center justify-center"
+            aria-hidden
+          >
+            {selectedCategory ? (
+              (() => {
+                const selected = data.find(
+                  (d) => d.category === selectedCategory,
+                )
+                const pct = selected
+                  ? formatPercentage(selected.percentage, intlLocale)
+                  : null
+                return pct ? (
+                  <span className="font-display font-semibold text-sm tabular-nums">
+                    {pct}%
+                  </span>
+                ) : null
+              })()
+            ) : (
+              <span className="font-display text-muted-foreground text-xs tabular-nums">
+                {data.length}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col gap-2">

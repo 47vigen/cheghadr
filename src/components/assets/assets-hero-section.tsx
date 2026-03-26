@@ -123,7 +123,7 @@ export function AssetsHeroSection({
           onWindowChange={onDeltaWindowChange}
         />
         {stale && (
-          <div className="mt-2">
+          <div className="mt-2 border-t border-border pt-2">
             <StalenessBanner
               snapshotAt={snapshotAt}
               namespace="assets"

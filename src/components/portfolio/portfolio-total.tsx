@@ -24,7 +24,7 @@ export function PortfolioTotal({
 
   return (
     <div className="flex flex-col items-start gap-0.5 py-2 ps-1">
-      <Text className="label-compact text-muted-foreground">
+      <Text className="label-compact text-foreground/60">
         {t('totalValue')}
       </Text>
       <div className="flex items-baseline gap-1.5">
