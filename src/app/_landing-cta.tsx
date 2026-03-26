@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+
 import { SessionProvider, useSession } from 'next-auth/react'
 
 function CtaButtons() {
