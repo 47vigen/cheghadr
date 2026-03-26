@@ -193,17 +193,17 @@
   "onboard": {
     "skip": "Skip",
     "next": "Next",
-    "slide0Title": "Welcome to Cheghadr?",
+    "slide0Title": "Welcome to Cheghadr? 🏦",
     "slide0Sub": "Your personal net worth tracker",
-    "slide1Title": "Track Everything",
+    "slide1Title": "Track Everything 📊",
     "slide1Sub": "Stocks, crypto, gold, currency — all in one place",
-    "slide2Title": "Live Prices & Alerts",
+    "slide2Title": "Live Prices & Alerts 🔔",
     "slide2Sub": "Real-time Iranian market prices and smart notifications",
-    "slide3Title": "Choose Your Language",
+    "slide3Title": "Choose Your Language 🌐",
     "slide3Sub": "You can change this later in settings",
     "cta": "Add Your First Asset",
-    "langEn": "English",
-    "langFa": "فارسی"
+    "langEn": "🇬🇧 English",
+    "langFa": "🇮🇷 فارسی"
   },
   "landing": {
     "tagline": "Your personal net worth, at a glance",

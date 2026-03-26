@@ -112,8 +112,8 @@ function WelcomeIllustration() {
         y="42"
         width="10"
         height="68"
-        fill="currentColor"
-        opacity="0.32"
+        fill="#4ade80"
+        opacity="0.72"
       />
       <rect
         x="112"
@@ -163,8 +163,8 @@ function TrackIllustration() {
             cx="12"
             cy="12"
             r="9"
-            fill="currentColor"
-            opacity={0.14 + i * 0.04}
+            fill={i === 0 ? '#4ade80' : 'currentColor'}
+            opacity={i === 0 ? 0.55 : 0.14 + i * 0.04}
           />
           {/* Name bar */}
           <rect
@@ -193,8 +193,8 @@ function TrackIllustration() {
             width={i % 2 === 0 ? 24 : 18}
             height="4"
             rx="1"
-            fill="currentColor"
-            opacity={i % 2 === 0 ? 0.5 : 0.22}
+            fill={i % 2 === 0 ? '#4ade80' : 'currentColor'}
+            opacity={i % 2 === 0 ? 0.75 : 0.22}
           />
           {/* Change bar */}
           <rect
@@ -273,9 +273,9 @@ function PricesIllustration() {
       {/* Line */}
       <path
         d={pathD}
-        stroke="currentColor"
+        stroke="#4ade80"
         strokeWidth="2"
-        opacity="0.55"
+        opacity="0.8"
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -285,8 +285,8 @@ function PricesIllustration() {
         cx={30 + (points.length - 1) * xStep}
         cy={28 + h - (points[points.length - 1]! / 100) * h}
         r="4"
-        fill="currentColor"
-        opacity="0.8"
+        fill="#4ade80"
+        opacity="1"
       />
       {/* Bell */}
       <g transform="translate(152, 118)" opacity="0.55">
@@ -342,7 +342,7 @@ function LangIllustration() {
         strokeWidth="1"
         opacity="0.15"
       />
-      {/* Right: Arabic Alef */}
+      {/* Right: Arabic Alef Madda */}
       <text
         x="148"
         y="72"
@@ -351,7 +351,7 @@ function LangIllustration() {
         fill="currentColor"
         opacity="0.6"
       >
-        ا
+        آ
       </text>
     </svg>
   )
