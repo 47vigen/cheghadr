@@ -332,7 +332,9 @@ describe('appRouter — alerts', () => {
     vi.mocked(db.alert.create).mockResolvedValue({ id: 'alert-new' } as never)
     vi.mocked(db.priceSnapshot.findFirst).mockResolvedValue({
       snapshotAt: new Date(),
-      data: { data: [{ base_currency: { symbol: 'USD' }, sell_price: '500000' }] },
+      data: {
+        data: [{ base_currency: { symbol: 'USD' }, sell_price: '500000' }],
+      },
     } as never)
     const caller = createCaller(db)
 
