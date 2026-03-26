@@ -20,6 +20,7 @@ export {
 } from './i18n'
 export type { PriceItem } from './parse'
 export {
+  computeAssetValueIRT,
   computeConversion,
   filterPriceItems,
   findBySymbol,

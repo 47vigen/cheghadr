@@ -75,6 +75,17 @@ export function computeConversion(
   return result.toFixed(4)
 }
 
+/**
+ * Value of an asset holding in IRT. Centralises the `quantity × sellPrice`
+ * calculation used across routers, lib modules, and cron jobs.
+ */
+export function computeAssetValueIRT(
+  quantity: string | number | bigint,
+  sellPrice: number,
+): number {
+  return Number(quantity) * sellPrice
+}
+
 /** Synthetic IRT entry for the calculator selector */
 export const IRT_ENTRY = {
   symbol: 'IRT',

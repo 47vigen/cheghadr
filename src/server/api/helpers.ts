@@ -2,7 +2,13 @@ import type { PrismaClient } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
+import { MAX_ACTIVE_ALERTS } from '@/lib/alerts/utils'
+import type { PriceItem } from '@/lib/prices'
 import { createPortfolioSnapshot } from '@/lib/portfolio'
+import { getCachedPriceSnapshot } from '@/server/price-cache'
+
+/** Maximum number of portfolios a user may own. */
+export const MAX_PORTFOLIOS = 10
 
 /** Default portfolio name when auto-creating (matches web `portfolio.ensureDefault`). */
 export const DEFAULT_PORTFOLIO_NAME = 'Main portfolio'
@@ -109,11 +115,49 @@ export function userAssetsWhereClause(
     : { userId, portfolioId: portfolioFilter.portfolioId }
 }
 
-/** Latest global price snapshot (same ordering as cron and `prices.latest`). */
-export function fetchLatestPriceSnapshot(db: PrismaClient) {
-  return db.priceSnapshot.findFirst({
-    orderBy: { snapshotAt: 'desc' },
-  })
+export interface AssetsWithPrices {
+  userAssets: Awaited<ReturnType<PrismaClient['userAsset']['findMany']>>
+  prices: PriceItem[]
+  snapshotAt: Date | null
+}
+
+/**
+ * Fetches user assets and the latest price snapshot in parallel, using the
+ * shared price cache. All procedures that need both should call this instead
+ * of issuing two independent queries.
+ */
+export async function loadAssetsWithPrices(
+  db: PrismaClient,
+  userId: string,
+  portfolioFilter: { portfolioId: string } | { portfolioId: null },
+): Promise<AssetsWithPrices> {
+  const where = userAssetsWhereClause(userId, portfolioFilter)
+  const [userAssets, cached] = await Promise.all([
+    db.userAsset.findMany({ where, orderBy: { createdAt: 'asc' } }),
+    getCachedPriceSnapshot(db),
+  ])
+  return {
+    userAssets,
+    prices: cached?.prices ?? [],
+    snapshotAt: cached?.snapshotAt ?? null,
+  }
+}
+
+/**
+ * Throws BAD_REQUEST when the user has already reached {@link MAX_ACTIVE_ALERTS}.
+ * Call before creating or re-enabling an alert.
+ */
+export async function assertUnderMaxActiveAlerts(
+  db: PrismaClient,
+  userId: string,
+): Promise<void> {
+  const count = await db.alert.count({ where: { userId, isActive: true } })
+  if (count >= MAX_ACTIVE_ALERTS) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: `Maximum ${MAX_ACTIVE_ALERTS} active alerts allowed`,
+    })
+  }
 }
 
 /** After mutating assets, refresh per-portfolio and consolidated snapshots. */

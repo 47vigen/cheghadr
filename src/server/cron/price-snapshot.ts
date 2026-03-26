@@ -1,6 +1,7 @@
 import type { PrismaClient } from '@prisma/client'
 
 import { evaluatePriceAlerts } from '@/lib/alerts/evaluation'
+import { invalidatePriceCache } from '@/server/price-cache'
 
 const ECOTRUST_API_URL = process.env.NEXT_PUBLIC_ECOTRUST_API_URL
 
@@ -48,6 +49,7 @@ export async function runPriceSnapshotCron(
   const currentSnapshot = await db.priceSnapshot.create({
     data: { data: data as object },
   })
+  invalidatePriceCache()
 
   const { evaluated, triggered } = await evaluatePriceAlerts(
     db,

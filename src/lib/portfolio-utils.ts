@@ -1,7 +1,14 @@
 import type { PortfolioDeltaWindow } from '@/lib/portfolio-snapshot-delta'
 
-import type { BilingualDisplayNames } from '@/lib/prices'
-import { pickDisplayName } from '@/lib/prices'
+import type { BilingualDisplayNames, PriceItem } from '@/lib/prices'
+import {
+  computeAssetValueIRT,
+  findBySymbol,
+  getBilingualAssetLabels,
+  getSellPriceBySymbol,
+  pickDisplayName,
+} from '@/lib/prices'
+import type { BreakdownItem } from '@/types/schemas'
 
 interface AssetWithChange {
   symbol: string
@@ -139,4 +146,34 @@ export function shouldUseLivePriceChangeForBiggestMover(
   window: PortfolioDeltaWindow,
 ): boolean {
   return window === 'ALL'
+}
+
+/**
+ * Returns the display name of the top holding by current IRT value, used in
+ * the daily digest message. Returns empty string when breakdown is empty.
+ */
+/**
+ * Returns the display name of the top holding by current IRT value, used in
+ * the daily digest message. Returns empty string when breakdown is empty.
+ */
+export function findTopHoldingByValue(
+  breakdown: BreakdownItem[],
+  prices: PriceItem[],
+  locale: string,
+): string {
+  let topName = ''
+  let maxValue = 0
+  for (const item of breakdown) {
+    const sellPrice = getSellPriceBySymbol(item.symbol, prices)
+    const value = computeAssetValueIRT(item.quantity, sellPrice)
+    if (value > maxValue) {
+      maxValue = value
+      const priceItem = findBySymbol(prices, item.symbol)
+      topName = pickDisplayName(
+        getBilingualAssetLabels(priceItem, item.symbol),
+        locale,
+      )
+    }
+  }
+  return topName
 }

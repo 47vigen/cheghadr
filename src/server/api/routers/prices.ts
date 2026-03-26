@@ -1,21 +1,21 @@
 import { getSnapshotStaleness } from '@/lib/prices'
-import { fetchLatestPriceSnapshot } from '@/server/api/helpers'
+import { getCachedPriceSnapshot } from '@/server/price-cache'
 import { publicProcedure, router } from '@/server/api/trpc'
 
 export const pricesRouter = router({
   latest: publicProcedure.query(async ({ ctx }) => {
-    const snapshot = await fetchLatestPriceSnapshot(ctx.db)
+    const cached = await getCachedPriceSnapshot(ctx.db)
 
-    if (!snapshot) {
+    if (!cached) {
       return { data: null, stale: true, snapshotAt: null }
     }
 
-    const { stale } = getSnapshotStaleness(snapshot.snapshotAt)
+    const { stale } = getSnapshotStaleness(cached.snapshotAt)
 
     return {
-      data: snapshot.data,
+      data: cached.data,
       stale,
-      snapshotAt: snapshot.snapshotAt,
+      snapshotAt: cached.snapshotAt,
     }
   }),
 })
