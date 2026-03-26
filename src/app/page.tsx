@@ -244,7 +244,7 @@ export default async function LandingPage() {
       <section className="py-8">
         <div className="mb-3 flex items-center justify-between px-4">
           <h2 className="label-compact text-muted-foreground">
-            Live Market Prices
+            📊 Live Market Prices
           </h2>
         </div>
 
@@ -259,18 +259,18 @@ export default async function LandingPage() {
         <div className="border-border border-t">
           <FeatureCard
             number="01"
-            title="Track Your Net Worth"
-            sub="Add assets across crypto, forex, gold, and more. See your total portfolio value in Iranian Toman, updated in real time."
+            title="💼 All Your Assets"
+            sub="Crypto, currency, gold, stocks — unified portfolio view"
           />
           <FeatureCard
             number="02"
-            title="Live Market Prices"
-            sub="Browse prices for hundreds of assets. Prices refresh automatically so you always have the latest data."
+            title="📈 Live Prices"
+            sub="Real-time Iranian market data, always up to date"
           />
           <FeatureCard
             number="03"
-            title="Smart Price Alerts"
-            sub="Set alerts for any asset — get notified the moment a price crosses your target, above or below."
+            title="🔔 Smart Alerts"
+            sub="Get notified when prices hit your target"
           />
         </div>
       </section>
