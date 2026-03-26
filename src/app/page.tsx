@@ -1,3 +1,5 @@
+import { unstable_cache } from 'next/cache'
+
 import type { PriceItem } from '@/lib/prices'
 import {
   findBySymbol,
@@ -10,7 +12,13 @@ import { getCachedPriceSnapshot } from '@/server/price-cache'
 
 import { LandingCta } from './_landing-cta'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
+
+const getLandingSnapshot = unstable_cache(
+  () => getCachedPriceSnapshot(db),
+  ['landing-snapshot'],
+  { revalidate: 60 },
+)
 
 /* ─── Featured symbols (priority order) ─────────────────── */
 
@@ -143,7 +151,7 @@ function FeatureCard({
 /* ─── Landing page ───────────────────────────────────────── */
 
 export default async function LandingPage() {
-  const snapshot = await getCachedPriceSnapshot(db)
+  const snapshot = await getLandingSnapshot()
 
   const featuredItems: PriceItem[] = snapshot
     ? FEATURED_SYMBOLS.flatMap((sym) => {
