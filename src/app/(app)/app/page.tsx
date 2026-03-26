@@ -23,13 +23,13 @@ import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
 
 import { useRouter } from '@/i18n/navigation'
 import { downloadCSV } from '@/lib/csv-download'
-import { computeBiggestMover } from '@/lib/portfolio-utils'
 import { TRPC_REFETCH_INTERVAL_MS } from '@/trpc/constants'
 import { api } from '@/trpc/react'
 
 export default function AssetsPage() {
   const locale = useLocale()
   const t = useTranslations('assets')
+  const tDelta = useTranslations('delta')
   const tExport = useTranslations('export')
   const router = useRouter()
 
@@ -87,6 +87,25 @@ export default function AssetsPage() {
     },
   )
 
+  const biggestMoverQuery = api.portfolio.biggestMover.useQuery(
+    selectedPortfolioId
+      ? {
+          window: deltaWindow,
+          timezone: chartTimeZone,
+          portfolioId: selectedPortfolioId,
+          locale: locale === 'fa' ? 'fa' : 'en',
+        }
+      : {
+          window: deltaWindow,
+          timezone: chartTimeZone,
+          locale: locale === 'fa' ? 'fa' : 'en',
+        },
+    {
+      refetchInterval: TRPC_REFETCH_INTERVAL_MS,
+      refetchOnWindowFocus: true,
+    },
+  )
+
   const breakdownQuery = api.portfolio.breakdown.useQuery(
     selectedPortfolioId ? { portfolioId: selectedPortfolioId } : undefined,
     {
@@ -109,6 +128,7 @@ export default function AssetsPage() {
     await Promise.all([
       refetch(),
       historyQuery.refetch(),
+      biggestMoverQuery.refetch(),
       alertsQuery.refetch(),
       breakdownQuery.refetch(),
     ])
@@ -128,10 +148,14 @@ export default function AssetsPage() {
     if (!stillExists) setSelectedPortfolioId(null)
   }, [portfoliosQuery.data, selectedPortfolioId])
 
-  const biggestMover = useMemo(
-    () => (data ? computeBiggestMover(data.assets, locale) : null),
-    [data, locale],
-  )
+  const biggestMoverPeriodLabel = useMemo(() => {
+    if (deltaWindow === 'ALL') return undefined
+    const key = `window${deltaWindow}` as
+      | 'window1D'
+      | 'window1W'
+      | 'window1M'
+    return tDelta(key)
+  }, [deltaWindow, tDelta])
 
   const filteredAssets = useMemo(() => {
     if (!data) return []
@@ -217,9 +241,11 @@ export default function AssetsPage() {
             void Promise.all([
               refetch(),
               historyQuery.refetch(),
+              biggestMoverQuery.refetch(),
               breakdownQuery.refetch(),
             ])
           }
+          chartTimeZone={chartTimeZone}
           onExport={handleExport}
           exportFetching={exportQuery.isFetching}
           deltaWindow={deltaWindow}
@@ -228,14 +254,10 @@ export default function AssetsPage() {
 
         <AssetsChartSection historyData={historyQuery.data} />
 
-        <AssetsBreakdownSection
-          breakdownData={breakdownQuery.data ?? undefined}
-          assetCount={data.assets.length}
-          selectedCategory={selectedCategory}
-          onCategorySelect={setSelectedCategory}
+        <AssetsBiggestMoverSection
+          biggestMover={biggestMoverQuery.data ?? null}
+          periodLabel={biggestMoverPeriodLabel}
         />
-
-        <AssetsBiggestMoverSection biggestMover={biggestMover} />
 
         {alertsQuery.data !== undefined && (
           <AssetsAlertSummarySection
@@ -247,6 +269,13 @@ export default function AssetsPage() {
             }
           />
         )}
+
+        <AssetsBreakdownSection
+          breakdownData={breakdownQuery.data ?? undefined}
+          assetCount={data.assets.length}
+          selectedCategory={selectedCategory}
+          onCategorySelect={setSelectedCategory}
+        />
 
         <AssetsListSection
           assets={data.assets}

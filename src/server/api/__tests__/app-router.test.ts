@@ -556,6 +556,23 @@ describe('appRouter — portfolio', () => {
     vi.useRealTimers()
   })
 
+  it('biggestMover returns null when user has no assets', async () => {
+    vi.mocked(db.userAsset.findMany).mockResolvedValue([])
+    vi.mocked(db.priceSnapshot.findFirst).mockResolvedValue({
+      snapshotAt: new Date(),
+      data: { data: [] },
+    } as never)
+    const caller = createCaller(db)
+
+    const result = await caller.portfolio.biggestMover({
+      window: '1D',
+      timezone: 'UTC',
+      locale: 'en',
+    })
+
+    expect(result).toBeNull()
+  })
+
   it('delete succeeds when user has more than one portfolio', async () => {
     vi.mocked(db.portfolio.findUnique).mockResolvedValue({
       id: 'p2',

@@ -33,6 +33,8 @@ export interface AssetsHeroSectionProps {
   exportFetching: boolean
   deltaWindow: DeltaWindow
   onDeltaWindowChange: (window: DeltaWindow) => void
+  /** Matches trend chart / portfolio delta / biggest mover. */
+  chartTimeZone: string
 }
 
 export function AssetsHeroSection({
@@ -53,6 +55,7 @@ export function AssetsHeroSection({
   exportFetching,
   deltaWindow,
   onDeltaWindowChange,
+  chartTimeZone,
 }: AssetsHeroSectionProps) {
   const tNav = useTranslations('nav')
   const tExport = useTranslations('export')
@@ -115,6 +118,7 @@ export function AssetsHeroSection({
         />
         <PortfolioDelta
           portfolioId={selectedPortfolioId ?? undefined}
+          timezone={chartTimeZone}
           window={deltaWindow}
           onWindowChange={onDeltaWindowChange}
         />

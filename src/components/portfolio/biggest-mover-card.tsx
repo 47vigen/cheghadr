@@ -10,13 +10,17 @@ import { getIntlLocale } from '@/lib/prices'
 type BiggestMoverCardProps = Pick<
   BiggestMover,
   'assetName' | 'deltaIRT' | 'changePct' | 'isPositive'
->
+> & {
+  /** When set (e.g. windowed move), shown instead of "today". */
+  periodLabel?: string
+}
 
 export function BiggestMoverCard({
   assetName,
   deltaIRT,
   changePct,
   isPositive,
+  periodLabel,
 }: BiggestMoverCardProps) {
   const t = useTranslations('breakdown')
   const tAssets = useTranslations('assets')
@@ -60,7 +64,9 @@ export function BiggestMoverCard({
           <Text className={`font-display text-xs tabular-nums ${colorClass}`}>
             ({pctFormatted}%)
           </Text>
-          <Text className="text-muted-foreground text-xs">{t('today')}</Text>
+          <Text className="text-muted-foreground text-xs">
+            {periodLabel ?? t('today')}
+          </Text>
         </div>
       </div>
     </div>

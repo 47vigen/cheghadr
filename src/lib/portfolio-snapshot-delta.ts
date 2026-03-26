@@ -1,26 +1,29 @@
+import { addDays, addMonths } from 'date-fns'
 import type { PrismaClient } from '@prisma/client'
+import { TZDate } from '@date-fns/tz'
 
 import { getSellPriceBySymbol, parsePriceSnapshot } from '@/lib/prices'
 import { resolveOwnedPortfolioFilter } from '@/server/api/helpers'
 
 export type PortfolioDeltaWindow = '1D' | '1W' | '1M' | 'ALL'
 
-export function getComparisonDateForWindow(
+/**
+ * Instant to compare against for portfolio delta / biggest mover, using calendar
+ * arithmetic in `timeZone` (aligned with `portfolio.history` chart windows).
+ */
+export function getComparisonInstantForWindowInTimeZone(
   window: PortfolioDeltaWindow,
+  timeZone: string,
 ): Date | null {
-  const now = new Date()
+  if (window === 'ALL') return null
+  const now = new TZDate(Date.now(), timeZone)
   switch (window) {
     case '1D':
-      now.setDate(now.getDate() - 1)
-      return now
+      return addDays(now, -1)
     case '1W':
-      now.setDate(now.getDate() - 7)
-      return now
+      return addDays(now, -7)
     case '1M':
-      now.setMonth(now.getMonth() - 1)
-      return now
-    case 'ALL':
-      return null
+      return addMonths(now, -1)
     default:
       return null
   }
@@ -42,6 +45,7 @@ export async function getPortfolioSnapshotDelta(
   userId: string,
   window: PortfolioDeltaWindow,
   portfolioId?: string,
+  timeZone = 'UTC',
 ): Promise<PortfolioSnapshotDeltaResult | null> {
   const portfolioFilter = await resolveOwnedPortfolioFilter(
     db,
@@ -67,7 +71,10 @@ export async function getPortfolioSnapshotDelta(
     currentIRT += Number(asset.quantity) * sellPrice
   }
 
-  const comparisonDate = getComparisonDateForWindow(window)
+  const comparisonDate = getComparisonInstantForWindowInTimeZone(
+    window,
+    timeZone,
+  )
 
   const atOrBefore = comparisonDate
     ? await db.portfolioSnapshot.findFirst({

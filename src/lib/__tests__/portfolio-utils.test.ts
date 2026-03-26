@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
-import { computeBiggestMover } from '@/lib/portfolio-utils'
+import {
+  computeBiggestMover,
+  computeBiggestMoverFromHistoricalBreakdown,
+} from '@/lib/portfolio-utils'
 import type { BilingualDisplayNames } from '@/lib/prices'
 
 const makeAsset = (
@@ -128,5 +131,26 @@ describe('computeBiggestMover', () => {
     const result = computeBiggestMover(assets, 'en')
     expect(result?.deltaIRT).toBeLessThan(-1_100_000)
     expect(result?.deltaIRT).toBeGreaterThan(-1_120_000)
+  })
+})
+
+describe('computeBiggestMoverFromHistoricalBreakdown', () => {
+  it('picks symbol with largest absolute IRT move vs previous snapshot', () => {
+    const prev = new Map<string, number>([
+      ['USD', 1_000_000],
+      ['BTC', 5_000_000],
+    ])
+    const current = [
+      makeAsset('USD', 1_000_000, null),
+      makeAsset('BTC', 5_000_000, null),
+      makeAsset('GOLD', 5_000_000, null),
+    ]
+    const result = computeBiggestMoverFromHistoricalBreakdown(
+      prev,
+      current,
+      'en',
+    )
+    expect(result?.symbol).toBe('GOLD')
+    expect(result?.deltaIRT).toBe(5_000_000)
   })
 })
