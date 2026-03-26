@@ -8,10 +8,13 @@ import {
   parsePriceSnapshot,
 } from '@/lib/prices'
 import {
+  fetchLatestPriceSnapshot,
   positiveDecimalStringSchema,
   refreshPortfolioSnapshotsAfterAssetChange,
   requireOwnedAsset,
   requireOwnedPortfolio,
+  resolveOwnedPortfolioFilter,
+  userAssetsWhereClause,
 } from '@/server/api/helpers'
 import { protectedProcedure, router } from '@/server/api/trpc'
 
@@ -29,18 +32,19 @@ export const assetsRouter = router({
         .optional(),
     )
     .query(async ({ ctx, input }) => {
-      const whereClause = input?.portfolioId
-        ? { userId: ctx.user.id, portfolioId: input.portfolioId }
-        : { userId: ctx.user.id }
+      const portfolioFilter = await resolveOwnedPortfolioFilter(
+        ctx.db,
+        ctx.user.id,
+        input?.portfolioId,
+      )
+      const whereClause = userAssetsWhereClause(ctx.user.id, portfolioFilter)
 
       const [userAssets, snapshot] = await Promise.all([
         ctx.db.userAsset.findMany({
           where: whereClause,
           orderBy: { createdAt: 'asc' },
         }),
-        ctx.db.priceSnapshot.findFirst({
-          orderBy: { snapshotAt: 'desc' },
-        }),
+        fetchLatestPriceSnapshot(ctx.db),
       ])
 
       const prices = parsePriceSnapshot(snapshot?.data)

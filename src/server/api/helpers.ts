@@ -99,6 +99,23 @@ export async function resolveOwnedPortfolioFilter(
   return { portfolioId: null }
 }
 
+/** `UserAsset` rows for a user, optionally scoped to one portfolio (omit when consolidated). */
+export function userAssetsWhereClause(
+  userId: string,
+  portfolioFilter: { portfolioId: string } | { portfolioId: null },
+): { userId: string } | { userId: string; portfolioId: string } {
+  return portfolioFilter.portfolioId === null
+    ? { userId }
+    : { userId, portfolioId: portfolioFilter.portfolioId }
+}
+
+/** Latest global price snapshot (same ordering as cron and `prices.latest`). */
+export function fetchLatestPriceSnapshot(db: PrismaClient) {
+  return db.priceSnapshot.findFirst({
+    orderBy: { snapshotAt: 'desc' },
+  })
+}
+
 /** After mutating assets, refresh per-portfolio and consolidated snapshots. */
 export function refreshPortfolioSnapshotsAfterAssetChange(
   db: PrismaClient,

@@ -434,6 +434,18 @@ describe('appRouter — assets (extended)', () => {
 
     expect(result.assets).toHaveLength(2)
   })
+
+  it('list throws FORBIDDEN when portfolioId belongs to another user', async () => {
+    vi.mocked(db.portfolio.findUnique).mockResolvedValue({
+      id: 'pf-other',
+      userId: 'other-user',
+    } as never)
+    const caller = createCaller(db)
+
+    await expect(
+      caller.assets.list({ portfolioId: 'pf-other' }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+  })
 })
 
 describe('appRouter — portfolio', () => {

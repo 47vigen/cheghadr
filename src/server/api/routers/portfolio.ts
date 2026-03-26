@@ -17,8 +17,10 @@ import {
 import { portfolioHistoryTimezoneSchema } from '@/lib/timezone-schema'
 import {
   ensureDefaultPortfolio,
+  fetchLatestPriceSnapshot,
   requireOwnedPortfolio,
   resolveOwnedPortfolioFilter,
+  userAssetsWhereClause,
 } from '@/server/api/helpers'
 import { protectedProcedure, router } from '@/server/api/trpc'
 
@@ -234,22 +236,19 @@ export const portfolioRouter = router({
         .optional(),
     )
     .query(async ({ ctx, input }) => {
-      if (input?.portfolioId) {
-        await requireOwnedPortfolio(ctx.db, input.portfolioId, ctx.user.id)
-      }
-
-      const whereClause = input?.portfolioId
-        ? { userId: ctx.user.id, portfolioId: input.portfolioId }
-        : { userId: ctx.user.id }
+      const portfolioFilter = await resolveOwnedPortfolioFilter(
+        ctx.db,
+        ctx.user.id,
+        input?.portfolioId,
+      )
+      const whereClause = userAssetsWhereClause(ctx.user.id, portfolioFilter)
 
       const [userAssets, priceSnap] = await Promise.all([
         ctx.db.userAsset.findMany({
           where: whereClause,
           orderBy: { createdAt: 'asc' },
         }),
-        ctx.db.priceSnapshot.findFirst({
-          orderBy: { snapshotAt: 'desc' },
-        }),
+        fetchLatestPriceSnapshot(ctx.db),
       ])
 
       if (userAssets.length === 0) return null
@@ -283,9 +282,7 @@ export const portfolioRouter = router({
             breakdown: true,
           },
         }),
-        ctx.db.priceSnapshot.findFirst({
-          orderBy: { snapshotAt: 'desc' },
-        }),
+        fetchLatestPriceSnapshot(ctx.db),
       ])
 
       const prices = parsePriceSnapshot(priceSnap?.data)
