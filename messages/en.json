@@ -83,7 +83,7 @@
     "enterQuantity": "Enter quantity",
     "assetAmount": "Asset amount",
     "valueInToman": "Value in Toman",
-    "priceHint": "Price: {price} T",
+    "priceHint": "Current price: {price} T per unit",
     "save": "Save",
     "checkmark": "✓ Selected",
     "noResults": "No results found",

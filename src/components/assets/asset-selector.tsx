@@ -132,11 +132,13 @@ export function AssetSelector({
               className="sm:max-w-[360px]"
               dir={locale === 'fa' ? 'rtl' : 'ltr'}
             >
-              <Modal.CloseTrigger />
-              <Modal.Header className="flex flex-col gap-1 pe-2">
-                <Modal.Heading>{tPicker('selectAsset')}</Modal.Heading>
+              <Modal.CloseTrigger className="min-h-11 min-w-11" />
+              <Modal.Header className="flex flex-col gap-0 pe-2 pt-1 pb-0">
+                <Modal.Heading className="text-base leading-snug">
+                  {tPicker('selectAsset')}
+                </Modal.Heading>
               </Modal.Header>
-              <Modal.Body className="max-h-[min(70vh,480px)] overflow-y-auto overflow-x-hidden px-1 pb-0">
+              <Modal.Body className="max-h-[min(70vh,440px)] overflow-y-auto overflow-x-hidden px-1 pt-0 pb-1">
                 <AssetSearchPanel
                   search={search}
                   onSearchChange={setSearch}
