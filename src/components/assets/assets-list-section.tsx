@@ -85,7 +85,9 @@ export function AssetsListSection({
               )
             : ''
         }
+        symbol={editTarget?.symbol ?? ''}
         quantity={editTarget?.quantity ?? { toString: () => '0' }}
+        sellPrice={editTarget?.sellPrice ?? 0}
         isOpen={editTarget !== null}
         onOpenChange={(open) => {
           if (!open) setEditTarget(null)
