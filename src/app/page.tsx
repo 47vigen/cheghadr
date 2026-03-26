@@ -12,8 +12,6 @@ import { getCachedPriceSnapshot } from '@/server/price-cache'
 
 import { LandingCta } from './_landing-cta'
 
-export const revalidate = 60
-
 const getLandingSnapshot = unstable_cache(
   () => getCachedPriceSnapshot(db),
   ['landing-snapshot'],
