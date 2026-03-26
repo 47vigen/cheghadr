@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 
 import { Button, Drawer, Label, NumberField, Spinner } from '@heroui/react'
-import { IconArrowsUpDown } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
@@ -112,16 +111,16 @@ export function AssetQuantityDrawer({
         <Drawer.Content placement="bottom">
           <Drawer.Dialog
             dir={locale === 'fa' ? 'rtl' : 'ltr'}
-            className="max-h-[min(92dvh,var(--visual-viewport-height,100dvh)*0.92)] border-border/60 border-t bg-background px-0 pt-4 pb-0 shadow-[0_-8px_32px_oklch(0_0_0/0.12)] sm:max-h-[min(90dvh,var(--visual-viewport-height,100dvh)*0.9)] dark:shadow-[0_-12px_40px_oklch(0_0_0/0.35)]"
+            className="max-h-[min(92dvh,var(--visual-viewport-height,100dvh)*0.92)] border-border/60 border-t bg-background px-0 pt-3 pb-0 shadow-[0_-8px_32px_oklch(0_0_0/0.12)] sm:max-h-[min(90dvh,var(--visual-viewport-height,100dvh)*0.9)] dark:shadow-[0_-12px_40px_oklch(0_0_0/0.35)]"
           >
-            <Drawer.Handle className="mx-auto mb-1" />
-            <Drawer.Header className="px-4 pt-0 pb-1">
+            <Drawer.Handle className="mx-auto mb-0.5" />
+            <Drawer.Header className="px-4 pt-0 pb-0.5">
               <Drawer.Heading className="text-balance font-semibold text-base leading-snug">
                 {title}
               </Drawer.Heading>
             </Drawer.Header>
 
-            <Drawer.Body className="flex flex-col gap-4 px-4 py-3">
+            <Drawer.Body className="flex flex-col gap-3 px-4 py-2">
               <NumberField
                 value={quantityNum}
                 onChange={handleQuantityChange}
@@ -158,47 +157,36 @@ export function AssetQuantityDrawer({
               </NumberField>
 
               {!isIRT ? (
-                <>
-                  <div
-                    className="flex items-center justify-center py-0.5"
-                    aria-hidden
-                  >
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full border border-border/90 bg-muted/30 text-muted-foreground/70 shadow-sm">
-                      <IconArrowsUpDown size={15} stroke={1.75} />
+                <NumberField
+                  value={valueIRTNum}
+                  onChange={handleValueChange}
+                  fullWidth
+                  minValue={0}
+                  formatOptions={{
+                    maximumFractionDigits: 0,
+                    useGrouping: true,
+                  }}
+                >
+                  <Label className="mb-1 block">
+                    {tPicker('valueInToman')}
+                  </Label>
+                  <div className="mt-0 flex min-w-0 items-stretch gap-2">
+                    <NumberField.Group className="!grid-cols-[minmax(0,1fr)] !h-auto min-h-11 min-w-0 flex-1 items-center overflow-visible rounded-xl border border-border/80 bg-surface/40 px-1 transition-colors focus-within:border-primary/40 focus-within:bg-surface">
+                      <NumberField.Input
+                        dir="ltr"
+                        placeholder="0"
+                        className="min-h-11 bg-transparent py-2.5 leading-normal"
+                      />
+                    </NumberField.Group>
+                    <span className="shrink-0 self-center font-medium text-muted-foreground text-sm">
+                      {tAssets('tomanAbbr')}
                     </span>
                   </div>
-
-                  <NumberField
-                    value={valueIRTNum}
-                    onChange={handleValueChange}
-                    fullWidth
-                    minValue={0}
-                    formatOptions={{
-                      maximumFractionDigits: 0,
-                      useGrouping: true,
-                    }}
-                  >
-                    <Label className="mb-1 block">
-                      {tPicker('valueInToman')}
-                    </Label>
-                    <div className="mt-0 flex min-w-0 items-stretch gap-2">
-                      <NumberField.Group className="!grid-cols-[minmax(0,1fr)] !h-auto min-h-11 min-w-0 flex-1 items-center overflow-visible rounded-xl border border-border/80 bg-surface/40 px-1 transition-colors focus-within:border-primary/40 focus-within:bg-surface">
-                        <NumberField.Input
-                          dir="ltr"
-                          placeholder="0"
-                          className="min-h-11 bg-transparent py-2.5 leading-normal"
-                        />
-                      </NumberField.Group>
-                      <span className="shrink-0 self-center font-medium text-muted-foreground text-sm">
-                        {tAssets('tomanAbbr')}
-                      </span>
-                    </div>
-                  </NumberField>
-                </>
+                </NumberField>
               ) : null}
             </Drawer.Body>
 
-            <Drawer.Footer className="border-border/60 border-t bg-background/95 px-0 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm supports-[backdrop-filter]:bg-background/80">
+            <Drawer.Footer className="border-border/60 border-t bg-background/95 px-0 pt-1.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm supports-[backdrop-filter]:bg-background/80">
               <Button
                 variant="primary"
                 fullWidth
