@@ -14,7 +14,7 @@ const NO_NAV_ROUTES = ['/alerts', '/assets/add']
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
-  const hideNav = NO_NAV_ROUTES.includes(pathname)
+  const hideNav = NO_NAV_ROUTES.some((r) => pathname.startsWith(r))
 
   return (
     <div className="flex min-h-svh flex-col">
