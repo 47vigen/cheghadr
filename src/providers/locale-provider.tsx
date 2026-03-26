@@ -16,6 +16,14 @@ import { NextIntlClientProvider } from 'next-intl'
 import type { Locale } from '@/i18n/routing'
 import { api } from '@/trpc/react'
 
+import enMessages from '../../messages/en.json'
+import faMessages from '../../messages/fa.json'
+
+const STATIC_MESSAGES: Record<Locale, Record<string, unknown>> = {
+  en: enMessages as Record<string, unknown>,
+  fa: faMessages as Record<string, unknown>,
+}
+
 function mapToLocale(code: string | undefined): Locale {
   if (!code) return 'en'
   const lower = code.toLowerCase().slice(0, 2)
@@ -45,7 +53,9 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(() =>
     typeof window !== 'undefined' ? detectLocale() : 'en',
   )
-  const [messages, setMessages] = useState<Record<string, unknown>>({})
+  const [messages, setMessages] = useState<Record<string, unknown>>(
+    () => STATIC_MESSAGES[detectLocale()],
+  )
   const localeChangeFromUserRef = useRef(false)
 
   const { mutate: persistPreferredLocale } =
@@ -56,14 +66,9 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     setLocaleState(next)
   }, [])
 
-  const loadMessages = useCallback(async (l: Locale) => {
-    const m = await import(`../../messages/${l}.json`)
-    return m.default as Record<string, unknown>
-  }, [])
-
   useEffect(() => {
-    loadMessages(locale).then(setMessages)
-  }, [locale, loadMessages])
+    setMessages(STATIC_MESSAGES[locale])
+  }, [locale])
 
   useEffect(() => {
     document.documentElement.lang = locale
