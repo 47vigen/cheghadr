@@ -107,6 +107,7 @@
   },
   "alerts": {
     "title": "My Alerts",
+    "back": "Back",
     "sectionTitle": "🔔 Alerts",
     "create": "Create Alert",
     "manage": "Manage",

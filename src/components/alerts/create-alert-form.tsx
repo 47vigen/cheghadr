@@ -2,8 +2,15 @@
 
 import { useState } from 'react'
 
-import { Button, Input, Label, Spinner, Text, TextField } from '@heroui/react'
-import { IconBriefcase } from '@tabler/icons-react'
+import {
+  Button,
+  Input,
+  Label,
+  Spinner,
+  Tabs,
+  Text,
+  TextField,
+} from '@heroui/react'
 import { clsx } from 'clsx'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
@@ -90,30 +97,43 @@ export function CreateAlertForm() {
         </Text>
       )}
 
-      {/* Asset / Portfolio selector */}
-      <div className="flex flex-col gap-3">
-        <Button
-          variant={isPortfolio ? 'primary' : 'secondary'}
-          fullWidth
-          className="justify-start gap-2"
-          onPress={() => setSelectedSymbol(PORTFOLIO_SYMBOL)}
-        >
-          <IconBriefcase size={14} className="shrink-0" />
-          {t('selectPortfolio')}
-        </Button>
+      {/* Asset / Portfolio tab selector */}
+      <Tabs
+        selectedKey={isPortfolio ? 'portfolio' : 'asset'}
+        onSelectionChange={(key) => {
+          if (key === 'portfolio') {
+            setSelectedSymbol(PORTFOLIO_SYMBOL)
+          } else {
+            setSelectedSymbol('')
+          }
+        }}
+      >
+        <Tabs.ListContainer>
+          <Tabs.List aria-label={t('selectAsset')} className="w-full">
+            <Tabs.Tab id="asset" className="flex-1">
+              {t('selectAsset')}
+              <Tabs.Indicator />
+            </Tabs.Tab>
+            <Tabs.Tab id="portfolio" className="flex-1">
+              {t('selectPortfolio')}
+              <Tabs.Indicator />
+            </Tabs.Tab>
+          </Tabs.List>
+        </Tabs.ListContainer>
+      </Tabs>
 
-        {prices.length > 0 && !isPortfolio && (
-          <AssetSelector
-            label={t('selectAsset')}
-            value={selectedSymbol}
-            onChange={(sym) => {
-              if (sym === 'IRT') return
-              setSelectedSymbol(sym)
-            }}
-            items={prices}
-          />
-        )}
-      </div>
+      {/* Asset dropdown — only shown in asset tab */}
+      {!isPortfolio && prices.length > 0 && (
+        <AssetSelector
+          label={t('selectAsset')}
+          value={selectedSymbol}
+          onChange={(sym) => {
+            if (sym === 'IRT') return
+            setSelectedSymbol(sym)
+          }}
+          items={prices}
+        />
+      )}
 
       {currentPrice !== null && currentPrice > 0 && (
         <Text className="text-muted-foreground text-xs leading-relaxed">
@@ -123,22 +143,24 @@ export function CreateAlertForm() {
         </Text>
       )}
 
-      <div className="flex gap-2">
-        <Button
-          variant={direction === 'ABOVE' ? 'primary' : 'secondary'}
-          fullWidth
-          onPress={() => setDirection('ABOVE')}
-        >
-          {t('directionAbove')}
-        </Button>
-        <Button
-          variant={direction === 'BELOW' ? 'primary' : 'secondary'}
-          fullWidth
-          onPress={() => setDirection('BELOW')}
-        >
-          {t('directionBelow')}
-        </Button>
-      </div>
+      {/* Above / Below tab selector */}
+      <Tabs
+        selectedKey={direction}
+        onSelectionChange={(key) => setDirection(key as AlertDir)}
+      >
+        <Tabs.ListContainer>
+          <Tabs.List aria-label={t('threshold')} className="w-full">
+            <Tabs.Tab id="ABOVE" className="flex-1">
+              {t('directionAbove')}
+              <Tabs.Indicator />
+            </Tabs.Tab>
+            <Tabs.Tab id="BELOW" className="flex-1">
+              {t('directionBelow')}
+              <Tabs.Indicator />
+            </Tabs.Tab>
+          </Tabs.List>
+        </Tabs.ListContainer>
+      </Tabs>
 
       <TextField
         value={threshold}
