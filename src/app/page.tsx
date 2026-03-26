@@ -15,7 +15,7 @@ import { LandingCta } from './_landing-cta'
 const getLandingSnapshot = unstable_cache(
   () => getCachedPriceSnapshot(db),
   ['landing-snapshot'],
-  { revalidate: 60 },
+  { revalidate: 1800 },
 )
 
 /* ─── Featured symbols (priority order) ─────────────────── */
