@@ -2,16 +2,10 @@
 
 import { useEffect, useState } from 'react'
 
-import {
-  Button,
-  InputGroup,
-  Label,
-  Modal,
-  Spinner,
-  TextField,
-} from '@heroui/react'
+import { Button, Drawer, Label, NumberField, Spinner } from '@heroui/react'
 import { IconArrowsUpDown } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
+import { toast } from 'sonner'
 
 import type { PriceItem } from '@/lib/prices'
 import { formatIRT, getLocalizedItemName } from '@/lib/prices'
@@ -19,18 +13,14 @@ import { formatIRT, getLocalizedItemName } from '@/lib/prices'
 interface QuantityModalProps {
   isOpen: boolean
   item: PriceItem | null
-  quantity: string
-  onQuantityChange: (value: string) => void
   onClose: () => void
-  onSave: () => void
+  onSave: (quantity: string) => void
   isPending: boolean
 }
 
 export function QuantityModal({
   isOpen,
   item,
-  quantity,
-  onQuantityChange,
   onClose,
   onSave,
   isPending,
@@ -42,38 +32,44 @@ export function QuantityModal({
   const sellPrice = Number(item?.sell_price ?? 0)
   const isIRT = item?.symbol === 'IRT'
 
-  // Derived Toman value shown in the second field
-  const [valueIRT, setValueIRT] = useState('')
+  const [quantityNum, setQuantityNum] = useState<number | undefined>(undefined)
+  const [valueIRTNum, setValueIRTNum] = useState<number | undefined>(undefined)
 
-  // Sync valueIRT whenever quantity or item changes (e.g. modal opens with new item)
+  // Reset both fields when drawer opens or the asset changes
   useEffect(() => {
     if (!isOpen) return
-    const qty = Number(quantity)
-    if (quantity === '' || Number.isNaN(qty)) {
-      setValueIRT('')
-    } else if (sellPrice > 0 && !isIRT) {
-      setValueIRT(String(qty * sellPrice))
-    }
-  }, [quantity, sellPrice, isIRT, isOpen])
+    setQuantityNum(undefined)
+    setValueIRTNum(undefined)
+  }, [isOpen])
 
-  const handleQuantityChange = (v: string) => {
-    onQuantityChange(v)
-    const qty = Number(v)
-    if (v === '' || Number.isNaN(qty)) {
-      setValueIRT('')
-    } else if (sellPrice > 0 && !isIRT) {
-      setValueIRT(String(qty * sellPrice))
+  // Typing in quantity → update Toman value only
+  const handleQuantityChange = (num: number | undefined) => {
+    setQuantityNum(num)
+    if (num !== undefined && sellPrice > 0 && !isIRT) {
+      setValueIRTNum(Math.round(num * sellPrice))
+    } else {
+      setValueIRTNum(undefined)
     }
   }
 
-  const handleValueChange = (v: string) => {
-    setValueIRT(v)
-    const val = Number(v)
-    if (v === '' || Number.isNaN(val)) {
-      onQuantityChange('')
-    } else if (sellPrice > 0 && !isIRT) {
-      onQuantityChange(String(val / sellPrice))
+  // Typing in Toman → update quantity only
+  const handleValueChange = (num: number | undefined) => {
+    setValueIRTNum(num)
+    if (num !== undefined && sellPrice > 0 && !isIRT) {
+      const raw = num / sellPrice
+      setQuantityNum(Math.round(raw * 1e8) / 1e8)
+    } else {
+      setQuantityNum(undefined)
     }
+  }
+
+  const handleSave = () => {
+    if (isPending) return
+    if (quantityNum === undefined || quantityNum <= 0) {
+      toast.error(tAssets('toastInvalidQuantity'))
+      return
+    }
+    onSave(String(quantityNum))
   }
 
   const assetName = item ? getLocalizedItemName(item, locale) : ''
@@ -85,106 +81,99 @@ export function QuantityModal({
       : null
 
   return (
-    <Modal>
-      <Modal.Backdrop
+    <Drawer>
+      <Drawer.Backdrop
         isOpen={isOpen}
-        onOpenChange={(v: boolean) => {
+        onOpenChange={(v) => {
           if (!v) onClose()
         }}
       >
-        <Modal.Container placement="auto" size="md">
-          <Modal.Dialog
-            className="sm:max-w-[360px]"
-            dir={locale === 'fa' ? 'rtl' : 'ltr'}
-          >
-            <Modal.CloseTrigger />
-            <Modal.Header>
-              <Modal.Heading>
+        <Drawer.Content placement="bottom">
+          <Drawer.Dialog dir={locale === 'fa' ? 'rtl' : 'ltr'}>
+            <Drawer.Handle />
+            <Drawer.Header>
+              <Drawer.Heading>
                 {item
                   ? `${assetName} — ${tPicker('enterQuantity')}`
                   : tPicker('enterQuantity')}
-              </Modal.Heading>
-            </Modal.Header>
+              </Drawer.Heading>
+              {priceHint && (
+                <span className="text-muted-foreground text-xs tabular-nums">
+                  {priceHint}
+                </span>
+              )}
+            </Drawer.Header>
 
-            <Modal.Body className="flex flex-col gap-3 p-4">
-              {/* Quantity field */}
-              <TextField
-                value={quantity}
+            <Drawer.Body className="flex flex-col gap-5 px-4 py-4">
+              {/* Asset quantity */}
+              <NumberField
+                value={quantityNum}
                 onChange={handleQuantityChange}
                 fullWidth
-                name="quantity"
+                minValue={0}
+                formatOptions={{ maximumFractionDigits: 8, useGrouping: false }}
+                autoFocus
               >
-                <div className="mb-1 flex items-baseline justify-between gap-2">
-                  <Label>{tPicker('assetAmount')}</Label>
-                  {priceHint && (
-                    <span className="text-muted-foreground text-xs tabular-nums">
-                      {priceHint}
+                <Label>{tPicker('assetAmount')}</Label>
+                <div className="mt-1 flex items-center gap-2">
+                  <NumberField.Group className="flex-1">
+                    <NumberField.Input
+                      dir="ltr"
+                      placeholder="0"
+                      className="py-3"
+                    />
+                  </NumberField.Group>
+                  {symbol && (
+                    <span className="shrink-0 font-medium text-muted-foreground text-sm">
+                      {symbol}
                     </span>
                   )}
                 </div>
-                <InputGroup>
-                  <InputGroup.Input
-                    type="number"
-                    inputMode="decimal"
-                    placeholder="0"
-                    dir="ltr"
-                    className="py-3"
-                    autoFocus
-                  />
-                  {symbol && (
-                    <InputGroup.Suffix>
-                      <span className="font-medium text-muted-foreground text-sm">
-                        {symbol}
-                      </span>
-                    </InputGroup.Suffix>
-                  )}
-                </InputGroup>
-              </TextField>
+              </NumberField>
 
-              {/* Swap divider — only shown for non-IRT assets */}
+              {/* Swap icon + Toman value — non-IRT only */}
               {!isIRT && (
                 <>
                   <div className="flex items-center justify-center">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full border border-border text-muted-foreground/40">
-                      <IconArrowsUpDown size={14} />
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-muted-foreground/60">
+                      <IconArrowsUpDown size={16} />
                     </span>
                   </div>
 
-                  {/* Toman value field */}
-                  <TextField
-                    value={valueIRT}
+                  <NumberField
+                    value={valueIRTNum}
                     onChange={handleValueChange}
                     fullWidth
-                    name="valueIRT"
+                    minValue={0}
+                    formatOptions={{
+                      maximumFractionDigits: 0,
+                      useGrouping: true,
+                    }}
                   >
-                    <Label className="mb-1 block">
-                      {tPicker('valueInToman')}
-                    </Label>
-                    <InputGroup>
-                      <InputGroup.Input
-                        type="number"
-                        inputMode="decimal"
-                        placeholder="0"
-                        dir="ltr"
-                        className="py-3"
-                      />
-                      <InputGroup.Suffix>
-                        <span className="font-medium text-muted-foreground text-sm">
-                          {tAssets('tomanAbbr')}
-                        </span>
-                      </InputGroup.Suffix>
-                    </InputGroup>
-                  </TextField>
+                    <Label>{tPicker('valueInToman')}</Label>
+                    <div className="mt-1 flex items-center gap-2">
+                      <NumberField.Group className="flex-1">
+                        <NumberField.Input
+                          dir="ltr"
+                          placeholder="0"
+                          className="py-3"
+                        />
+                      </NumberField.Group>
+                      <span className="shrink-0 font-medium text-muted-foreground text-sm">
+                        {tAssets('tomanAbbr')}
+                      </span>
+                    </div>
+                  </NumberField>
                 </>
               )}
-            </Modal.Body>
+            </Drawer.Body>
 
-            <Modal.Footer>
+            <Drawer.Footer>
               <Button
                 variant="secondary"
                 fullWidth
                 size="lg"
-                onPress={onSave}
+                onPress={handleSave}
                 isDisabled={isPending}
               >
                 {isPending ? (
@@ -193,10 +182,10 @@ export function QuantityModal({
                   tPicker('save')
                 )}
               </Button>
-            </Modal.Footer>
-          </Modal.Dialog>
-        </Modal.Container>
-      </Modal.Backdrop>
-    </Modal>
+            </Drawer.Footer>
+          </Drawer.Dialog>
+        </Drawer.Content>
+      </Drawer.Backdrop>
+    </Drawer>
   )
 }

@@ -45,7 +45,6 @@ export default function PricesPage() {
   const [search, setSearch] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [modalItem, setModalItem] = useState<PriceItem | null>(null)
-  const [quantity, setQuantity] = useState('')
 
   const { notificationOccurred } = useTelegramHaptics()
   const utils = api.useUtils()
@@ -60,7 +59,6 @@ export default function PricesPage() {
       toast.success(tAssets('toastAdded'))
       setModalOpen(false)
       setModalItem(null)
-      setQuantity('')
     },
     onError: (err) => {
       notificationOccurred('error')
@@ -70,29 +68,22 @@ export default function PricesPage() {
 
   const openModal = (item: PriceItem) => {
     setModalItem(item)
-    setQuantity('')
     setModalOpen(true)
   }
 
   const closeModal = () => {
     setModalOpen(false)
     setModalItem(null)
-    setQuantity('')
   }
 
-  const handleSave = () => {
+  const handleSave = (qty: string) => {
     if (!modalItem || addMutation.isPending) return
-    const qty = Number(quantity)
-    if (!quantity || Number.isNaN(qty) || qty <= 0) {
-      toast.error(tAssets('toastInvalidQuantity'))
-      return
-    }
     const sym = getBaseSymbol(modalItem)
     if (!sym || !portfolioId) {
       toast.error(tAssets('toastAddError'))
       return
     }
-    addMutation.mutate({ symbol: sym, quantity, portfolioId })
+    addMutation.mutate({ symbol: sym, quantity: qty, portfolioId })
   }
 
   const { data, isLoading, isError, error, refetch } =
@@ -211,8 +202,6 @@ export default function PricesPage() {
       <QuantityModal
         isOpen={modalOpen}
         item={modalItem}
-        quantity={quantity}
-        onQuantityChange={setQuantity}
         onClose={closeModal}
         onSave={handleSave}
         isPending={addMutation.isPending}

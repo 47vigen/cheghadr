@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 
+import { InputGroup, TextField } from '@heroui/react'
+import { IconSearch } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
@@ -40,7 +42,6 @@ export function AssetPicker({
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [modalItem, setModalItem] = useState<PriceItem | null>(null)
-  const [quantity, setQuantity] = useState('')
 
   const utils = api.useUtils()
   const { notificationOccurred } = useTelegramHaptics()
@@ -62,10 +63,8 @@ export function AssetPicker({
   const items = [makeIrtPriceItem(), ...parsePriceSnapshot(priceData)]
   const groups = useAssetSearchGroups(items, search)
 
-  // Derive category list from all groups (unfiltered by category)
   const categoryIds = groups.map((g) => g.category)
 
-  // When searching, show all; otherwise filter by active category
   const visibleGroups =
     search || activeCategory === null
       ? groups
@@ -73,29 +72,21 @@ export function AssetPicker({
 
   const handleSearchChange = (v: string) => {
     setSearch(v)
-    // Reset category filter when user starts typing
     if (v) setActiveCategory(null)
   }
 
   const closeModal = () => {
     setModalOpen(false)
     setModalItem(null)
-    setQuantity('')
   }
 
   const openModal = (item: PriceItem) => {
     setModalItem(item)
-    setQuantity('')
     setModalOpen(true)
   }
 
-  const handleSave = () => {
+  const handleSave = (qty: string) => {
     if (!modalItem || addMutation.isPending) return
-    const qty = Number(quantity)
-    if (!quantity || Number.isNaN(qty) || qty <= 0) {
-      toast.error(t('toastInvalidQuantity'))
-      return
-    }
     const sym = getBaseSymbol(modalItem)
     if (!sym) {
       toast.error(t('toastAddError'))
@@ -105,22 +96,42 @@ export function AssetPicker({
       toast.error(t('toastAddError'))
       return
     }
-    addMutation.mutate({ symbol: sym, quantity, portfolioId })
+    addMutation.mutate({ symbol: sym, quantity: qty, portfolioId })
   }
 
   return (
     <>
-      {categoryIds.length > 0 && !search && (
-        <PriceCategoryNav
-          categories={categoryIds}
-          activeId={activeCategory ?? categoryIds[0] ?? ''}
-          onSelect={(cat) =>
-            setActiveCategory(activeCategory === cat ? null : cat)
-          }
-        />
-      )}
+      {/* Unified sticky header: search always on top, categories below */}
+      <div className="sticky top-0 z-20 -mx-[var(--page-px)] border-border/80 border-b bg-background/90 px-[var(--page-px)] backdrop-blur-md">
+        <div className="py-2">
+          <TextField value={search} onChange={handleSearchChange} fullWidth>
+            <InputGroup>
+              <InputGroup.Prefix>
+                <IconSearch size={16} className="text-muted-foreground" />
+              </InputGroup.Prefix>
+              <InputGroup.Input
+                placeholder={tPicker('search')}
+                type="search"
+                dir={locale === 'fa' ? 'rtl' : 'ltr'}
+                className="py-3 [appearance:textfield] [color-scheme:inherit] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
+              />
+            </InputGroup>
+          </TextField>
+        </div>
+        {categoryIds.length > 0 && !search && (
+          <PriceCategoryNav
+            categories={categoryIds}
+            activeId={activeCategory ?? categoryIds[0] ?? ''}
+            onSelect={(cat) =>
+              setActiveCategory(activeCategory === cat ? null : cat)
+            }
+            sticky={false}
+          />
+        )}
+      </div>
 
       <AssetSearchPanel
+        hideSearch
         search={search}
         onSearchChange={handleSearchChange}
         locale={locale}
@@ -131,14 +142,11 @@ export function AssetPicker({
           `${formatIRT(Number(item.sell_price), locale)} ${t('tomanAbbr')}`
         }
         emptyHeader={tPicker('noResults')}
-        wrapSearchInSection
       />
 
       <QuantityModal
         isOpen={modalOpen}
         item={modalItem}
-        quantity={quantity}
-        onQuantityChange={setQuantity}
         onClose={closeModal}
         onSave={handleSave}
         isPending={addMutation.isPending}

@@ -25,6 +25,8 @@ interface AssetSearchPanelProps {
   emptyHeader: string
   beforeList?: ReactNode
   wrapSearchInSection?: boolean
+  /** When true, skip rendering the search field (used when search is hoisted to a parent sticky header). */
+  hideSearch?: boolean
 }
 
 export function AssetSearchPanel({
@@ -39,6 +41,7 @@ export function AssetSearchPanel({
   emptyHeader,
   beforeList,
   wrapSearchInSection = false,
+  hideSearch = false,
 }: AssetSearchPanelProps) {
   const searchField = (
     <TextField value={search} onChange={onSearchChange} fullWidth>
@@ -58,7 +61,8 @@ export function AssetSearchPanel({
 
   return (
     <div className="section-stack">
-      {wrapSearchInSection ? <Section>{searchField}</Section> : searchField}
+      {!hideSearch &&
+        (wrapSearchInSection ? <Section>{searchField}</Section> : searchField)}
 
       {beforeList}
 
