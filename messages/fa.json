@@ -20,7 +20,7 @@
   "assets": {
     "totalValue": "ارزش کل دارایی‌ها",
     "myAssets": "دارایی‌های من",
-    "assetsList": "لیست دارایی‌ها",
+    "assetsList": "💼 لیست دارایی‌ها",
     "addAsset": "افزودن دارایی",
     "loadError": "خطا در بارگذاری",
     "retryButton": "تلاش مجدد",
@@ -44,7 +44,7 @@
     "toastAdded": "دارایی اضافه شد",
     "toastAddError": "خطا در افزودن",
     "toastInvalidQuantity": "مقدار باید عددی مثبت باشد",
-    "portfolioChart": "روند ارزش دارایی‌ها",
+    "portfolioChart": "📈 روند ارزش دارایی‌ها",
     "chartEmpty": "نمودار شما پس از دو روز نمایش داده می‌شود",
     "chartPeriod7": "۷ روز",
     "chartPeriod30": "۳۰ روز",
@@ -104,7 +104,7 @@
   },
   "alerts": {
     "title": "هشدارهای من",
-    "sectionTitle": "هشدارها",
+    "sectionTitle": "🔔 هشدارها",
     "create": "ایجاد هشدار",
     "manage": "مدیریت",
     "selectAsset": "دارایی را انتخاب کنید",
@@ -148,8 +148,8 @@
     "portfolioTarget": "کل دارایی‌ها"
   },
   "breakdown": {
-    "title": "ترکیب سبد",
-    "biggestMover": "بیشترین تغییر",
+    "title": "📊 ترکیب سبد",
+    "biggestMover": "🏆 بیشترین تغییر",
     "filterActive": "فیلتر: {category}",
     "showAll": "نمایش همه",
     "ofPortfolio": "از سبد",

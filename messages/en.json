@@ -20,7 +20,7 @@
   "assets": {
     "totalValue": "Total Portfolio Value",
     "myAssets": "My Assets",
-    "assetsList": "Asset list",
+    "assetsList": "💼 Asset List",
     "addAsset": "Add Asset",
     "loadError": "Failed to load",
     "retryButton": "Retry",
@@ -44,7 +44,7 @@
     "toastAdded": "Asset added",
     "toastAddError": "Error adding",
     "toastInvalidQuantity": "Quantity must be a positive number",
-    "portfolioChart": "Portfolio Trend",
+    "portfolioChart": "📈 Portfolio Trend",
     "chartEmpty": "Your chart will appear after two days",
     "chartPeriod7": "7D",
     "chartPeriod30": "30D",
@@ -104,7 +104,7 @@
   },
   "alerts": {
     "title": "My Alerts",
-    "sectionTitle": "Alerts",
+    "sectionTitle": "🔔 Alerts",
     "create": "Create Alert",
     "manage": "Manage",
     "selectAsset": "Select an asset",
@@ -148,8 +148,8 @@
     "portfolioTarget": "Total Portfolio"
   },
   "breakdown": {
-    "title": "Portfolio Breakdown",
-    "biggestMover": "Biggest Mover",
+    "title": "📊 Portfolio Breakdown",
+    "biggestMover": "🏆 Biggest Mover",
     "filterActive": "Filter: {category}",
     "showAll": "Show All",
     "ofPortfolio": "of portfolio",

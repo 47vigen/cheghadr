@@ -18,6 +18,21 @@ export function AssetsAlertSummarySection({
 }: AssetsAlertSummarySectionProps) {
   const tAlerts = useTranslations('alerts')
   const router = useRouter()
+  const isEmpty = activeCount === 0 && triggeredCount === 0
+
+  // When no alerts exist, render a flat inline CTA strip without the Section
+  // wrapper to save vertical space and reduce visual weight.
+  if (isEmpty) {
+    return (
+      <div>
+        <AlertSummaryCard
+          activeCount={0}
+          triggeredCount={0}
+          onManage={() => router.push('/alerts')}
+        />
+      </div>
+    )
+  }
 
   return (
     <div>
