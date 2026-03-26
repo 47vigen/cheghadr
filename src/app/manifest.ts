@@ -10,7 +10,8 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Cheghadr?',
     short_name: 'Cheghadr',
-    description: 'Personal net worth tracker',
+    description:
+      'Track your net worth in Iranian Toman. Monitor crypto, forex, gold and more — in Persian or English.',
     start_url: '/',
     display: 'standalone',
     orientation: 'portrait',

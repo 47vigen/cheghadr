@@ -1,21 +1,22 @@
-'use client'
+import { unstable_cache } from 'next/cache'
 
-import { useMemo } from 'react'
-
-import { Skeleton } from '@heroui/react'
-import { useSession } from 'next-auth/react'
-import { useLocale, useTranslations } from 'next-intl'
-
-import { Link } from '@/i18n/navigation'
 import type { PriceItem } from '@/lib/prices'
 import {
   findBySymbol,
   formatChange,
   formatIRT,
   getLocalizedItemName,
-  parsePriceSnapshot,
 } from '@/lib/prices'
-import { api } from '@/trpc/react'
+import { db } from '@/server/db'
+import { getCachedPriceSnapshot } from '@/server/price-cache'
+
+import { LandingCta } from './_landing-cta'
+
+const getLandingSnapshot = unstable_cache(
+  () => getCachedPriceSnapshot(db),
+  ['landing-snapshot'],
+  { revalidate: 1800 },
+)
 
 /* ─── Featured symbols (priority order) ─────────────────── */
 
@@ -34,18 +35,10 @@ const FEATURED_SYMBOLS = [
 
 /* ─── Ticker row ─────────────────────────────────────────── */
 
-function TickerItem({
-  item,
-  locale,
-  tomanAbbr,
-}: {
-  item: PriceItem
-  locale: string
-  tomanAbbr: string
-}) {
-  const name = getLocalizedItemName(item, locale)
+function TickerItem({ item }: { item: PriceItem }) {
+  const name = getLocalizedItemName(item, 'en')
   const sellPrice = Number.parseFloat(item.sell_price ?? '0')
-  const change = formatChange(item.change, locale)
+  const change = formatChange(item.change, 'en')
   const sym =
     item.base_currency?.symbol?.slice(0, 4) ??
     item.symbol?.split('-')[0]?.slice(0, 4) ??
@@ -67,9 +60,7 @@ function TickerItem({
           className="font-display font-semibold text-sm tabular-nums"
           dir="ltr"
         >
-          {Number.isNaN(sellPrice)
-            ? '—'
-            : `${formatIRT(sellPrice, locale)} ${tomanAbbr}`}
+          {Number.isNaN(sellPrice) ? '—' : `${formatIRT(sellPrice, 'en')} T`}
         </span>
         {change && (
           <span
@@ -86,51 +77,17 @@ function TickerItem({
   )
 }
 
-/* ─── Skeleton rows while loading ────────────────────────── */
-
-function TickerSkeleton() {
-  return (
-    <div className="flex flex-col">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div
-          key={i}
-          className="flex items-center justify-between border-border border-b px-4 py-3"
-        >
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-9 w-9" />
-            <Skeleton className="h-3 w-24" />
-          </div>
-          <div className="flex flex-col items-end gap-1">
-            <Skeleton className="h-3 w-20" />
-            <Skeleton className="h-2.5 w-12" />
-          </div>
-        </div>
-      ))}
-    </div>
-  )
-}
-
 /* ─── Infinite vertical ticker ───────────────────────────── */
 
-function LiveTicker({
-  items,
-  locale,
-  tomanAbbr,
-}: {
-  items: PriceItem[]
-  locale: string
-  tomanAbbr: string
-}) {
+function LiveTicker({ items }: { items: PriceItem[] }) {
   if (items.length === 0) return null
 
-  // Duplicate list for seamless infinite scroll
   const doubled = [...items, ...items]
   const visibleRows = Math.min(items.length, 7)
-  const rowH = 57 // px per row (py-3 top+bottom = 24px + content ~33px)
+  const rowH = 57
 
   return (
-    <div
-      role="region"
+    <section
       aria-label="Live market prices"
       className="relative overflow-hidden"
       style={{ height: `${visibleRows * rowH}px` }}
@@ -158,16 +115,10 @@ function LiveTicker({
         style={{ animationDuration: `${items.length * 2.8}s` }}
       >
         {doubled.map((item, idx) => (
-          <TickerItem
-            // biome-ignore lint/suspicious/noArrayIndexKey: duplicated list for seamless loop
-            key={`${item.symbol}-${idx}`}
-            item={item}
-            locale={locale}
-            tomanAbbr={tomanAbbr}
-          />
+          <TickerItem key={`${item.symbol}-${idx}`} item={item} />
         ))}
       </div>
-    </div>
+    </section>
   )
 }
 
@@ -197,27 +148,15 @@ function FeatureCard({
 
 /* ─── Landing page ───────────────────────────────────────── */
 
-export default function LandingPage() {
-  const t = useTranslations('landing')
-  const locale = useLocale()
-  const { data: session } = useSession()
+export default async function LandingPage() {
+  const snapshot = await getLandingSnapshot()
 
-  const pricesQuery = api.prices.latest.useQuery(undefined, {
-    refetchInterval: 60_000,
-    staleTime: 30_000,
-  })
-
-  const featuredItems = useMemo<PriceItem[]>(() => {
-    if (!pricesQuery.data?.data) return []
-    const all = parsePriceSnapshot(pricesQuery.data.data)
-    return FEATURED_SYMBOLS.flatMap((sym) => {
-      const found = findBySymbol(all, sym)
-      return found ? [found] : []
-    })
-  }, [pricesQuery.data])
-
-  const tomanAbbr = t('tomanAbbr')
-  const appHref = session ? '/app' : '/login'
+  const featuredItems: PriceItem[] = snapshot
+    ? FEATURED_SYMBOLS.flatMap((sym) => {
+        const found = findBySymbol(snapshot.prices, sym)
+        return found ? [found] : []
+      })
+    : []
 
   return (
     <div className="flex min-h-svh flex-col bg-background text-foreground">
@@ -245,7 +184,7 @@ export default function LandingPage() {
           }}
           aria-hidden
         >
-          {locale === 'fa' ? '؟' : '?'}
+          ?
         </div>
 
         {/* Hero content */}
@@ -257,23 +196,23 @@ export default function LandingPage() {
           <div className="flex flex-col items-center gap-1">
             <h1
               className="font-bold font-display leading-none tracking-tight"
-              lang={locale === 'fa' ? 'fa' : undefined}
               style={{ fontSize: 'clamp(2.75rem, 14vw, 5.5rem)' }}
             >
-              {locale === 'fa' ? 'چه‌قدر؟' : 'Cheghadr?'}
+              Cheghadr?
             </h1>
-            {locale !== 'fa' && (
-              <span className="font-display text-muted-foreground text-xs uppercase tracking-[0.25em]">
-                چه‌قدر؟
-              </span>
-            )}
+            <span className="font-display text-muted-foreground text-xs uppercase tracking-[0.25em]">
+              چه‌قدر؟
+            </span>
           </div>
 
           {/* Tagline */}
           <div className="flex flex-col gap-2">
-            <p className="font-medium text-base leading-snug">{t('tagline')}</p>
+            <p className="font-medium text-base leading-snug">
+              Your personal net worth, at a glance
+            </p>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              {t('subTagline')}
+              Track assets, follow live prices, and get alerts — in Persian or
+              English
             </p>
           </div>
 
@@ -282,20 +221,7 @@ export default function LandingPage() {
             className="flex w-full flex-col gap-2"
             style={{ animation: 'fade-in 500ms 180ms ease-out both' }}
           >
-            <Link
-              href={appHref}
-              className="label-compact flex h-12 w-full items-center justify-center border border-foreground bg-foreground text-background transition-opacity hover:opacity-80 active:opacity-60"
-            >
-              {t('openApp')}
-            </Link>
-            {!session && (
-              <Link
-                href="/login"
-                className="label-compact flex h-12 w-full items-center justify-center border border-border text-foreground transition-all hover:border-foreground active:opacity-60"
-              >
-                {t('loginCta')}
-              </Link>
-            )}
+            <LandingCta />
           </div>
         </div>
 
@@ -318,55 +244,33 @@ export default function LandingPage() {
       <section className="py-8">
         <div className="mb-3 flex items-center justify-between px-4">
           <h2 className="label-compact text-muted-foreground">
-            {t('tickerTitle')}
+            Live Market Prices
           </h2>
-          {pricesQuery.data?.stale === false && (
-            <span
-              className="label-compact flex items-center gap-1.5"
-              style={{ color: 'var(--success)' }}
-            >
-              <span
-                className="block h-1.5 w-1.5 rounded-full bg-[--success]"
-                style={{ animation: 'pulse-soft 2s ease-in-out infinite' }}
-              />
-              LIVE
-            </span>
-          )}
         </div>
 
         <div className="border-border border-t">
-          {pricesQuery.isLoading ? (
-            <TickerSkeleton />
-          ) : (
-            <LiveTicker
-              items={featuredItems}
-              locale={locale}
-              tomanAbbr={tomanAbbr}
-            />
-          )}
+          <LiveTicker items={featuredItems} />
         </div>
       </section>
 
       {/* ── Features ─────────────────────────────────────── */}
       <section className="px-4 pt-4 pb-6">
-        <h2 className="label-compact mb-3 text-muted-foreground">
-          {t('featuresTitle')}
-        </h2>
+        <h2 className="label-compact mb-3 text-muted-foreground">Features</h2>
         <div className="border-border border-t">
           <FeatureCard
             number="01"
-            title={t('feature1Title')}
-            sub={t('feature1Sub')}
+            title="Track Your Net Worth"
+            sub="Add assets across crypto, forex, gold, and more. See your total portfolio value in Iranian Toman, updated in real time."
           />
           <FeatureCard
             number="02"
-            title={t('feature2Title')}
-            sub={t('feature2Sub')}
+            title="Live Market Prices"
+            sub="Browse prices for hundreds of assets. Prices refresh automatically so you always have the latest data."
           />
           <FeatureCard
             number="03"
-            title={t('feature3Title')}
-            sub={t('feature3Sub')}
+            title="Smart Price Alerts"
+            sub="Set alerts for any asset — get notified the moment a price crosses your target, above or below."
           />
         </div>
       </section>
@@ -375,22 +279,12 @@ export default function LandingPage() {
       <footer className="border-border border-t px-4 py-10">
         <div className="flex flex-col items-center gap-5 text-center">
           <div className="flex flex-col gap-0.5">
-            <span
-              className="font-bold font-display text-lg"
-              lang={locale === 'fa' ? 'fa' : undefined}
-            >
-              {locale === 'fa' ? 'چه‌قدر؟' : 'Cheghadr?'}
-            </span>
+            <span className="font-bold font-display text-lg">Cheghadr?</span>
             <span className="label-compact text-muted-foreground">
               Personal net worth tracker
             </span>
           </div>
-          <Link
-            href={appHref}
-            className="label-compact flex h-10 items-center justify-center border border-foreground bg-foreground px-8 text-background transition-opacity hover:opacity-80 active:opacity-60"
-          >
-            {t('openApp')}
-          </Link>
+          <LandingCta footer />
         </div>
       </footer>
 
