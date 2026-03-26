@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 
 import { AssetSearchPanel } from '@/components/assets/asset-search-panel'
 import { QuantityModal } from '@/components/assets/quantity-modal'
+import { PriceCategoryNav } from '@/components/prices/price-category-nav'
 
 import { useAssetSearchGroups } from '@/hooks/use-asset-search-groups'
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
@@ -36,6 +37,7 @@ export function AssetPicker({
   const locale = useLocale()
 
   const [search, setSearch] = useState('')
+  const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [modalItem, setModalItem] = useState<PriceItem | null>(null)
   const [quantity, setQuantity] = useState('')
@@ -59,6 +61,21 @@ export function AssetPicker({
 
   const items = [makeIrtPriceItem(), ...parsePriceSnapshot(priceData)]
   const groups = useAssetSearchGroups(items, search)
+
+  // Derive category list from all groups (unfiltered by category)
+  const categoryIds = groups.map((g) => g.category)
+
+  // When searching, show all; otherwise filter by active category
+  const visibleGroups =
+    search || activeCategory === null
+      ? groups
+      : groups.filter((g) => g.category === activeCategory)
+
+  const handleSearchChange = (v: string) => {
+    setSearch(v)
+    // Reset category filter when user starts typing
+    if (v) setActiveCategory(null)
+  }
 
   const closeModal = () => {
     setModalOpen(false)
@@ -93,12 +110,22 @@ export function AssetPicker({
 
   return (
     <>
+      {categoryIds.length > 0 && !search && (
+        <PriceCategoryNav
+          categories={categoryIds}
+          activeId={activeCategory ?? categoryIds[0] ?? ''}
+          onSelect={(cat) =>
+            setActiveCategory(activeCategory === cat ? null : cat)
+          }
+        />
+      )}
+
       <AssetSearchPanel
         search={search}
-        onSearchChange={(v) => setSearch(v)}
+        onSearchChange={handleSearchChange}
         locale={locale}
         searchPlaceholder={tPicker('search')}
-        groups={groups}
+        groups={visibleGroups}
         onSelect={openModal}
         getSubtitle={(item) =>
           `${formatIRT(Number(item.sell_price), locale)} ${t('tomanAbbr')}`

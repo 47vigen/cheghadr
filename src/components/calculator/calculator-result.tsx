@@ -64,7 +64,7 @@ export function CalculatorResult({
       <div className="mb-1.5 px-2">
         <h2 className="section-header">{t('resultTitle')}</h2>
       </div>
-      <div className="overflow-hidden rounded-2xl bg-card">
+      <div className="overflow-hidden border border-border bg-card">
         {!formattedResult ? (
           <Placeholder header={t('resultPlaceholder')} />
         ) : (

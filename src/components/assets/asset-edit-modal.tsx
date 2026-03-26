@@ -90,7 +90,7 @@ export function AssetEditModal({
             </Modal.Body>
             <Modal.Footer>
               <Button
-                variant="primary"
+                variant="secondary"
                 fullWidth
                 size="lg"
                 onPress={handleUpdate}

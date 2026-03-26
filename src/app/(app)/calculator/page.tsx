@@ -95,7 +95,7 @@ export default function CalculatorPage() {
           <div className="mb-1.5 px-2">
             <h2 className="section-header">{t('title')}</h2>
           </div>
-          <div className="overflow-hidden rounded-2xl bg-card-elevated">
+          <div className="overflow-hidden border border-border bg-card-elevated">
             {/* From selector */}
             <div className="px-3 pt-2.5 pb-1.5">
               <AssetSelector
@@ -113,10 +113,10 @@ export default function CalculatorPage() {
               <Button
                 size="sm"
                 isIconOnly
-                variant="outline"
+                variant="ghost"
                 onPress={handleSwap}
                 aria-label={t('swap')}
-                className="mx-3 shrink-0"
+                className="mx-3 shrink-0 border border-border"
               >
                 <IconArrowsExchange size={16} className="rotate-90" />
               </Button>

@@ -63,7 +63,7 @@ export function QuantityModal({
             </Modal.Body>
             <Modal.Footer>
               <Button
-                variant="primary"
+                variant="secondary"
                 fullWidth
                 size="lg"
                 onPress={onSave}

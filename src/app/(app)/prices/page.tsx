@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 
 import { Input, TextField } from '@heroui/react'
+import { IconSearch } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
@@ -152,6 +153,9 @@ export default function PricesPage() {
                 type="search"
                 className="py-3"
                 dir={locale === 'fa' ? 'rtl' : 'ltr'}
+                startContent={
+                  <IconSearch size={16} className="text-muted-foreground" />
+                }
               />
             </TextField>
             {data?.stale && (

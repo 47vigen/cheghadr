@@ -17,7 +17,7 @@ export function ChangeLabel({ change }: ChangeLabelProps) {
 
   return (
     <span
-      className={`inline-flex items-center px-1 py-0 font-display font-medium text-[length:var(--section-label-size)] ${
+      className={`inline-flex items-center px-1 py-0 font-display font-medium text-xs ${
         isPositive
           ? 'bg-success/15 text-success'
           : 'bg-destructive/15 text-destructive'

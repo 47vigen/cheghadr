@@ -67,7 +67,7 @@ export function PriceCategoryNav({
               className={clsx(
                 'shrink-0 rounded-sm border px-3 py-1.5 font-[family-name:var(--font-display)] text-[0.65rem] uppercase tracking-[0.08em] transition-[background-color,border-color,color,transform] duration-[var(--motion-duration-fast)]',
                 isActive
-                  ? 'border-accent bg-accent text-accent-foreground'
+                  ? 'border-foreground/40 bg-foreground/10 font-semibold text-foreground'
                   : 'border-border bg-card text-muted-foreground hover:border-foreground/20 hover:text-foreground active:scale-[0.98]',
               )}
             >
