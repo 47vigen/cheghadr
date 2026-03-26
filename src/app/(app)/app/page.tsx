@@ -150,10 +150,7 @@ export default function AssetsPage() {
 
   const biggestMoverPeriodLabel = useMemo(() => {
     if (deltaWindow === 'ALL') return undefined
-    const key = `window${deltaWindow}` as
-      | 'window1D'
-      | 'window1W'
-      | 'window1M'
+    const key = `window${deltaWindow}` as 'window1D' | 'window1W' | 'window1M'
     return tDelta(key)
   }, [deltaWindow, tDelta])
 

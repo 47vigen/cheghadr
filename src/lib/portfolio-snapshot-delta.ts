@@ -1,9 +1,10 @@
-import { addDays, addMonths } from 'date-fns'
-import type { PrismaClient } from '@prisma/client'
 import { TZDate } from '@date-fns/tz'
+import type { PrismaClient } from '@prisma/client'
+import { addDays, addMonths } from 'date-fns'
 
-import { getSellPriceBySymbol, parsePriceSnapshot } from '@/lib/prices'
+import { computeAssetValueIRT, getSellPriceBySymbol } from '@/lib/prices'
 import { resolveOwnedPortfolioFilter } from '@/server/api/helpers'
+import { getCachedPriceSnapshot } from '@/server/price-cache'
 
 export type PortfolioDeltaWindow = '1D' | '1W' | '1M' | 'ALL'
 
@@ -53,22 +54,21 @@ export async function getPortfolioSnapshotDelta(
     portfolioId,
   )
 
-  const whereClause = portfolioId
-    ? { userId, portfolioId }
+  const whereClause = portfolioFilter.portfolioId
+    ? { userId, portfolioId: portfolioFilter.portfolioId }
     : { userId }
 
-  const [userAssets, priceSnapshot] = await Promise.all([
+  const [userAssets, cached] = await Promise.all([
     db.userAsset.findMany({ where: whereClause }),
-    db.priceSnapshot.findFirst({ orderBy: { snapshotAt: 'desc' } }),
+    getCachedPriceSnapshot(db),
   ])
 
-  if (userAssets.length === 0 || !priceSnapshot) return null
+  if (userAssets.length === 0 || !cached) return null
 
-  const prices = parsePriceSnapshot(priceSnapshot.data)
   let currentIRT = 0
   for (const asset of userAssets) {
-    const sellPrice = getSellPriceBySymbol(asset.symbol, prices)
-    currentIRT += Number(asset.quantity) * sellPrice
+    const sellPrice = getSellPriceBySymbol(asset.symbol, cached.prices)
+    currentIRT += computeAssetValueIRT(Number(asset.quantity), sellPrice)
   }
 
   const comparisonDate = getComparisonInstantForWindowInTimeZone(

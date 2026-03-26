@@ -115,10 +115,7 @@ export function getPortfolioHistoryRange(
 }
 
 /** Start of the calendar day after `rangeEnd` (exclusive upper bound for DB queries). */
-export function exclusiveEndAfterRange(
-  rangeEnd: Date,
-  timeZone: string,
-): Date {
+export function exclusiveEndAfterRange(rangeEnd: Date, timeZone: string): Date {
   return startOfDayInTimeZone(
     addDays(new TZDate(rangeEnd, timeZone), 1),
     timeZone,

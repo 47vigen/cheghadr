@@ -1,7 +1,8 @@
 import type { PrismaClient } from '@prisma/client'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createPortfolioSnapshot } from '@/lib/portfolio'
+import { invalidatePriceCache } from '@/server/price-cache'
 
 function createDbMock() {
   const db = {
@@ -26,6 +27,11 @@ function createDbMock() {
     }
   }
 }
+
+beforeEach(() => {
+  // Clear the module-level price cache so each test starts fresh.
+  invalidatePriceCache()
+})
 
 describe('createPortfolioSnapshot', () => {
   it('returns null when there are no user assets', async () => {

@@ -1,20 +1,19 @@
 import { z } from 'zod'
 
 import {
+  computeAssetValueIRT,
   findBySymbol,
   getBilingualAssetLabels,
   getSellPriceBySymbol,
   getSnapshotStaleness,
-  parsePriceSnapshot,
 } from '@/lib/prices'
 import {
-  fetchLatestPriceSnapshot,
+  loadAssetsWithPrices,
   positiveDecimalStringSchema,
   refreshPortfolioSnapshotsAfterAssetChange,
   requireOwnedAsset,
   requireOwnedPortfolio,
   resolveOwnedPortfolioFilter,
-  userAssetsWhereClause,
 } from '@/server/api/helpers'
 import { protectedProcedure, router } from '@/server/api/trpc'
 
@@ -37,25 +36,19 @@ export const assetsRouter = router({
         ctx.user.id,
         input?.portfolioId,
       )
-      const whereClause = userAssetsWhereClause(ctx.user.id, portfolioFilter)
 
-      const [userAssets, snapshot] = await Promise.all([
-        ctx.db.userAsset.findMany({
-          where: whereClause,
-          orderBy: { createdAt: 'asc' },
-        }),
-        fetchLatestPriceSnapshot(ctx.db),
-      ])
-
-      const prices = parsePriceSnapshot(snapshot?.data)
+      const { userAssets, prices, snapshotAt } = await loadAssetsWithPrices(
+        ctx.db,
+        ctx.user.id,
+        portfolioFilter,
+      )
 
       const assets = userAssets.map((asset) => {
         const priceItem = findBySymbol(prices, asset.symbol)
         const sellPrice = getSellPriceBySymbol(asset.symbol, prices)
-        const qty = Number(asset.quantity)
         return {
           ...asset,
-          valueIRT: qty * sellPrice,
+          valueIRT: computeAssetValueIRT(Number(asset.quantity), sellPrice),
           displayNames: getBilingualAssetLabels(priceItem, asset.symbol),
           assetIcon: priceItem?.png ?? priceItem?.base_currency?.png ?? null,
           change: priceItem?.change ?? null,
@@ -65,8 +58,7 @@ export const assetsRouter = router({
       })
 
       const totalIRT = assets.reduce((sum, a) => sum + a.valueIRT, 0)
-
-      const { stale } = getSnapshotStaleness(snapshot?.snapshotAt)
+      const { stale } = getSnapshotStaleness(snapshotAt ?? undefined)
 
       const usdSellPrice = getSellPriceBySymbol('USD', prices)
       const eurSellPrice = getSellPriceBySymbol('EUR', prices)
@@ -74,7 +66,7 @@ export const assetsRouter = router({
       return {
         assets,
         totalIRT,
-        snapshotAt: snapshot?.snapshotAt ?? null,
+        snapshotAt,
         stale,
         usdSellPrice: usdSellPrice > 0 ? usdSellPrice : null,
         eurSellPrice: eurSellPrice > 0 ? eurSellPrice : null,

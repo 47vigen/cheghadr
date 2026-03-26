@@ -1,4 +1,5 @@
 import {
+  computeAssetValueIRT,
   findBySymbol,
   getSellPriceBySymbol,
   type PriceItem,
@@ -33,7 +34,7 @@ export function computeLivePortfolioBreakdown(
     const category = priceItem?.base_currency.category?.symbol ?? 'OTHER'
     const sellPrice = getSellPriceBySymbol(asset.symbol, prices)
     const qty = Number(asset.quantity)
-    const valueIRT = qty * sellPrice
+    const valueIRT = computeAssetValueIRT(qty, sellPrice)
     totalIRT += valueIRT
 
     const item: BreakdownItem = {

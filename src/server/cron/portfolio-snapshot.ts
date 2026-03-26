@@ -8,13 +8,8 @@ import {
 import { hasCrossedThreshold } from '@/lib/alerts/utils'
 import { NotificationQueue } from '@/lib/notifications'
 import { createPortfolioSnapshot } from '@/lib/portfolio'
-import {
-  getBaseSymbol,
-  getBilingualAssetLabels,
-  getSellPriceBySymbol,
-  parsePriceSnapshot,
-  pickDisplayName,
-} from '@/lib/prices'
+import { findTopHoldingByValue } from '@/lib/portfolio-utils'
+import { getCachedPriceSnapshot } from '@/server/price-cache'
 import { parseBreakdownJson } from '@/types/schemas'
 
 const YESTERDAY_CUTOFF_MS = 23 * 60 * 60 * 1000
@@ -41,20 +36,32 @@ export async function runPortfolioCron(
     },
   })
 
-  let portfolioSnapshotCount = 0
-  for (const user of activeUsers) {
-    const portfolios = await db.portfolio.findMany({
-      where: { userId: user.id },
-      select: { id: true },
-    })
-    for (const portfolio of portfolios) {
-      const snap = await createPortfolioSnapshot(db, user.id, portfolio.id)
-      if (snap) portfolioSnapshotCount++
-    }
+  // Batch-fetch all portfolios for active users in one query, then parallelize
+  // snapshot creation per user — avoids the previous N+1 sequential pattern.
+  const userIds = activeUsers.map((u) => u.id)
+  const allPortfolios = await db.portfolio.findMany({
+    where: { userId: { in: userIds } },
+    select: { id: true, userId: true },
+  })
 
-    const snap = await createPortfolioSnapshot(db, user.id, null)
-    if (snap) portfolioSnapshotCount++
+  const portfoliosByUserId = new Map<string, { id: string }[]>()
+  for (const p of allPortfolios) {
+    const list = portfoliosByUserId.get(p.userId) ?? []
+    list.push({ id: p.id })
+    portfoliosByUserId.set(p.userId, list)
   }
+
+  const snapshotCounts = await Promise.all(
+    activeUsers.map(async (user) => {
+      const portfolios = portfoliosByUserId.get(user.id) ?? []
+      const results = await Promise.all([
+        ...portfolios.map((p) => createPortfolioSnapshot(db, user.id, p.id)),
+        createPortfolioSnapshot(db, user.id, null),
+      ])
+      return results.filter(Boolean).length
+    }),
+  )
+  const portfolioSnapshotCount = snapshotCounts.reduce((a, b) => a + b, 0)
 
   const queue = new NotificationQueue()
   const triggeredAlertIds: string[] = []
@@ -119,9 +126,9 @@ export async function runPortfolioCron(
   }
 
   const digestUsers = activeUsers.filter((u) => u.dailyDigestEnabled)
-  const latestPriceSnap = await db.priceSnapshot.findFirst({
-    orderBy: { snapshotAt: 'desc' },
-  })
+
+  // Fetch latest prices once for all digest users via cache
+  const cached = await getCachedPriceSnapshot(db)
 
   for (const user of digestUsers) {
     const digestLocale = toAlertMessageLocale(user.preferredLocale)
@@ -151,22 +158,10 @@ export async function runPortfolioCron(
         ? (((currentIRT - previousIRT) / previousIRT) * 100).toFixed(2)
         : '0.00'
 
-    let topMoverName = ''
-    if (latestPriceSnap) {
-      const prices = parsePriceSnapshot(latestPriceSnap.data)
-      const breakdown = parseBreakdownJson(todaySnap.breakdown)
-      let maxValue = 0
-      for (const item of breakdown) {
-        const price = getSellPriceBySymbol(item.symbol, prices)
-        const value = item.quantity * price
-        if (value > maxValue) {
-          maxValue = value
-          const priceItem = prices.find((p) => getBaseSymbol(p) === item.symbol)
-          const labels = getBilingualAssetLabels(priceItem, item.symbol)
-          topMoverName = pickDisplayName(labels, digestLocale)
-        }
-      }
-    }
+    const breakdown = parseBreakdownJson(todaySnap.breakdown)
+    const topMoverName = cached
+      ? findTopHoldingByValue(breakdown, cached.prices, digestLocale)
+      : ''
 
     const text = dailyDigestMessage(deltaPct, topMoverName, digestLocale)
     queue.enqueue({

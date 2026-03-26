@@ -1,41 +1,40 @@
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
+import { createPortfolioSnapshot } from '@/lib/portfolio'
+import { computeLivePortfolioBreakdown } from '@/lib/portfolio-breakdown'
 import {
   buildDailyPortfolioHistorySeries,
   exclusiveEndAfterRange,
   getPortfolioHistoryRange,
 } from '@/lib/portfolio-history'
-import { computeLivePortfolioBreakdown } from '@/lib/portfolio-breakdown'
-import { createPortfolioSnapshot } from '@/lib/portfolio'
+import type { PortfolioDeltaWindow } from '@/lib/portfolio-snapshot-delta'
 import {
   getComparisonInstantForWindowInTimeZone,
   getPortfolioSnapshotDelta,
 } from '@/lib/portfolio-snapshot-delta'
-import type { PortfolioDeltaWindow } from '@/lib/portfolio-snapshot-delta'
 import {
   computeBiggestMoverFromAssetRows,
   computeBiggestMoverFromHistoricalBreakdown,
   shouldUseLivePriceChangeForBiggestMover,
 } from '@/lib/portfolio-utils'
 import {
+  computeAssetValueIRT,
   findBySymbol,
   getBilingualAssetLabels,
   getSellPriceBySymbol,
-  parsePriceSnapshot,
 } from '@/lib/prices'
 import { portfolioHistoryTimezoneSchema } from '@/lib/timezone-schema'
 import {
   ensureDefaultPortfolio,
-  fetchLatestPriceSnapshot,
+  loadAssetsWithPrices,
+  MAX_PORTFOLIOS,
   requireOwnedPortfolio,
   resolveOwnedPortfolioFilter,
-  userAssetsWhereClause,
 } from '@/server/api/helpers'
-import { parseBreakdownJson } from '@/types/schemas'
 import { protectedProcedure, router } from '@/server/api/trpc'
-
-const MAX_PORTFOLIOS = 10
+import { getCachedPriceSnapshot } from '@/server/price-cache'
+import { parseBreakdownJson } from '@/types/schemas'
 
 const portfolioIdInput = z.string().min(1).optional()
 
@@ -47,6 +46,9 @@ const biggestMoverInput = z
     locale: z.enum(['en', 'fa']).default('en'),
   })
   .optional()
+
+const logSnapshotError = (err: unknown) =>
+  console.error('[SNAPSHOT] Refresh failed', err)
 
 export const portfolioRouter = router({
   list: protectedProcedure.query(async ({ ctx }) => {
@@ -143,7 +145,9 @@ export const portfolioRouter = router({
       await ctx.db.portfolio.delete({ where: { id: input.id } })
 
       // Recreate consolidated snapshot without this portfolio's assets
-      void createPortfolioSnapshot(ctx.db, ctx.user.id, null)
+      void createPortfolioSnapshot(ctx.db, ctx.user.id, null).catch(
+        logSnapshotError,
+      )
     }),
 
   history: protectedProcedure
@@ -250,8 +254,9 @@ export const portfolioRouter = router({
       )
     }),
 
-  biggestMover: protectedProcedure.input(biggestMoverInput).query(
-    async ({ ctx, input }) => {
+  biggestMover: protectedProcedure
+    .input(biggestMoverInput)
+    .query(async ({ ctx, input }) => {
       const window = input?.window ?? '1D'
       const timeZone = input?.timezone ?? 'UTC'
       const locale = input?.locale ?? 'en'
@@ -261,28 +266,22 @@ export const portfolioRouter = router({
         ctx.user.id,
         input?.portfolioId,
       )
-      const whereClause = userAssetsWhereClause(ctx.user.id, portfolioFilter)
 
-      const [userAssets, priceSnap] = await Promise.all([
-        ctx.db.userAsset.findMany({
-          where: whereClause,
-          orderBy: { createdAt: 'asc' },
-        }),
-        fetchLatestPriceSnapshot(ctx.db),
-      ])
+      const { userAssets, prices } = await loadAssetsWithPrices(
+        ctx.db,
+        ctx.user.id,
+        portfolioFilter,
+      )
 
-      if (userAssets.length === 0 || !priceSnap) return null
-
-      const prices = parsePriceSnapshot(priceSnap.data)
+      if (userAssets.length === 0 || prices.length === 0) return null
 
       const assetRows = userAssets.map((asset) => {
         const priceItem = findBySymbol(prices, asset.symbol)
         const sellPrice = getSellPriceBySymbol(asset.symbol, prices)
-        const qty = Number(asset.quantity)
         return {
           symbol: asset.symbol,
           displayNames: getBilingualAssetLabels(priceItem, asset.symbol),
-          valueIRT: qty * sellPrice,
+          valueIRT: computeAssetValueIRT(Number(asset.quantity), sellPrice),
           change: priceItem?.change ?? null,
         }
       })
@@ -324,8 +323,7 @@ export const portfolioRouter = router({
         assetRows,
         locale,
       )
-    },
-  ),
+    }),
 
   breakdown: protectedProcedure
     .input(
@@ -341,19 +339,15 @@ export const portfolioRouter = router({
         ctx.user.id,
         input?.portfolioId,
       )
-      const whereClause = userAssetsWhereClause(ctx.user.id, portfolioFilter)
 
-      const [userAssets, priceSnap] = await Promise.all([
-        ctx.db.userAsset.findMany({
-          where: whereClause,
-          orderBy: { createdAt: 'asc' },
-        }),
-        fetchLatestPriceSnapshot(ctx.db),
-      ])
+      const { userAssets, prices } = await loadAssetsWithPrices(
+        ctx.db,
+        ctx.user.id,
+        portfolioFilter,
+      )
 
       if (userAssets.length === 0) return null
 
-      const prices = parsePriceSnapshot(priceSnap?.data)
       return computeLivePortfolioBreakdown(userAssets, prices)
     }),
 
@@ -372,7 +366,7 @@ export const portfolioRouter = router({
         input?.portfolioId,
       )
 
-      const [snapshots, priceSnap] = await Promise.all([
+      const [snapshots, cached] = await Promise.all([
         ctx.db.portfolioSnapshot.findMany({
           where: { userId: ctx.user.id, ...portfolioFilter },
           orderBy: { snapshotAt: 'asc' },
@@ -382,11 +376,10 @@ export const portfolioRouter = router({
             breakdown: true,
           },
         }),
-        fetchLatestPriceSnapshot(ctx.db),
+        getCachedPriceSnapshot(ctx.db),
       ])
 
-      const prices = parsePriceSnapshot(priceSnap?.data)
-      const usdSellPrice = getSellPriceBySymbol('USD', prices)
+      const usdSellPrice = getSellPriceBySymbol('USD', cached?.prices ?? [])
 
       const header = 'date,totalIRT,totalUSD,breakdown_json'
       const rows = snapshots.map((s) => {

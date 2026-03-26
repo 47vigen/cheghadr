@@ -1,14 +1,14 @@
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
-import { MAX_ACTIVE_ALERTS } from '@/lib/alerts/utils'
-import { findBySymbol, parsePriceSnapshot } from '@/lib/prices'
+import { findBySymbol } from '@/lib/prices'
 import {
-  fetchLatestPriceSnapshot,
+  assertUnderMaxActiveAlerts,
   positiveDecimalStringSchema,
   requireOwnedAlert,
 } from '@/server/api/helpers'
 import { protectedProcedure, router } from '@/server/api/trpc'
+import { getCachedPriceSnapshot } from '@/server/price-cache'
 
 const thresholdSchema = positiveDecimalStringSchema(
   'Threshold must be a positive number',
@@ -39,29 +39,24 @@ export const alertsRouter = router({
         })
       }
 
-      const activeCount = await ctx.db.alert.count({
-        where: { userId: ctx.user.id, isActive: true },
-      })
-
-      if (activeCount >= MAX_ACTIVE_ALERTS) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: `Maximum ${MAX_ACTIVE_ALERTS} active alerts allowed`,
-        })
-      }
+      await assertUnderMaxActiveAlerts(ctx.db, ctx.user.id)
 
       if (input.type === 'PRICE' && input.symbol) {
-        const latestSnapshot = await fetchLatestPriceSnapshot(ctx.db)
+        const cached = await getCachedPriceSnapshot(ctx.db)
 
-        if (latestSnapshot) {
-          const prices = parsePriceSnapshot(latestSnapshot.data)
-          const item = findBySymbol(prices, input.symbol)
-          if (!item) {
-            throw new TRPCError({
-              code: 'BAD_REQUEST',
-              message: 'Invalid asset symbol',
-            })
-          }
+        if (!cached) {
+          throw new TRPCError({
+            code: 'SERVICE_UNAVAILABLE',
+            message: 'Price data is not available yet',
+          })
+        }
+
+        const item = findBySymbol(cached.prices, input.symbol)
+        if (!item) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Invalid asset symbol',
+          })
         }
       }
 
@@ -82,15 +77,7 @@ export const alertsRouter = router({
       const alert = await requireOwnedAlert(ctx.db, input.id, ctx.user.id)
 
       if (!alert.isActive) {
-        const activeCount = await ctx.db.alert.count({
-          where: { userId: ctx.user.id, isActive: true },
-        })
-        if (activeCount >= MAX_ACTIVE_ALERTS) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: `Maximum ${MAX_ACTIVE_ALERTS} active alerts allowed`,
-          })
-        }
+        await assertUnderMaxActiveAlerts(ctx.db, ctx.user.id)
       }
 
       return ctx.db.alert.update({

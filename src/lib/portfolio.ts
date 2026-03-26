@@ -1,6 +1,7 @@
 import type { PortfolioSnapshot, PrismaClient } from '@prisma/client'
 
-import { getSellPriceBySymbol, parsePriceSnapshot } from '@/lib/prices'
+import { computeAssetValueIRT, getSellPriceBySymbol } from '@/lib/prices'
+import { getCachedPriceSnapshot } from '@/server/price-cache'
 
 const DEDUP_WINDOW_MINUTES = 5
 
@@ -21,12 +22,12 @@ export async function createPortfolioSnapshot(
 ): Promise<PortfolioSnapshot | null> {
   const whereClause = portfolioId ? { userId, portfolioId } : { userId }
 
-  const [userAssets, priceSnapshot] = await Promise.all([
+  const [userAssets, cached] = await Promise.all([
     db.userAsset.findMany({ where: whereClause }),
-    db.priceSnapshot.findFirst({ orderBy: { snapshotAt: 'desc' } }),
+    getCachedPriceSnapshot(db),
   ])
 
-  if (userAssets.length === 0 || !priceSnapshot) {
+  if (userAssets.length === 0 || !cached) {
     return null
   }
 
@@ -42,8 +43,6 @@ export async function createPortfolioSnapshot(
   })
   if (recent) return null
 
-  const prices = parsePriceSnapshot(priceSnapshot.data)
-
   const breakdown: Array<{
     symbol: string
     quantity: number
@@ -52,9 +51,9 @@ export async function createPortfolioSnapshot(
   let totalIRT = 0
 
   for (const asset of userAssets) {
-    const sellPrice = getSellPriceBySymbol(asset.symbol, prices)
+    const sellPrice = getSellPriceBySymbol(asset.symbol, cached.prices)
     const qty = Number(asset.quantity)
-    const valueIRT = qty * sellPrice
+    const valueIRT = computeAssetValueIRT(qty, sellPrice)
     totalIRT += valueIRT
     breakdown.push({ symbol: asset.symbol, quantity: qty, valueIRT })
   }
