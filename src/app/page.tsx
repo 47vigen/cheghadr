@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { connection } from 'next/server'
 
 import type { PriceItem } from '@/lib/prices'
 import {
@@ -142,6 +143,7 @@ function FeatureCard({
 /* ─── Landing page ───────────────────────────────────────── */
 
 export default async function LandingPage() {
+  await connection()
   const [session, snapshot] = await Promise.all([
     auth(),
     getCachedPriceSnapshot(db),
