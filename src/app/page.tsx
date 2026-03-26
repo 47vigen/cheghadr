@@ -1,4 +1,5 @@
 import { unstable_cache } from 'next/cache'
+import Link from 'next/link'
 
 import type { PriceItem } from '@/lib/prices'
 import {
@@ -221,6 +222,12 @@ export default async function LandingPage() {
             className="flex w-full flex-col gap-2"
             style={{ animation: 'fade-in 500ms 180ms ease-out both' }}
           >
+            <Link
+              href="/app"
+              className="label-compact flex h-12 w-full items-center justify-center border border-foreground bg-foreground text-background transition-opacity hover:opacity-80 active:opacity-60"
+            >
+              Open App
+            </Link>
             <LandingCta />
           </div>
         </div>
@@ -284,7 +291,12 @@ export default async function LandingPage() {
               Personal net worth tracker
             </span>
           </div>
-          <LandingCta footer />
+          <Link
+            href="/app"
+            className="label-compact flex h-10 items-center justify-center border border-foreground bg-foreground px-8 text-background transition-opacity hover:opacity-80 active:opacity-60"
+          >
+            Open App
+          </Link>
         </div>
       </footer>
 
