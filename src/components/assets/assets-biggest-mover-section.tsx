@@ -9,10 +9,13 @@ import type { BiggestMover } from '@/lib/portfolio-utils'
 
 export interface AssetsBiggestMoverSectionProps {
   biggestMover: BiggestMover | null
+  /** Shown next to the percentage (window label or "today"). */
+  periodLabel?: string
 }
 
 export function AssetsBiggestMoverSection({
   biggestMover,
+  periodLabel,
 }: AssetsBiggestMoverSectionProps) {
   const tBreakdown = useTranslations('breakdown')
 
@@ -21,7 +24,7 @@ export function AssetsBiggestMoverSection({
   return (
     <div>
       <Section header={tBreakdown('biggestMover')}>
-        <BiggestMoverCard {...biggestMover} />
+        <BiggestMoverCard {...biggestMover} periodLabel={periodLabel} />
       </Section>
     </div>
   )

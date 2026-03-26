@@ -8,9 +8,19 @@ import {
 } from '@/lib/portfolio-history'
 import { computeLivePortfolioBreakdown } from '@/lib/portfolio-breakdown'
 import { createPortfolioSnapshot } from '@/lib/portfolio'
-import { getPortfolioSnapshotDelta } from '@/lib/portfolio-snapshot-delta'
+import {
+  getComparisonInstantForWindowInTimeZone,
+  getPortfolioSnapshotDelta,
+} from '@/lib/portfolio-snapshot-delta'
 import type { PortfolioDeltaWindow } from '@/lib/portfolio-snapshot-delta'
 import {
+  computeBiggestMoverFromAssetRows,
+  computeBiggestMoverFromHistoricalBreakdown,
+  shouldUseLivePriceChangeForBiggestMover,
+} from '@/lib/portfolio-utils'
+import {
+  findBySymbol,
+  getBilingualAssetLabels,
   getSellPriceBySymbol,
   parsePriceSnapshot,
 } from '@/lib/prices'
@@ -22,11 +32,21 @@ import {
   resolveOwnedPortfolioFilter,
   userAssetsWhereClause,
 } from '@/server/api/helpers'
+import { parseBreakdownJson } from '@/types/schemas'
 import { protectedProcedure, router } from '@/server/api/trpc'
 
 const MAX_PORTFOLIOS = 10
 
 const portfolioIdInput = z.string().min(1).optional()
+
+const biggestMoverInput = z
+  .object({
+    window: z.enum(['1D', '1W', '1M', 'ALL']).default('1D'),
+    timezone: portfolioHistoryTimezoneSchema,
+    portfolioId: portfolioIdInput,
+    locale: z.enum(['en', 'fa']).default('en'),
+  })
+  .optional()
 
 export const portfolioRouter = router({
   list: protectedProcedure.query(async ({ ctx }) => {
@@ -213,19 +233,99 @@ export const portfolioRouter = router({
       z
         .object({
           window: z.enum(['1D', '1W', '1M', 'ALL']).default('1D'),
+          timezone: portfolioHistoryTimezoneSchema,
           portfolioId: portfolioIdInput,
         })
         .optional(),
     )
     .query(({ ctx, input }) => {
       const window = input?.window ?? '1D'
+      const timeZone = input?.timezone ?? 'UTC'
       return getPortfolioSnapshotDelta(
         ctx.db,
         ctx.user.id,
         window,
         input?.portfolioId,
+        timeZone,
       )
     }),
+
+  biggestMover: protectedProcedure.input(biggestMoverInput).query(
+    async ({ ctx, input }) => {
+      const window = input?.window ?? '1D'
+      const timeZone = input?.timezone ?? 'UTC'
+      const locale = input?.locale ?? 'en'
+
+      const portfolioFilter = await resolveOwnedPortfolioFilter(
+        ctx.db,
+        ctx.user.id,
+        input?.portfolioId,
+      )
+      const whereClause = userAssetsWhereClause(ctx.user.id, portfolioFilter)
+
+      const [userAssets, priceSnap] = await Promise.all([
+        ctx.db.userAsset.findMany({
+          where: whereClause,
+          orderBy: { createdAt: 'asc' },
+        }),
+        fetchLatestPriceSnapshot(ctx.db),
+      ])
+
+      if (userAssets.length === 0 || !priceSnap) return null
+
+      const prices = parsePriceSnapshot(priceSnap.data)
+
+      const assetRows = userAssets.map((asset) => {
+        const priceItem = findBySymbol(prices, asset.symbol)
+        const sellPrice = getSellPriceBySymbol(asset.symbol, prices)
+        const qty = Number(asset.quantity)
+        return {
+          symbol: asset.symbol,
+          displayNames: getBilingualAssetLabels(priceItem, asset.symbol),
+          valueIRT: qty * sellPrice,
+          change: priceItem?.change ?? null,
+        }
+      })
+
+      if (shouldUseLivePriceChangeForBiggestMover(window)) {
+        return computeBiggestMoverFromAssetRows(assetRows, locale)
+      }
+
+      const comparisonInstant = getComparisonInstantForWindowInTimeZone(
+        window,
+        timeZone,
+      )
+      if (!comparisonInstant) {
+        return computeBiggestMoverFromAssetRows(assetRows, locale)
+      }
+
+      const prevSnap = await ctx.db.portfolioSnapshot.findFirst({
+        where: {
+          userId: ctx.user.id,
+          ...portfolioFilter,
+          snapshotAt: { lte: comparisonInstant },
+        },
+        orderBy: { snapshotAt: 'desc' },
+        select: { breakdown: true },
+      })
+
+      if (!prevSnap) {
+        return computeBiggestMoverFromAssetRows(assetRows, locale)
+      }
+
+      const breakdownItems = parseBreakdownJson(prevSnap.breakdown)
+      const prevBySymbol = new Map<string, number>()
+      for (const row of breakdownItems) {
+        prevBySymbol.set(row.symbol, row.valueIRT)
+      }
+
+      return computeBiggestMoverFromHistoricalBreakdown(
+        prevBySymbol,
+        assetRows,
+        locale,
+      )
+    },
+  ),
 
   breakdown: protectedProcedure
     .input(

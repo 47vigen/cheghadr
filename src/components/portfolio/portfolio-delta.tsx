@@ -17,6 +17,8 @@ const WINDOWS: DeltaWindow[] = ['1D', '1W', '1M', 'ALL']
 
 interface PortfolioDeltaProps {
   portfolioId?: string
+  /** IANA timezone; must match trend chart / biggest mover. */
+  timezone?: string
   /** When both `window` and `onWindowChange` are set, selection is controlled by the parent. */
   window?: DeltaWindow
   onWindowChange?: (window: DeltaWindow) => void
@@ -24,6 +26,7 @@ interface PortfolioDeltaProps {
 
 export function PortfolioDelta({
   portfolioId,
+  timezone = 'UTC',
   window: windowProp,
   onWindowChange,
 }: PortfolioDeltaProps = {}) {
@@ -35,7 +38,9 @@ export function PortfolioDelta({
   const { selectionChanged } = useTelegramHaptics()
 
   const { data, isLoading } = api.portfolio.delta.useQuery(
-    portfolioId ? { window, portfolioId } : { window },
+    portfolioId
+      ? { window, portfolioId, timezone }
+      : { window, timezone },
     { refetchInterval: TRPC_REFETCH_INTERVAL_MS },
   )
 

@@ -31,6 +31,7 @@ export function PortfolioDeleteModal({
       void utils.portfolio.history.invalidate()
       void utils.portfolio.breakdown.invalidate()
       void utils.portfolio.delta.invalidate()
+      void utils.portfolio.biggestMover.invalidate()
       onOpenChange(false)
     },
     onError: (err) => {
