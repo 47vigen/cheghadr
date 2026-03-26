@@ -252,11 +252,6 @@ export function AssetQuantityDrawer({
                     {priceHint}
                   </Description>
                 ) : null}
-                {showDualFields ? (
-                  <Description className="mt-1 text-muted-foreground text-xs leading-snug">
-                    {tPicker('quantitySyncHint')}
-                  </Description>
-                ) : null}
                 <div className="mt-2 min-w-0" dir="ltr">
                   <NumberField.Group className={fieldGroupClass}>
                     <NumberField.Input
@@ -287,9 +282,6 @@ export function AssetQuantityDrawer({
                   <Label className="font-medium">
                     {tPicker('valueInToman')}
                   </Label>
-                  <Description className="mt-0.5 text-muted-foreground text-xs leading-snug">
-                    {tPicker('valueSyncHint')}
-                  </Description>
                   <div className="mt-2 min-w-0" dir="ltr">
                     <NumberField.Group className={fieldGroupClass}>
                       <NumberField.Input

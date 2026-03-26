@@ -84,8 +84,6 @@
     "assetAmount": "Asset amount",
     "valueInToman": "Value in Toman",
     "priceHint": "Current price: {price} T per unit",
-    "quantitySyncHint": "Toman updates a moment after you stop typing here.",
-    "valueSyncHint": "Amount updates a moment after you stop typing here.",
     "save": "Save",
     "checkmark": "✓ Selected",
     "noResults": "No results found",
