@@ -150,7 +150,7 @@ export default function AddAssetPage() {
         <AssetPicker
           priceData={data.data}
           portfolioId={resolvedPortfolioId}
-          onSaved={() => router.push('/')}
+          onSaved={() => router.push('/app')}
         />
       </div>
     </PageShell>
