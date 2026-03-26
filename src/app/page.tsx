@@ -1,5 +1,3 @@
-import { connection } from 'next/server'
-
 import type { PriceItem } from '@/lib/prices'
 import {
   findBySymbol,
@@ -11,6 +9,8 @@ import { db } from '@/server/db'
 import { getCachedPriceSnapshot } from '@/server/price-cache'
 
 import { LandingCta } from './_landing-cta'
+
+export const dynamic = 'force-dynamic'
 
 /* ─── Featured symbols (priority order) ─────────────────── */
 
@@ -143,7 +143,6 @@ function FeatureCard({
 /* ─── Landing page ───────────────────────────────────────── */
 
 export default async function LandingPage() {
-  await connection()
   const snapshot = await getCachedPriceSnapshot(db)
 
   const featuredItems: PriceItem[] = snapshot
