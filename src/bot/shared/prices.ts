@@ -1,10 +1,9 @@
-import { type PriceItem, parsePriceSnapshot } from '@/lib/prices'
+import type { PriceItem } from '@/lib/prices'
 import { db } from '@/server/db'
+import { getCachedPriceSnapshot } from '@/server/price-cache'
 
 /** Fetch the latest price snapshot and parse it. Shared across screens & wizards. */
 export async function getLatestPrices(): Promise<PriceItem[]> {
-  const snap = await db.priceSnapshot.findFirst({
-    orderBy: { snapshotAt: 'desc' },
-  })
-  return snap ? parsePriceSnapshot(snap.data) : []
+  const cached = await getCachedPriceSnapshot(db)
+  return cached?.prices ?? []
 }
