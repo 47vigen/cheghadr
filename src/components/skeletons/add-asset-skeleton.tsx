@@ -12,7 +12,7 @@ export function AddAssetSkeleton() {
     <PageSkeleton>
       <Section>
         <div className="px-2 py-1.5">
-          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full rounded-xl" />
         </div>
       </Section>
 

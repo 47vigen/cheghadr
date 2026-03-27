@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl'
 
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 
-import { usePathname, useRouter } from '@/i18n/navigation'
+import { Link, usePathname } from '@/i18n/navigation'
 
 type AppRoute = '/app' | '/prices' | '/calculator'
 
@@ -29,7 +29,6 @@ const tabs: Array<{
 
 export function BottomNav() {
   const pathname = usePathname()
-  const router = useRouter()
   const t = useTranslations('nav')
   const { selectionChanged } = useTelegramHaptics()
 
@@ -44,15 +43,12 @@ export function BottomNav() {
         const isSelected =
           pathname === path || pathname.startsWith(`${path}/`)
         return (
-          <button
+          <Link
             key={id}
-            type="button"
+            href={path}
             aria-label={t(labelKey)}
             aria-current={isSelected ? 'page' : undefined}
-            onClick={() => {
-              selectionChanged()
-              router.push(path)
-            }}
+            onClick={selectionChanged}
             className={`flex flex-col items-center gap-0.5 px-2 py-1 transition-colors ${
               isSelected
                 ? 'text-accent'
@@ -63,7 +59,7 @@ export function BottomNav() {
             <span className="label-compact" aria-hidden>
               {t(labelKey)}
             </span>
-          </button>
+          </Link>
         )
       })}
     </nav>

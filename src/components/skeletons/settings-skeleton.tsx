@@ -11,8 +11,8 @@ export function SettingsSkeleton() {
     <PageSkeleton>
       <Section header={<SectionHeaderSkeleton />}>
         <div className="flex gap-2 p-1">
-          <Skeleton className="h-9 flex-1" />
-          <Skeleton className="h-9 flex-1" />
+          <Skeleton className="h-9 flex-1 rounded-xl" />
+          <Skeleton className="h-9 flex-1 rounded-xl" />
         </div>
       </Section>
 
@@ -22,7 +22,7 @@ export function SettingsSkeleton() {
             <Skeleton className="mb-1 h-4 w-24" />
             <Skeleton className="h-3 w-40" />
           </div>
-          <Skeleton className="h-6 w-11 shrink-0" />
+          <Skeleton className="h-6 w-11 shrink-0 rounded-full" />
         </div>
       </Section>
     </PageSkeleton>

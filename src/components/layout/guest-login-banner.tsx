@@ -1,17 +1,14 @@
 'use client'
 
-import type { Route } from 'next'
-
 import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 
-import { usePathname, useRouter } from '@/i18n/navigation'
+import { Link, usePathname } from '@/i18n/navigation'
 import { getRawInitData } from '@/utils/telegram'
 
 export function GuestLoginBanner() {
   const { data: session, status } = useSession()
   const pathname = usePathname()
-  const router = useRouter()
   const t = useTranslations('guest')
 
   // Don't show in Telegram mini app — auth handled via initData
@@ -23,20 +20,14 @@ export function GuestLoginBanner() {
   // Don't show if authenticated or still loading
   if (status === 'loading' || session) return null
 
-  const handleLogin = () => {
-    const encodedPath = encodeURIComponent(pathname)
-    router.push(`/login?callbackUrl=${encodedPath}` as Route)
-  }
-
   return (
     <div className="sticky top-0 z-50 flex items-center justify-center bg-primary px-4 pt-[max(0.625rem,env(safe-area-inset-top))] pb-2.5">
-      <button
-        type="button"
+      <Link
+        href={{ pathname: '/login', query: { callbackUrl: pathname } }}
         className="font-medium text-primary-foreground text-sm"
-        onClick={handleLogin}
       >
         {t('ctaBanner')}
-      </button>
+      </Link>
     </div>
   )
 }

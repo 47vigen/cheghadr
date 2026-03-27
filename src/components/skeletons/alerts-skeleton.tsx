@@ -18,14 +18,14 @@ export function AlertsSkeleton() {
 
       <Section header={<SectionHeaderSkeleton />}>
         <div className="flex flex-col gap-3 p-2">
-          <Skeleton className="h-9 w-full" />
-          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-9 w-full rounded-xl" />
+          <Skeleton className="h-10 w-full rounded-xl" />
           <div className="flex gap-2">
-            <Skeleton className="h-9 flex-1" />
-            <Skeleton className="h-9 flex-1" />
+            <Skeleton className="h-9 flex-1 rounded-xl" />
+            <Skeleton className="h-9 flex-1 rounded-xl" />
           </div>
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-9 w-full" />
+          <Skeleton className="h-10 w-full rounded-xl" />
+          <Skeleton className="h-9 w-full rounded-xl" />
         </div>
       </Section>
 

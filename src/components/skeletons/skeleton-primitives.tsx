@@ -15,7 +15,7 @@ function ListRowSkeleton({
 }: ListRowSkeletonProps) {
   return (
     <div className="cell-row">
-      <Skeleton className="size-8 shrink-0" />
+      <Skeleton className="size-8 shrink-0 rounded-full" />
       <div className="min-w-0 flex-1">
         <Skeleton className="h-4 w-24" />
         {hasSubtitle ? <Skeleton className="mt-0.5 h-3 w-16" /> : null}

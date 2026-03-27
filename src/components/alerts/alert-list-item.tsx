@@ -64,6 +64,11 @@ export function AlertListItem({ alert }: AlertListItemProps) {
   return (
     <>
       <Cell
+        onPress={
+          toggleMutation.isPending
+            ? undefined
+            : () => toggleMutation.mutate({ id: alert.id })
+        }
         before={
           <IconBell
             size={18}
