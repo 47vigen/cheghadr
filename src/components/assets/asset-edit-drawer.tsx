@@ -9,7 +9,7 @@ import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 
 import { api } from '@/trpc/react'
 
-export interface AssetEditModalProps {
+export interface AssetEditDrawerProps {
   assetId: string
   assetName: string
   symbol: string
@@ -19,7 +19,7 @@ export interface AssetEditModalProps {
   onOpenChange: (open: boolean) => void
 }
 
-export function AssetEditModal({
+export function AssetEditDrawer({
   assetId,
   assetName,
   symbol,
@@ -27,7 +27,7 @@ export function AssetEditModal({
   sellPrice,
   isOpen,
   onOpenChange,
-}: AssetEditModalProps) {
+}: AssetEditDrawerProps) {
   const t = useTranslations('assets')
 
   const utils = api.useUtils()
