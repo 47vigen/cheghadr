@@ -89,6 +89,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     if (!serverSettings || serverLocaleAppliedRef.current) return
     if (localeChangeFromUserRef.current) return
     serverLocaleAppliedRef.current = true
+    if (!serverSettings.isOnboarded) return
     const saved = serverSettings.preferredLocale as Locale | undefined
     if (saved && saved !== locale) {
       setLocaleState(saved)
