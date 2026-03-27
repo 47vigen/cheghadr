@@ -2,10 +2,9 @@
 
 import { useState } from 'react'
 
-import { InputGroup, TextField } from '@heroui/react'
+import { InputGroup, TextField, toast } from '@heroui/react'
 import { IconSearch } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { toast } from 'sonner'
 
 import { AssetQuantityDrawer } from '@/components/assets/asset-quantity-drawer'
 import { AssetSearchPanel } from '@/components/assets/asset-search-panel'
@@ -58,7 +57,7 @@ export function AssetPicker({
     },
     onError: (err) => {
       notificationOccurred('error')
-      toast.error(err.message || t('toastAddError'))
+      toast.danger(err.message || t('toastAddError'))
     },
   })
 
@@ -86,11 +85,11 @@ export function AssetPicker({
     if (!selectedItem || addMutation.isPending) return
     const sym = getBaseSymbol(selectedItem)
     if (!sym) {
-      toast.error(t('toastAddError'))
+      toast.danger(t('toastAddError'))
       return
     }
     if (!portfolioId) {
-      toast.error(t('toastAddError'))
+      toast.danger(t('toastAddError'))
       return
     }
     addMutation.mutate({ symbol: sym, quantity: qty, portfolioId })
@@ -99,7 +98,9 @@ export function AssetPicker({
   const sellPrice = Number(selectedItem?.sell_price ?? 0)
   const isIRT = selectedItem?.symbol === 'IRT'
   const symbol = selectedItem ? getBaseSymbol(selectedItem) : ''
-  const assetName = selectedItem ? getLocalizedItemName(selectedItem, locale) : ''
+  const assetName = selectedItem
+    ? getLocalizedItemName(selectedItem, locale)
+    : ''
   const drawerTitle = selectedItem
     ? `${assetName} — ${tPicker('enterQuantity')}`
     : tPicker('enterQuantity')

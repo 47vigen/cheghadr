@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
+import { toast } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
-import { toast } from 'sonner'
 
 import { AssetsAlertSummarySection } from '@/components/assets/assets-alert-summary-section'
 import { AssetsBiggestMoverSection } from '@/components/assets/assets-biggest-mover-section'
@@ -13,7 +13,7 @@ import { AssetsFab } from '@/components/assets/assets-fab'
 import { AssetsHeroSection } from '@/components/assets/assets-hero-section'
 import { AssetsListSection } from '@/components/assets/assets-list-section'
 import { PageShell } from '@/components/layout/page-shell'
-import { PortfolioDeleteModal } from '@/components/portfolio/portfolio-delete-modal'
+import { PortfolioDeleteDialog } from '@/components/portfolio/portfolio-delete-dialog'
 import type { DeltaWindow } from '@/components/portfolio/portfolio-delta'
 import { PortfolioFormModal } from '@/components/portfolio/portfolio-form-modal'
 import { AssetsSkeleton } from '@/components/skeletons/assets-skeleton'
@@ -308,7 +308,7 @@ export default function AssetsPage() {
         }
       />
 
-      <PortfolioDeleteModal
+      <PortfolioDeleteDialog
         isOpen={showDeleteModal}
         onOpenChange={(open) => {
           setShowDeleteModal(open)

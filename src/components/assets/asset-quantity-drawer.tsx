@@ -9,9 +9,9 @@ import {
   Label,
   NumberField,
   Spinner,
+  toast,
 } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
-import { toast } from 'sonner'
 
 import { formatIRT } from '@/lib/prices'
 
@@ -91,7 +91,7 @@ export function AssetQuantityDrawer({
   const handleSave = () => {
     if (isPending) return
     if (quantityNum === undefined || quantityNum <= 0) {
-      toast.error(tAssets('toastInvalidQuantity'))
+      toast.danger(tAssets('toastInvalidQuantity'))
       return
     }
     onSave(String(quantityNum))
@@ -156,10 +156,7 @@ export function AssetQuantityDrawer({
                 ) : null}
                 <div className="mt-2 min-w-0" dir="ltr">
                   <NumberField.Group className={fieldGroupClass}>
-                    <NumberField.Input
-                      placeholder="0"
-                      className={inputClass}
-                    />
+                    <NumberField.Input placeholder="0" className={inputClass} />
                     {symbol ? (
                       <span aria-hidden className={suffixClass}>
                         {symbol}
