@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 import { useLocale, useTranslations } from 'next-intl'
 
-import { AssetDeleteModal } from '@/components/assets/asset-delete-modal'
+import { AssetDeleteDialog } from '@/components/assets/asset-delete-dialog'
 import { AssetEditDrawer } from '@/components/assets/asset-edit-drawer'
 import { AssetListItem } from '@/components/assets/asset-list-item'
 import { CategoryFilterHeader } from '@/components/assets/category-filter-header'
@@ -93,7 +93,7 @@ export function AssetsListSection({
           if (!open) setEditTarget(null)
         }}
       />
-      <AssetDeleteModal
+      <AssetDeleteDialog
         assetId={deleteTarget?.id ?? ''}
         assetName={
           deleteTarget

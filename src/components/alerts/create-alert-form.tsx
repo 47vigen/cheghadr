@@ -10,10 +10,10 @@ import {
   Tabs,
   Text,
   TextField,
+  toast,
 } from '@heroui/react'
 import { clsx } from 'clsx'
 import { useLocale, useTranslations } from 'next-intl'
-import { toast } from 'sonner'
 
 import { AssetSelector } from '@/components/assets/asset-selector'
 
@@ -60,7 +60,7 @@ export function CreateAlertForm() {
     },
     onError: (err) => {
       notificationOccurred('error')
-      toast.error(err.message || t('toastCreateError'))
+      toast.danger(err.message || t('toastCreateError'))
     },
   })
 

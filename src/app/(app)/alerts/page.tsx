@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from 'react'
 
-import { Button, Switch, Text } from '@heroui/react'
+import { Button, Switch, Text, toast } from '@heroui/react'
 import { IconArrowLeft, IconBellPlus } from '@tabler/icons-react'
 import { useTranslations } from 'next-intl'
-import { toast } from 'sonner'
 
 import { AlertListItem } from '@/components/alerts/alert-list-item'
 import { CreateAlertForm } from '@/components/alerts/create-alert-form'
@@ -55,7 +54,7 @@ export default function AlertsPage() {
     },
     onError: (err) => {
       notificationOccurred('error')
-      toast.error(err.message || t('toastToggleError'))
+      toast.danger(err.message || t('toastToggleError'))
     },
   })
 

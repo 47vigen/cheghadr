@@ -2,10 +2,9 @@
 
 import { useMemo, useState } from 'react'
 
-import { InputGroup, TextField } from '@heroui/react'
+import { InputGroup, TextField, toast } from '@heroui/react'
 import { IconSearch } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { toast } from 'sonner'
 
 import { AssetQuantityDrawer } from '@/components/assets/asset-quantity-drawer'
 import { PageShell } from '@/components/layout/page-shell'
@@ -64,7 +63,7 @@ export default function PricesPage() {
     },
     onError: (err) => {
       notificationOccurred('error')
-      toast.error(err.message || tAssets('toastAddError'))
+      toast.danger(err.message || tAssets('toastAddError'))
     },
   })
 
@@ -82,7 +81,7 @@ export default function PricesPage() {
     if (!modalItem || addMutation.isPending) return
     const sym = getBaseSymbol(modalItem)
     if (!sym || !portfolioId) {
-      toast.error(tAssets('toastAddError'))
+      toast.danger(tAssets('toastAddError'))
       return
     }
     addMutation.mutate({ symbol: sym, quantity: qty, portfolioId })

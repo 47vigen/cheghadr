@@ -2,8 +2,8 @@
 
 import type { ReactNode } from 'react'
 
+import { Toast } from '@heroui/react'
 import { SessionProvider } from 'next-auth/react'
-import { Toaster } from 'sonner'
 
 import { ClientProviders } from '@/providers/client-providers'
 import { LocaleProvider } from '@/providers/locale-provider'
@@ -28,7 +28,7 @@ export function ClientRoot({ children }: { children: ReactNode }) {
         <LocaleProvider>
           <ClientProviders>
             {children}
-            <Toaster richColors position="top-center" />
+            <Toast.Provider placement="top" />
           </ClientProviders>
         </LocaleProvider>
       </TRPCReactProvider>

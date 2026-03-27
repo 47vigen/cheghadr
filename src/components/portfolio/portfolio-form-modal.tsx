@@ -2,9 +2,16 @@
 
 import { useEffect, useState } from 'react'
 
-import { Button, Input, Label, Modal, Spinner, TextField } from '@heroui/react'
+import {
+  Button,
+  Input,
+  Label,
+  Modal,
+  Spinner,
+  TextField,
+  toast,
+} from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
-import { toast } from 'sonner'
 
 import { api } from '@/trpc/react'
 import type { PortfolioListItem } from '@/types/api'
@@ -44,7 +51,7 @@ export function PortfolioFormModal({
       onOpenChange(false)
     },
     onError: (err) => {
-      toast.error(err.message || t('toastCreateError'))
+      toast.danger(err.message || t('toastCreateError'))
     },
   })
 
@@ -55,7 +62,7 @@ export function PortfolioFormModal({
       onOpenChange(false)
     },
     onError: (err) => {
-      toast.error(err.message || t('toastRenameError'))
+      toast.danger(err.message || t('toastRenameError'))
     },
   })
 

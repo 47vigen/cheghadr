@@ -1,7 +1,7 @@
 'use client'
 
+import { toast } from '@heroui/react'
 import { useTranslations } from 'next-intl'
-import { toast } from 'sonner'
 
 import { AssetQuantityDrawer } from '@/components/assets/asset-quantity-drawer'
 
@@ -42,7 +42,7 @@ export function AssetEditDrawer({
     },
     onError: (err) => {
       notificationOccurred('error')
-      toast.error(err.message || t('toastUpdateError'))
+      toast.danger(err.message || t('toastUpdateError'))
     },
   })
 
