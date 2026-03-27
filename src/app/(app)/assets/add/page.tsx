@@ -3,22 +3,18 @@
 import { useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
 
-import { Button } from '@heroui/react'
-import { IconArrowLeft } from '@tabler/icons-react'
 import { useTranslations } from 'next-intl'
 
 import { AssetPicker } from '@/components/assets/asset-picker'
+import { PageHeader } from '@/components/layout/page-header'
 import { PageShell } from '@/components/layout/page-shell'
 import { AddAssetSkeleton } from '@/components/skeletons/add-asset-skeleton'
 import { EmptyState, ErrorState } from '@/components/ui/async-states'
-import { Cell } from '@/components/ui/cell'
-import { Section } from '@/components/ui/section'
 
 import { useTelegramBackButton } from '@/hooks/use-telegram-back-button'
 
 import { useRouter } from '@/i18n/navigation'
 import { api } from '@/trpc/react'
-import { isTelegramWebApp } from '@/utils/telegram'
 
 export default function AddAssetPage() {
   const router = useRouter()
@@ -26,7 +22,6 @@ export default function AddAssetPage() {
   const searchParams = useSearchParams()
   const portfolioId = searchParams.get('portfolioId') ?? ''
   useTelegramBackButton(true)
-  const inTelegram = isTelegramWebApp()
 
   const { data, isLoading, isError, error, refetch } =
     api.prices.latest.useQuery()
@@ -121,29 +116,12 @@ export default function AddAssetPage() {
 
   return (
     <PageShell>
-      {!inTelegram && (
-        <div>
-          <Section>
-            <Cell
-              before={
-                <Button
-                  isIconOnly
-                  variant="ghost"
-                  size="md"
-                  aria-label={t('back')}
-                  onPress={() => router.push('/')}
-                >
-                  <IconArrowLeft size={24} />
-                </Button>
-              }
-            >
-              {t('title')}
-            </Cell>
-          </Section>
-        </div>
-      )}
+      <PageHeader
+        title={t('title')}
+        onBack={() => router.push('/')}
+        backLabel={t('back')}
+      />
       <div className="px-3 pt-2 pb-1">
-        {inTelegram && <h2 className="section-header mb-0.5">{t('title')}</h2>}
         <p className="text-muted-foreground text-xs">{t('subtitle')}</p>
       </div>
       <div>

@@ -12,6 +12,7 @@ import { PriceCategoryNav } from '@/components/prices/price-category-nav'
 import { useAssetSearchGroups } from '@/hooks/use-asset-search-groups'
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 
+import { getDir } from '@/lib/i18n-utils'
 import type { PriceItem } from '@/lib/prices'
 import {
   formatIRT,
@@ -114,7 +115,7 @@ export function AssetPicker({
               <SearchField.SearchIcon />
               <SearchField.Input
                 placeholder={tPicker('search')}
-                dir={locale === 'fa' ? 'rtl' : 'ltr'}
+                dir={getDir(locale)}
                 className="py-3"
               />
               <SearchField.ClearButton />

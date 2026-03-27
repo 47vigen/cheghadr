@@ -14,6 +14,7 @@ import { Section } from '@/components/ui/section'
 
 import { useAssetSearchGroups } from '@/hooks/use-asset-search-groups'
 
+import { getDir } from '@/lib/i18n-utils'
 import type { PriceItem } from '@/lib/prices'
 import {
   getBaseSymbol,
@@ -128,7 +129,7 @@ export function AssetSelector({
         >
           <Drawer.Content placement="bottom">
             <Drawer.Dialog
-              dir={locale === 'fa' ? 'rtl' : 'ltr'}
+              dir={getDir(locale)}
               className="max-h-[min(92dvh,var(--visual-viewport-height,100dvh)*0.92)] border-border/60 border-t bg-background px-0 pt-3 pb-0 shadow-[0_-8px_32px_oklch(0_0_0/0.12)] sm:max-h-[min(90dvh,var(--visual-viewport-height,100dvh)*0.9)] dark:shadow-[0_-12px_40px_oklch(0_0_0/0.35)]"
             >
               <Drawer.Handle className="mx-auto mb-0.5" />

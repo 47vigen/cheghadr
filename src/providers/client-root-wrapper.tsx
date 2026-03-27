@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 import type { ReactNode } from 'react'
 
-import { DynamicLoader } from '@/components/dynamic-loader'
+import { DynamicLoader } from '@/components/ui/dynamic-loader'
 
 const ClientRoot = dynamic(
   () =>

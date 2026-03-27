@@ -10,6 +10,9 @@ interface CellProps {
   subtitle?: string
   subhead?: string
   after?: ReactNode
+  /** Preferred interaction handler (React Aria style). */
+  onPress?: () => void
+  /** @deprecated Use onPress instead. */
   onClick?: () => void
   className?: string
 }
@@ -20,19 +23,20 @@ export function Cell({
   subtitle,
   subhead,
   after,
+  onPress,
   onClick,
   className,
 }: CellProps) {
-  const Component = onClick ? 'button' : 'div'
-  const isInteractive = !!onClick
+  const handler = onPress ?? onClick
+  const Component = handler ? 'button' : 'div'
 
   return (
     <Component
-      type={onClick ? 'button' : undefined}
-      onClick={onClick}
+      type={handler ? 'button' : undefined}
+      onClick={handler}
       className={clsx(
         'cell-row',
-        isInteractive && 'cell-row-interactive',
+        handler && 'cell-row-interactive',
         className,
       )}
     >

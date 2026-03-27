@@ -8,7 +8,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 
 import { formatIRT, getIntlLocale } from '@/lib/prices'
-import { TRPC_REFETCH_INTERVAL_MS } from '@/trpc/constants'
+import { REFETCH_PORTFOLIO_MS } from '@/trpc/constants'
 import { api } from '@/trpc/react'
 
 export type DeltaWindow = '1D' | '1W' | '1M' | 'ALL'
@@ -39,7 +39,7 @@ export function PortfolioDelta({
 
   const { data, isLoading } = api.portfolio.delta.useQuery(
     portfolioId ? { window, portfolioId, timezone } : { window, timezone },
-    { refetchInterval: TRPC_REFETCH_INTERVAL_MS },
+    { refetchInterval: REFETCH_PORTFOLIO_MS },
   )
 
   if (!data && !isLoading) return null

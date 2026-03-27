@@ -14,6 +14,7 @@ import WebApp from '@twa-dev/sdk'
 import { NextIntlClientProvider } from 'next-intl'
 
 import type { Locale } from '@/i18n/routing'
+import { getDir } from '@/lib/i18n-utils'
 import { api } from '@/trpc/react'
 
 import enMessages from '../../messages/en.json'
@@ -77,7 +78,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.lang = locale
-    document.documentElement.dir = locale === 'fa' ? 'rtl' : 'ltr'
+    document.documentElement.dir = getDir(locale)
   }, [locale])
 
   useEffect(() => {
