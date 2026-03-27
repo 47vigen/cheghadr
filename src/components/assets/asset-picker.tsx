@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 
-import { InputGroup, TextField, toast } from '@heroui/react'
-import { IconSearch } from '@tabler/icons-react'
+import { SearchField, toast } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { AssetQuantityDrawer } from '@/components/assets/asset-quantity-drawer'
@@ -39,7 +38,7 @@ export function AssetPicker({
   const locale = useLocale()
 
   const [search, setSearch] = useState('')
-  const [activeCategory, setActiveCategory] = useState<string | null>(null)
+  const [activeCategory, setActiveCategory] = useState<string | null>('CURRENCY')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<PriceItem | null>(null)
 
@@ -110,19 +109,17 @@ export function AssetPicker({
       {/* Unified sticky header: search always on top, categories below */}
       <div className="sticky top-0 z-20 -mx-[var(--page-px)] border-border/80 border-b bg-background/90 px-[var(--page-px)] backdrop-blur-md">
         <div className="py-2">
-          <TextField value={search} onChange={handleSearchChange} fullWidth>
-            <InputGroup>
-              <InputGroup.Prefix>
-                <IconSearch size={16} className="text-muted-foreground" />
-              </InputGroup.Prefix>
-              <InputGroup.Input
+          <SearchField value={search} onChange={handleSearchChange} fullWidth>
+            <SearchField.Group>
+              <SearchField.SearchIcon />
+              <SearchField.Input
                 placeholder={tPicker('search')}
-                type="search"
                 dir={locale === 'fa' ? 'rtl' : 'ltr'}
-                className="py-3 [appearance:textfield] [color-scheme:inherit] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
+                className="py-3"
               />
-            </InputGroup>
-          </TextField>
+              <SearchField.ClearButton />
+            </SearchField.Group>
+          </SearchField>
         </div>
         {categoryIds.length > 0 && !search && (
           <PriceCategoryNav

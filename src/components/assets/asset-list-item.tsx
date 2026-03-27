@@ -65,9 +65,15 @@ export function AssetListItem({
         </div>
       </button>
 
-      {/* Right zone: value + change + delete */}
+      {/* Right zone: value + change + percentage (tappable → edit) + delete */}
       <div className="flex shrink-0 items-center gap-1.5">
-        <div className="flex flex-col items-end gap-0.5">
+        <button
+          type="button"
+          className="flex flex-col items-end gap-0.5 transition-opacity active:opacity-60"
+          onClick={onEdit}
+          aria-label={t('editTitle', { name: assetName })}
+          tabIndex={-1}
+        >
           <Text className="font-display font-semibold text-sm tabular-nums">
             {formatIRT(valueIRT, locale)} {t('tomanAbbr')}
           </Text>
@@ -80,7 +86,7 @@ export function AssetListItem({
               % {tBreakdown('ofPortfolio')}
             </Text>
           )}
-        </div>
+        </button>
         <Button
           isIconOnly
           variant="ghost"

@@ -4,12 +4,11 @@ import { useState } from 'react'
 
 import {
   Button,
-  Input,
   Label,
+  NumberField,
   Spinner,
   Tabs,
   Text,
-  TextField,
   toast,
 } from '@heroui/react'
 import { clsx } from 'clsx'
@@ -34,12 +33,13 @@ const PORTFOLIO_SYMBOL = '__PORTFOLIO__'
 
 export function CreateAlertForm() {
   const t = useTranslations('alerts')
+  const tAssets = useTranslations('assets')
   const locale = useLocale()
   const { notificationOccurred } = useTelegramHaptics()
 
   const [selectedSymbol, setSelectedSymbol] = useState('')
   const [direction, setDirection] = useState<AlertDir>('ABOVE')
-  const [threshold, setThreshold] = useState('')
+  const [threshold, setThreshold] = useState<number | undefined>(undefined)
 
   const utils = api.useUtils()
 
@@ -55,7 +55,7 @@ export function CreateAlertForm() {
       notificationOccurred('success')
       void utils.alerts.list.invalidate()
       setSelectedSymbol('')
-      setThreshold('')
+      setThreshold(undefined)
       toast.success(t('toastCreated'))
     },
     onError: (err) => {
@@ -75,17 +75,17 @@ export function CreateAlertForm() {
   const canSubmit =
     !atLimit &&
     selectedSymbol !== '' &&
-    threshold !== '' &&
-    Number(threshold) > 0 &&
+    threshold !== undefined &&
+    threshold > 0 &&
     !createMutation.isPending
 
   const handleSubmit = () => {
-    if (!canSubmit) return
+    if (!canSubmit || threshold === undefined) return
     createMutation.mutate({
       type: alertType,
       symbol: isPortfolio ? undefined : selectedSymbol,
       direction,
-      thresholdIRT: threshold,
+      thresholdIRT: String(threshold),
     })
   }
 
@@ -162,21 +162,29 @@ export function CreateAlertForm() {
         </Tabs.ListContainer>
       </Tabs>
 
-      <TextField
+      <NumberField
         value={threshold}
         onChange={setThreshold}
         fullWidth
-        name="threshold"
+        minValue={0}
+        formatOptions={{ maximumFractionDigits: 0, useGrouping: true }}
       >
         <Label>{t('threshold')}</Label>
-        <Input
-          type="number"
-          inputMode="decimal"
-          placeholder={t('thresholdPlaceholder')}
-          dir={locale === 'fa' ? 'rtl' : 'ltr'}
-          className="py-3"
-        />
-      </TextField>
+        <div className="mt-2 min-w-0" dir="ltr">
+          <NumberField.Group className="number-field__group !inline-flex !h-auto min-h-11 w-full min-w-0 items-stretch overflow-hidden rounded-xl border border-border/80 bg-surface/40 shadow-none transition-colors data-[focus-within]:border-primary/40 data-[focus-within]:bg-surface">
+            <NumberField.Input
+              placeholder={t('thresholdPlaceholder')}
+              className="number-field__input min-h-11 min-w-0 flex-1 bg-transparent py-2.5 ps-3 pe-2 leading-normal"
+            />
+            <span
+              aria-hidden
+              className="flex max-w-[40%] shrink-0 items-center border-border/50 border-s px-3 font-medium text-muted-foreground text-sm tabular-nums"
+            >
+              {tAssets('tomanAbbr')}
+            </span>
+          </NumberField.Group>
+        </div>
+      </NumberField>
 
       <Button
         variant="primary"
