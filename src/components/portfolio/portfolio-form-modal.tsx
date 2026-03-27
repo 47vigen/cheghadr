@@ -13,6 +13,7 @@ import {
 } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
 
+import { getDir } from '@/lib/i18n-utils'
 import { api } from '@/trpc/react'
 import type { PortfolioListItem } from '@/types/api'
 
@@ -91,7 +92,7 @@ export function PortfolioFormModal({
         <Modal.Container placement="auto" size="md">
           <Modal.Dialog
             className="sm:max-w-[360px]"
-            dir={locale === 'fa' ? 'rtl' : 'ltr'}
+            dir={getDir(locale)}
           >
             <Modal.CloseTrigger />
             <Modal.Header>
@@ -110,7 +111,7 @@ export function PortfolioFormModal({
                 <Input
                   type="text"
                   placeholder={t('namePlaceholder')}
-                  dir={locale === 'fa' ? 'rtl' : 'ltr'}
+                  dir={getDir(locale)}
                   className="py-3"
                 />
               </TextField>

@@ -33,8 +33,6 @@ export function BottomNav() {
   const t = useTranslations('nav')
   const { selectionChanged } = useTelegramHaptics()
 
-  if (pathname.startsWith('/assets/add')) return null
-
   return (
     <nav
       className="fixed start-0 end-0 bottom-0 z-40 flex items-center justify-around border-border border-t bg-surface px-2 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))]"
@@ -43,7 +41,8 @@ export function BottomNav() {
       }}
     >
       {tabs.map(({ id, path, labelKey, Icon }) => {
-        const isSelected = pathname === path
+        const isSelected =
+          pathname === path || pathname.startsWith(`${path}/`)
         return (
           <button
             key={id}

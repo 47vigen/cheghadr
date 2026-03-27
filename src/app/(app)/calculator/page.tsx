@@ -20,7 +20,7 @@ import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 
 import { computeConversion, parsePriceSnapshot } from '@/lib/prices'
-import { TRPC_REFETCH_INTERVAL_MS } from '@/trpc/constants'
+import { REFETCH_PRICES_MS } from '@/trpc/constants'
 import { api } from '@/trpc/react'
 
 export default function CalculatorPage() {
@@ -28,7 +28,7 @@ export default function CalculatorPage() {
   const tCommon = useTranslations('common')
   const { data, isLoading, isError, error, refetch } =
     api.prices.latest.useQuery(undefined, {
-      refetchInterval: TRPC_REFETCH_INTERVAL_MS,
+      refetchInterval: REFETCH_PRICES_MS,
       refetchOnWindowFocus: true,
     })
 

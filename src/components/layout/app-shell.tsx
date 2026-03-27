@@ -8,8 +8,7 @@ import { BottomNav } from '@/components/layout/bottom-nav'
 import { GuestLoginBanner } from '@/components/layout/guest-login-banner'
 
 import { usePathname } from '@/i18n/navigation'
-
-const NO_NAV_ROUTES = ['/alerts', '/assets/add', '/settings']
+import { NO_NAV_ROUTES } from '@/lib/routes'
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()

@@ -1,28 +1,23 @@
 'use client'
 
-import { Button } from '@heroui/react'
-import { IconArrowLeft, IconBellPlus } from '@tabler/icons-react'
+import { IconBellPlus } from '@tabler/icons-react'
 import { useTranslations } from 'next-intl'
 
 import { AlertListItem } from '@/components/alerts/alert-list-item'
 import { CreateAlertForm } from '@/components/alerts/create-alert-form'
+import { PageHeader } from '@/components/layout/page-header'
 import { PageShell } from '@/components/layout/page-shell'
 import { AlertsSkeleton } from '@/components/skeletons/alerts-skeleton'
 import { ErrorState } from '@/components/ui/async-states'
-import { Cell } from '@/components/ui/cell'
 import { Placeholder } from '@/components/ui/placeholder'
 import { Section } from '@/components/ui/section'
 
 import { useTelegramBackButton } from '@/hooks/use-telegram-back-button'
 
-import { useRouter } from '@/i18n/navigation'
 import { api } from '@/trpc/react'
-import { isTelegramWebApp } from '@/utils/telegram'
 
 export default function AlertsPage() {
   const t = useTranslations('alerts')
-  const router = useRouter()
-  const inTelegram = isTelegramWebApp()
   useTelegramBackButton(true)
 
   const {
@@ -32,6 +27,10 @@ export default function AlertsPage() {
     error,
     refetch,
   } = api.alerts.list.useQuery()
+
+  if (isLoading) {
+    return <AlertsSkeleton />
+  }
 
   if (isError) {
     return (
@@ -44,42 +43,13 @@ export default function AlertsPage() {
     )
   }
 
-  if (isLoading) {
-    return <AlertsSkeleton />
-  }
-
   const activeAlerts = alerts?.filter((a) => a.isActive) ?? []
   const triggeredAlerts =
     alerts?.filter((a) => !a.isActive && a.triggeredAt) ?? []
 
   return (
     <PageShell>
-      {!inTelegram && (
-        <div>
-          <Section>
-            <Cell
-              before={
-                <Button
-                  isIconOnly
-                  variant="ghost"
-                  size="md"
-                  aria-label={t('back')}
-                  onPress={() => router.back()}
-                >
-                  <IconArrowLeft size={24} />
-                </Button>
-              }
-            >
-              {t('title')}
-            </Cell>
-          </Section>
-        </div>
-      )}
-      {inTelegram && (
-        <div className="px-3 pt-3 pb-1">
-          <h2 className="section-header mb-0.5">{t('title')}</h2>
-        </div>
-      )}
+      <PageHeader title={t('title')} backLabel={t('back')} />
 
       <div>
         <Section header={t('create')}>

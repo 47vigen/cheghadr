@@ -10,6 +10,7 @@ import {
 } from '@/components/assets/asset-list-surface'
 import { Section } from '@/components/ui/section'
 
+import { getDir } from '@/lib/i18n-utils'
 import type { PriceItem } from '@/lib/prices'
 
 interface AssetSearchPanelProps {
@@ -48,7 +49,7 @@ export function AssetSearchPanel({
         <SearchField.SearchIcon />
         <SearchField.Input
           placeholder={searchPlaceholder}
-          dir={locale === 'fa' ? 'rtl' : 'ltr'}
+          dir={getDir(locale)}
           className="py-3"
         />
         <SearchField.ClearButton />

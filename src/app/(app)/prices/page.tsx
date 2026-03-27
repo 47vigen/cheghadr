@@ -22,6 +22,7 @@ import { usePriceCategoryScrollSpy } from '@/hooks/use-price-category-scroll-spy
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 
+import { getDir } from '@/lib/i18n-utils'
 import type { PriceItem } from '@/lib/prices'
 import {
   filterPriceItems,
@@ -32,7 +33,7 @@ import {
   sortedGroupEntries,
 } from '@/lib/prices'
 import { priceCategorySectionId } from '@/lib/prices/anchors'
-import { TRPC_REFETCH_INTERVAL_MS } from '@/trpc/constants'
+import { REFETCH_PRICES_MS } from '@/trpc/constants'
 import { api } from '@/trpc/react'
 
 export default function PricesPage() {
@@ -88,7 +89,7 @@ export default function PricesPage() {
 
   const { data, isLoading, isError, error, refetch } =
     api.prices.latest.useQuery(undefined, {
-      refetchInterval: TRPC_REFETCH_INTERVAL_MS,
+      refetchInterval: REFETCH_PRICES_MS,
       refetchOnWindowFocus: true,
     })
 
@@ -143,7 +144,7 @@ export default function PricesPage() {
                 <SearchField.SearchIcon />
                 <SearchField.Input
                   placeholder={t('search')}
-                  dir={locale === 'fa' ? 'rtl' : 'ltr'}
+                  dir={getDir(locale)}
                   className="py-3"
                 />
                 <SearchField.ClearButton />

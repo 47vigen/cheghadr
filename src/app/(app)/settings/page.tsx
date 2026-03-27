@@ -3,24 +3,19 @@
 import { useEffect, useState } from 'react'
 
 import { Button, Switch, Text, toast } from '@heroui/react'
-import { IconArrowLeft } from '@tabler/icons-react'
 import { useTranslations } from 'next-intl'
 
+import { PageHeader } from '@/components/layout/page-header'
 import { PageShell } from '@/components/layout/page-shell'
 import { SettingsSkeleton } from '@/components/skeletons/settings-skeleton'
-import { Cell } from '@/components/ui/cell'
 import { Section } from '@/components/ui/section'
 import { useTelegramBackButton } from '@/hooks/use-telegram-back-button'
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
-import { useRouter } from '@/i18n/navigation'
 import { useLocaleContext } from '@/providers/locale-provider'
 import { api } from '@/trpc/react'
-import { isTelegramWebApp } from '@/utils/telegram'
 
 export default function SettingsPage() {
   const t = useTranslations('settings')
-  const router = useRouter()
-  const inTelegram = isTelegramWebApp()
   useTelegramBackButton(true)
   const { notificationOccurred } = useTelegramHaptics()
   const localeCtx = useLocaleContext()
@@ -52,32 +47,7 @@ export default function SettingsPage() {
 
   return (
     <PageShell>
-      {!inTelegram && (
-        <div>
-          <Section>
-            <Cell
-              before={
-                <Button
-                  isIconOnly
-                  variant="ghost"
-                  size="md"
-                  aria-label={t('back')}
-                  onPress={() => router.back()}
-                >
-                  <IconArrowLeft size={24} />
-                </Button>
-              }
-            >
-              {t('title')}
-            </Cell>
-          </Section>
-        </div>
-      )}
-      {inTelegram && (
-        <div className="px-3 pt-3 pb-1">
-          <h2 className="section-header mb-0.5">{t('title')}</h2>
-        </div>
-      )}
+      <PageHeader title={t('title')} backLabel={t('back')} />
 
       <div>
         <Section header={t('languageSection')}>
@@ -117,14 +87,8 @@ export default function SettingsPage() {
               isDisabled={
                 toggleDigestMutation.isPending || digestEnabled === null
               }
-              onChange={() =>
-                toggleDigestMutation.mutate({
-                  enabled: !(
-                    digestEnabled ??
-                    settingsData?.dailyDigestEnabled ??
-                    false
-                  ),
-                })
+              onChange={(isSelected) =>
+                toggleDigestMutation.mutate({ enabled: isSelected })
               }
               size="sm"
               aria-label={t('dailyDigest')}
