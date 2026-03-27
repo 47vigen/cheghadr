@@ -1,8 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-
-import { Button, Switch, Text, toast } from '@heroui/react'
+import { Button } from '@heroui/react'
 import { IconArrowLeft, IconBellPlus } from '@tabler/icons-react'
 import { useTranslations } from 'next-intl'
 
@@ -16,7 +14,6 @@ import { Placeholder } from '@/components/ui/placeholder'
 import { Section } from '@/components/ui/section'
 
 import { useTelegramBackButton } from '@/hooks/use-telegram-back-button'
-import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 
 import { useRouter } from '@/i18n/navigation'
 import { api } from '@/trpc/react'
@@ -27,8 +24,6 @@ export default function AlertsPage() {
   const router = useRouter()
   const inTelegram = isTelegramWebApp()
   useTelegramBackButton(true)
-  const { notificationOccurred } = useTelegramHaptics()
-  const [digestEnabled, setDigestEnabled] = useState<boolean | null>(null)
 
   const {
     data: alerts,
@@ -37,26 +32,6 @@ export default function AlertsPage() {
     error,
     refetch,
   } = api.alerts.list.useQuery()
-
-  const { data: settingsData } = api.user.getSettings.useQuery()
-
-  useEffect(() => {
-    if (settingsData && digestEnabled === null) {
-      setDigestEnabled(settingsData.dailyDigestEnabled)
-    }
-  }, [settingsData, digestEnabled])
-
-  const toggleDigestMutation = api.user.toggleDailyDigest.useMutation({
-    onSuccess: (user) => {
-      notificationOccurred('success')
-      setDigestEnabled(user.dailyDigestEnabled)
-      toast.success(t('toastToggled'))
-    },
-    onError: (err) => {
-      notificationOccurred('error')
-      toast.danger(err.message || t('toastToggleError'))
-    },
-  })
 
   if (isError) {
     return (
@@ -148,44 +123,6 @@ export default function AlertsPage() {
           </Section>
         </div>
       )}
-
-      <div>
-        <Section header={t('settings')}>
-          <div className="flex items-start justify-between gap-3 px-1 py-2">
-            <div className="flex min-w-0 flex-col gap-1.5">
-              <Text className="block font-medium text-sm leading-snug">
-                {t('dailyDigest')}
-              </Text>
-              <Text className="block text-muted-foreground text-xs leading-relaxed">
-                {t('dailyDigestDescription')}
-              </Text>
-            </div>
-            <Switch
-              isSelected={
-                digestEnabled ?? settingsData?.dailyDigestEnabled ?? false
-              }
-              isDisabled={
-                toggleDigestMutation.isPending || digestEnabled === null
-              }
-              onChange={() =>
-                toggleDigestMutation.mutate({
-                  enabled: !(
-                    digestEnabled ??
-                    settingsData?.dailyDigestEnabled ??
-                    false
-                  ),
-                })
-              }
-              size="sm"
-              aria-label={t('dailyDigest')}
-            >
-              <Switch.Control>
-                <Switch.Thumb />
-              </Switch.Control>
-            </Switch>
-          </div>
-        </Section>
-      </div>
     </PageShell>
   )
 }

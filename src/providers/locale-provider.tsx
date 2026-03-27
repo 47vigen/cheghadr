@@ -57,9 +57,14 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     () => STATIC_MESSAGES[detectLocale()],
   )
   const localeChangeFromUserRef = useRef(false)
+  const serverLocaleAppliedRef = useRef(false)
 
   const { mutate: persistPreferredLocale } =
     api.user.setPreferredLocale.useMutation({ retry: false })
+
+  const { data: serverSettings } = api.user.getSettings.useQuery(undefined, {
+    retry: false,
+  })
 
   const setLocale = useCallback((next: Locale) => {
     localeChangeFromUserRef.current = true
@@ -79,6 +84,16 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     if (!localeChangeFromUserRef.current) return
     persistPreferredLocale({ locale })
   }, [locale, persistPreferredLocale])
+
+  useEffect(() => {
+    if (!serverSettings || serverLocaleAppliedRef.current) return
+    if (localeChangeFromUserRef.current) return
+    serverLocaleAppliedRef.current = true
+    const saved = serverSettings.preferredLocale as Locale | undefined
+    if (saved && saved !== locale) {
+      setLocaleState(saved)
+    }
+  }, [serverSettings, locale])
 
   return (
     <LocaleContext.Provider value={{ locale, setLocale }}>

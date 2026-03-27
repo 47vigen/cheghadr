@@ -5,12 +5,11 @@ import type { ReactNode } from 'react'
 import { clsx } from 'clsx'
 
 import { BottomNav } from '@/components/layout/bottom-nav'
-import { DevLocaleSwitcher } from '@/components/layout/dev-locale-switcher'
 import { GuestLoginBanner } from '@/components/layout/guest-login-banner'
 
 import { usePathname } from '@/i18n/navigation'
 
-const NO_NAV_ROUTES = ['/alerts', '/assets/add']
+const NO_NAV_ROUTES = ['/alerts', '/assets/add', '/settings']
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
@@ -18,7 +17,6 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-svh flex-col">
-      <DevLocaleSwitcher />
       <GuestLoginBanner />
       <main
         className={clsx(

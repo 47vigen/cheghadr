@@ -2,8 +2,7 @@
   "nav": {
     "assets": "دارایی‌های من",
     "prices": "قیمت‌ها",
-    "calculator": "ماشین حساب",
-    "alerts": "هشدارها"
+    "calculator": "ماشین حساب"
   },
   "login": {
     "title": "چه‌قدر؟",
@@ -140,9 +139,6 @@
     "triggeredAt": "فعال شده در {time}",
     "above": "بالای {threshold} تومان",
     "below": "پایین {threshold} تومان",
-    "dailyDigest": "خلاصه روزانه",
-    "dailyDigestDescription": "هر صبح خلاصه‌ای از وضعیت دارایی‌هایتان دریافت کنید",
-    "settings": "تنظیمات",
     "loadError": "خطا در بارگذاری هشدارها",
     "retryButton": "تلاش مجدد",
     "ctaTitle": "هشدار قیمت بسازید",
@@ -223,6 +219,17 @@
     "tickerTitle": "📊 قیمت‌های زنده بازار",
     "featuresTitle": "ویژگی‌ها",
     "tomanAbbr": "ت"
+  },
+  "settings": {
+    "title": "تنظیمات",
+    "languageSection": "زبان",
+    "notificationsSection": "اعلان‌ها",
+    "dailyDigest": "خلاصه روزانه",
+    "dailyDigestDescription": "هر صبح خلاصه‌ای از وضعیت دارایی‌هایتان دریافت کنید",
+    "back": "بازگشت",
+    "toastDigestUpdated": "تنظیم خلاصه روزانه ذخیره شد",
+    "toastDigestError": "خطا در ذخیره تنظیم",
+    "toastLocaleUpdated": "زبان به‌روز شد"
   },
   "categories": {
     "CURRENCY": "ارز",
