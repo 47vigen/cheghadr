@@ -2,8 +2,7 @@
   "nav": {
     "assets": "My Assets",
     "prices": "Prices",
-    "calculator": "Calculator",
-    "alerts": "Alerts"
+    "calculator": "Calculator"
   },
   "login": {
     "title": "Cheghadr?",
@@ -140,9 +139,6 @@
     "triggeredAt": "Triggered at {time}",
     "above": "Above {threshold} Toman",
     "below": "Below {threshold} Toman",
-    "dailyDigest": "Daily Digest",
-    "dailyDigestDescription": "Receive a morning summary of your portfolio status",
-    "settings": "Settings",
     "loadError": "Failed to load alerts",
     "retryButton": "Retry",
     "ctaTitle": "Create a price alert",
@@ -223,6 +219,17 @@
     "tickerTitle": "📊 Live Market Prices",
     "featuresTitle": "Features",
     "tomanAbbr": "T"
+  },
+  "settings": {
+    "title": "Settings",
+    "languageSection": "Language",
+    "notificationsSection": "Notifications",
+    "dailyDigest": "Daily Digest",
+    "dailyDigestDescription": "Receive a morning summary of your portfolio status",
+    "back": "Back",
+    "toastDigestUpdated": "Digest preference saved",
+    "toastDigestError": "Error saving digest preference",
+    "toastLocaleUpdated": "Language updated"
   },
   "categories": {
     "CURRENCY": "Currency",

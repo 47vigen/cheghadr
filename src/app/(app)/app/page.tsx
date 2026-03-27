@@ -169,6 +169,8 @@ export default function AssetsPage() {
     )
   }, [selectedCategory, breakdownQuery.data])
 
+  const handleSettings = () => router.push('/settings')
+
   const handleExport = async () => {
     const result = await exportQuery.refetch()
     if (result.data && result.data.rowCount > 0) {
@@ -243,6 +245,7 @@ export default function AssetsPage() {
             ])
           }
           chartTimeZone={chartTimeZone}
+          onSettings={handleSettings}
           onExport={handleExport}
           exportFetching={exportQuery.isFetching}
           deltaWindow={deltaWindow}

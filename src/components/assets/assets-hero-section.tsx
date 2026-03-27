@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@heroui/react'
-import { IconDownload, IconPencil, IconTrash } from '@tabler/icons-react'
+import { IconDownload, IconPencil, IconSettings2, IconTrash } from '@tabler/icons-react'
 import { useTranslations } from 'next-intl'
 
 import {
@@ -29,6 +29,7 @@ export interface AssetsHeroSectionProps {
   stale: boolean
   snapshotAt: Date | string | null
   onRefreshStale: () => void
+  onSettings: () => void
   onExport: () => void
   exportFetching: boolean
   deltaWindow: DeltaWindow
@@ -51,6 +52,7 @@ export function AssetsHeroSection({
   stale,
   snapshotAt,
   onRefreshStale,
+  onSettings,
   onExport,
   exportFetching,
   deltaWindow,
@@ -60,6 +62,7 @@ export function AssetsHeroSection({
   const tNav = useTranslations('nav')
   const tExport = useTranslations('export')
   const tPortfolios = useTranslations('portfolios')
+  const tSettings = useTranslations('settings')
 
   return (
     <div>
@@ -67,16 +70,27 @@ export function AssetsHeroSection({
         header={tNav('assets')}
         variant="hero"
         trailing={
-          <Button
-            isIconOnly
-            variant="ghost"
-            size="sm"
-            onPress={() => void onExport()}
-            isDisabled={exportFetching}
-            aria-label={tExport('button')}
-          >
-            <IconDownload size={18} />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              isIconOnly
+              variant="ghost"
+              size="sm"
+              onPress={onSettings}
+              aria-label={tSettings('title')}
+            >
+              <IconSettings2 size={18} />
+            </Button>
+            <Button
+              isIconOnly
+              variant="ghost"
+              size="sm"
+              onPress={() => void onExport()}
+              isDisabled={exportFetching}
+              aria-label={tExport('button')}
+            >
+              <IconDownload size={18} />
+            </Button>
+          </div>
         }
       >
         {hasMultiplePortfolios && portfolios && (
