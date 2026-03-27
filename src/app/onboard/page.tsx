@@ -484,10 +484,7 @@ export default function OnboardPage() {
       onTouchEnd={handleTouchEnd}
     >
       {/* ── Top chrome ──────────────────────────────────── */}
-      <div
-        className="relative z-20 px-4"
-        style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
-      >
+      <div className="relative z-20 px-4 pt-[max(1rem,env(safe-area-inset-top))]">
         <ProgressSegments total={SLIDE_COUNT} current={currentSlide} />
       </div>
 
@@ -573,10 +570,7 @@ export default function OnboardPage() {
       </div>
 
       {/* ── Bottom CTA ──────────────────────────────────── */}
-      <div
-        className="relative z-20 px-6"
-        style={{ paddingBottom: 'max(2.5rem, env(safe-area-inset-bottom))' }}
-      >
+      <div className="relative z-20 px-6 pb-[max(2.5rem,env(safe-area-inset-bottom))]">
         {currentSlide < SLIDE_COUNT - 1 ? (
           <Button
             variant="primary"

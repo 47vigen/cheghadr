@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import Script from 'next/script'
 import type { ReactNode } from 'react'
 
@@ -8,6 +8,12 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import '@/styles/globals.css'
 
 import { JetBrainsMono, Vazirmatn } from '@/styles/fonts'
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+}
 
 export const metadata: Metadata = {
   title: {

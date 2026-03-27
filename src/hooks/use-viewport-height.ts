@@ -21,6 +21,10 @@ export function useViewportHeight(): void {
           '--tg-viewport-height',
           `${height}px`,
         )
+        document.documentElement.style.setProperty(
+          '--visual-viewport-height',
+          `${height}px`,
+        )
       }
     }
 
@@ -30,6 +34,7 @@ export function useViewportHeight(): void {
     return () => {
       WebApp.offEvent('viewportChanged', update)
       document.documentElement.style.removeProperty('--tg-viewport-height')
+      document.documentElement.style.removeProperty('--visual-viewport-height')
     }
   }, [])
 }

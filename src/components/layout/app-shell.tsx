@@ -23,8 +23,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main
         className={clsx(
           'overscroll-behavior-y-contain flex-1 bg-background [scroll-padding-bottom:calc(var(--tabbar-height,56px)+env(safe-area-inset-bottom)+8px)] [touch-action:pan-y]',
-          !hideNav &&
-            'pb-[calc(var(--tabbar-height,56px)+env(safe-area-inset-bottom))]',
+          hideNav
+            ? 'pb-[env(safe-area-inset-bottom)]'
+            : 'pb-[calc(var(--tabbar-height,56px)+env(safe-area-inset-bottom))]',
         )}
       >
         {children}
