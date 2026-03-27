@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react'
 
-import { Button, Input, Label, TextField } from '@heroui/react'
+import { Button, Label, NumberField } from '@heroui/react'
 import { IconArrowsExchange } from '@tabler/icons-react'
 import { useTranslations } from 'next-intl'
 
@@ -34,7 +34,7 @@ export default function CalculatorPage() {
 
   const [fromSymbol, setFromSymbol] = useState('USD')
   const [toSymbol, setToSymbol] = useState('IRT')
-  const [amount, setAmount] = useState('')
+  const [amount, setAmount] = useState<number | undefined>(undefined)
   const amountRowRef = useRef<HTMLDivElement>(null)
 
   const { isRefreshing } = usePullToRefresh(async () => {
@@ -44,9 +44,10 @@ export default function CalculatorPage() {
   const prices = parsePriceSnapshot(data?.data)
   const { selectionChanged } = useTelegramHaptics()
 
-  const result = amount
-    ? computeConversion(amount, fromSymbol, toSymbol, prices)
-    : null
+  const result =
+    amount !== undefined && amount > 0
+      ? computeConversion(String(amount), fromSymbol, toSymbol, prices)
+      : null
 
   const handleSwap = () => {
     selectionChanged()
@@ -139,18 +140,28 @@ export default function CalculatorPage() {
 
             {/* Amount input */}
             <div ref={amountRowRef} className="px-3 pt-2.5 pb-3">
-              <TextField fullWidth value={amount} onChange={setAmount}>
+              <NumberField
+                value={amount}
+                onChange={setAmount}
+                fullWidth
+                minValue={0}
+                formatOptions={{ maximumFractionDigits: 8, useGrouping: false }}
+              >
                 <Label className="section-header mb-1.5 block">
                   {t('amount')}
                 </Label>
-                <Input
-                  type="number"
-                  inputMode="decimal"
-                  placeholder={t('amountPlaceholder')}
-                  className="py-3"
-                  onFocus={handleAmountFocus}
-                />
-              </TextField>
+                <div className="mt-2 min-w-0" dir="ltr">
+                  <NumberField.Group
+                    className="number-field__group !inline-flex !h-auto min-h-11 w-full min-w-0 items-stretch overflow-hidden rounded-xl border border-border/80 bg-surface/40 shadow-none transition-colors data-[focus-within]:border-primary/40 data-[focus-within]:bg-surface"
+                    onFocus={handleAmountFocus}
+                  >
+                    <NumberField.Input
+                      placeholder={t('amountPlaceholder')}
+                      className="number-field__input min-h-11 min-w-0 flex-1 bg-transparent py-2.5 ps-3 pe-2 leading-normal"
+                    />
+                  </NumberField.Group>
+                </div>
+              </NumberField>
             </div>
           </div>
         </div>

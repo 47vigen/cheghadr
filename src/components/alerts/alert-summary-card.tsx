@@ -19,18 +19,23 @@ export function AlertSummaryCard({
 
   if (activeCount === 0 && triggeredCount === 0) {
     return (
-      <div className="flex items-center justify-between gap-2 px-2 py-2">
-        <div className="flex items-center gap-2">
-          <IconBellPlus size={16} className="shrink-0 text-muted-foreground" />
-          <div className="min-w-0">
-            <Text className="text-muted-foreground text-sm">
-              {t('ctaTitle')}
-            </Text>
+      <div className="overflow-hidden rounded-[var(--radius)] border border-border bg-card">
+        <div className="flex items-center justify-between gap-2 px-3 py-3">
+          <div className="flex items-center gap-2">
+            <IconBellPlus
+              size={16}
+              className="shrink-0 text-muted-foreground"
+            />
+            <div className="min-w-0">
+              <Text className="text-muted-foreground text-sm">
+                {t('ctaTitle')}
+              </Text>
+            </div>
           </div>
+          <Button size="sm" variant="secondary" onPress={onManage}>
+            {t('create')}
+          </Button>
         </div>
-        <Button size="sm" variant="secondary" onPress={onManage}>
-          {t('create')}
-        </Button>
       </div>
     )
   }

@@ -2,8 +2,7 @@
 
 import type { ReactNode } from 'react'
 
-import { InputGroup, TextField } from '@heroui/react'
-import { IconSearch } from '@tabler/icons-react'
+import { SearchField } from '@heroui/react'
 
 import {
   type AssetListGroup,
@@ -44,19 +43,17 @@ export function AssetSearchPanel({
   hideSearch = false,
 }: AssetSearchPanelProps) {
   const searchField = (
-    <TextField value={search} onChange={onSearchChange} fullWidth>
-      <InputGroup>
-        <InputGroup.Prefix>
-          <IconSearch size={16} className="text-muted-foreground" />
-        </InputGroup.Prefix>
-        <InputGroup.Input
+    <SearchField value={search} onChange={onSearchChange} fullWidth>
+      <SearchField.Group>
+        <SearchField.SearchIcon />
+        <SearchField.Input
           placeholder={searchPlaceholder}
-          type="search"
           dir={locale === 'fa' ? 'rtl' : 'ltr'}
-          className="py-3 [appearance:textfield] [color-scheme:inherit] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
+          className="py-3"
         />
-      </InputGroup>
-    </TextField>
+        <SearchField.ClearButton />
+      </SearchField.Group>
+    </SearchField>
   )
 
   return (

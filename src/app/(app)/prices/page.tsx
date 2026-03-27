@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from 'react'
 
-import { InputGroup, TextField, toast } from '@heroui/react'
-import { IconSearch } from '@tabler/icons-react'
+import { SearchField, toast } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { AssetQuantityDrawer } from '@/components/assets/asset-quantity-drawer'
@@ -139,19 +138,17 @@ export default function PricesPage() {
       <PageShell className="pb-[max(1.5rem,var(--bottom-safe))]">
         <div>
           <Section header={tNav('prices')} variant="hero">
-            <TextField value={search} onChange={setSearch} fullWidth>
-              <InputGroup>
-                <InputGroup.Prefix>
-                  <IconSearch size={16} className="text-muted-foreground" />
-                </InputGroup.Prefix>
-                <InputGroup.Input
+            <SearchField value={search} onChange={setSearch} fullWidth>
+              <SearchField.Group>
+                <SearchField.SearchIcon />
+                <SearchField.Input
                   placeholder={t('search')}
-                  type="search"
-                  className="py-3"
                   dir={locale === 'fa' ? 'rtl' : 'ltr'}
+                  className="py-3"
                 />
-              </InputGroup>
-            </TextField>
+                <SearchField.ClearButton />
+              </SearchField.Group>
+            </SearchField>
             {data?.stale && (
               <div className="mt-2">
                 <StalenessBanner
