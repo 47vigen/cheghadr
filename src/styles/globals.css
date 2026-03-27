@@ -40,7 +40,6 @@
     -webkit-tap-highlight-color: transparent;
     -webkit-text-size-adjust: 100%;
     --tabbar-height: 56px;
-    --bottom-above-tabbar: var(--tabbar-height, 56px);
     --bottom-safe: max(16px, env(safe-area-inset-bottom));
     /* Fixed “Add asset” ribbon (p-1.5 + sm button) — used to pad scroll above it */
     --app-fab-stack-height: 56px;

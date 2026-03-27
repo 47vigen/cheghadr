@@ -37,7 +37,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed start-0 end-0 bottom-0 z-40 flex items-center justify-around border-border border-t bg-surface px-2 py-1 pb-[env(safe-area-inset-bottom)]"
+      className="fixed start-0 end-0 bottom-0 z-40 flex items-center justify-around border-border border-t bg-surface px-2 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))]"
       style={{
         height: 'calc(var(--tabbar-height) + env(safe-area-inset-bottom))',
       }}

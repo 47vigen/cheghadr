@@ -29,7 +29,7 @@ export function GuestLoginBanner() {
   }
 
   return (
-    <div className="sticky top-0 z-50 flex items-center justify-center bg-primary px-4 py-2.5">
+    <div className="sticky top-0 z-50 flex items-center justify-center bg-primary px-4 pt-[max(0.625rem,env(safe-area-inset-top))] pb-2.5">
       <button
         type="button"
         className="font-medium text-primary-foreground text-sm"
