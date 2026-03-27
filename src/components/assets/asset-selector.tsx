@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-import { Modal } from '@heroui/react'
+import { Drawer } from '@heroui/react'
 import { IconChevronDown } from '@tabler/icons-react'
 import { clsx } from 'clsx'
 import { useLocale, useTranslations } from 'next-intl'
@@ -73,7 +73,7 @@ export function AssetSelector({
 
   const current = getCurrentDisplay(value, items, locale, label)
 
-  const closeModal = () => {
+  const closeDrawer = () => {
     setOpen(false)
     setSearch('')
   }
@@ -119,26 +119,25 @@ export function AssetSelector({
         </Cell>
       </div>
 
-      <Modal>
-        <Modal.Backdrop
+      <Drawer>
+        <Drawer.Backdrop
           isOpen={open}
-          onOpenChange={(v: boolean) => {
-            if (!v) closeModal()
-            else setOpen(true)
+          onOpenChange={(v) => {
+            if (!v) closeDrawer()
           }}
         >
-          <Modal.Container>
-            <Modal.Dialog
-              className="sm:max-w-[360px]"
+          <Drawer.Content placement="bottom">
+            <Drawer.Dialog
               dir={locale === 'fa' ? 'rtl' : 'ltr'}
+              className="max-h-[min(92dvh,var(--visual-viewport-height,100dvh)*0.92)] border-border/60 border-t bg-background px-0 pt-3 pb-0 shadow-[0_-8px_32px_oklch(0_0_0/0.12)] sm:max-h-[min(90dvh,var(--visual-viewport-height,100dvh)*0.9)] dark:shadow-[0_-12px_40px_oklch(0_0_0/0.35)]"
             >
-              <Modal.CloseTrigger className="min-h-11 min-w-11" />
-              <Modal.Header className="flex flex-col gap-0 pe-2 pt-1 pb-0">
-                <Modal.Heading className="text-base leading-snug">
+              <Drawer.Handle className="mx-auto mb-0.5" />
+              <Drawer.Header className="px-4 pt-0 pb-1">
+                <Drawer.Heading className="font-semibold text-base leading-snug">
                   {tPicker('selectAsset')}
-                </Modal.Heading>
-              </Modal.Header>
-              <Modal.Body className="max-h-[min(70vh,440px)] overflow-y-auto overflow-x-hidden px-1 pt-0 pb-1">
+                </Drawer.Heading>
+              </Drawer.Header>
+              <Drawer.Body className="overflow-y-auto px-0 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
                 <AssetSearchPanel
                   search={search}
                   onSearchChange={setSearch}
@@ -147,7 +146,7 @@ export function AssetSelector({
                   groups={groups}
                   onSelect={(item) => {
                     onChange(getBaseSymbol(item))
-                    closeModal()
+                    closeDrawer()
                   }}
                   getAfter={(item) =>
                     value === getBaseSymbol(item) ? (
@@ -155,6 +154,7 @@ export function AssetSelector({
                     ) : undefined
                   }
                   emptyHeader={tPicker('noResults')}
+                  wrapSearchInSection
                   beforeList={
                     !search.trim() ? (
                       <Section
@@ -179,7 +179,7 @@ export function AssetSelector({
                           }
                           onClick={() => {
                             onChange('IRT')
-                            closeModal()
+                            closeDrawer()
                           }}
                         >
                           {tPicker('toman')}
@@ -188,11 +188,11 @@ export function AssetSelector({
                     ) : null
                   }
                 />
-              </Modal.Body>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+              </Drawer.Body>
+            </Drawer.Dialog>
+          </Drawer.Content>
+        </Drawer.Backdrop>
+      </Drawer>
     </>
   )
 }

@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { AssetDeleteModal } from '@/components/assets/asset-delete-modal'
-import { AssetEditModal } from '@/components/assets/asset-edit-modal'
+import { AssetEditDrawer } from '@/components/assets/asset-edit-drawer'
 import { AssetListItem } from '@/components/assets/asset-list-item'
 import { CategoryFilterHeader } from '@/components/assets/category-filter-header'
 import { AssetsEmptyState } from '@/components/assets/empty-state'
@@ -74,7 +74,7 @@ export function AssetsListSection({
         ))}
       </Section>
 
-      <AssetEditModal
+      <AssetEditDrawer
         assetId={editTarget?.id ?? ''}
         assetName={
           editTarget

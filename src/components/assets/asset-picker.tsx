@@ -7,8 +7,8 @@ import { IconSearch } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
+import { AssetQuantityDrawer } from '@/components/assets/asset-quantity-drawer'
 import { AssetSearchPanel } from '@/components/assets/asset-search-panel'
-import { QuantityModal } from '@/components/assets/quantity-modal'
 import { PriceCategoryNav } from '@/components/prices/price-category-nav'
 
 import { useAssetSearchGroups } from '@/hooks/use-asset-search-groups'
@@ -18,6 +18,7 @@ import type { PriceItem } from '@/lib/prices'
 import {
   formatIRT,
   getBaseSymbol,
+  getLocalizedItemName,
   makeIrtPriceItem,
   parsePriceSnapshot,
 } from '@/lib/prices'
@@ -40,8 +41,8 @@ export function AssetPicker({
 
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
-  const [modalOpen, setModalOpen] = useState(false)
-  const [modalItem, setModalItem] = useState<PriceItem | null>(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [selectedItem, setSelectedItem] = useState<PriceItem | null>(null)
 
   const utils = api.useUtils()
   const { notificationOccurred } = useTelegramHaptics()
@@ -51,7 +52,8 @@ export function AssetPicker({
       notificationOccurred('success')
       void utils.assets.list.invalidate()
       toast.success(t('toastAdded'))
-      closeModal()
+      setDrawerOpen(false)
+      setSelectedItem(null)
       onSaved()
     },
     onError: (err) => {
@@ -75,19 +77,14 @@ export function AssetPicker({
     if (v) setActiveCategory(null)
   }
 
-  const closeModal = () => {
-    setModalOpen(false)
-    setModalItem(null)
-  }
-
-  const openModal = (item: PriceItem) => {
-    setModalItem(item)
-    setModalOpen(true)
+  const handleSelect = (item: PriceItem) => {
+    setSelectedItem(item)
+    setDrawerOpen(true)
   }
 
   const handleSave = (qty: string) => {
-    if (!modalItem || addMutation.isPending) return
-    const sym = getBaseSymbol(modalItem)
+    if (!selectedItem || addMutation.isPending) return
+    const sym = getBaseSymbol(selectedItem)
     if (!sym) {
       toast.error(t('toastAddError'))
       return
@@ -98,6 +95,14 @@ export function AssetPicker({
     }
     addMutation.mutate({ symbol: sym, quantity: qty, portfolioId })
   }
+
+  const sellPrice = Number(selectedItem?.sell_price ?? 0)
+  const isIRT = selectedItem?.symbol === 'IRT'
+  const symbol = selectedItem ? getBaseSymbol(selectedItem) : ''
+  const assetName = selectedItem ? getLocalizedItemName(selectedItem, locale) : ''
+  const drawerTitle = selectedItem
+    ? `${assetName} — ${tPicker('enterQuantity')}`
+    : tPicker('enterQuantity')
 
   return (
     <>
@@ -137,19 +142,28 @@ export function AssetPicker({
         locale={locale}
         searchPlaceholder={tPicker('search')}
         groups={visibleGroups}
-        onSelect={openModal}
+        onSelect={handleSelect}
         getSubtitle={(item) =>
           `${formatIRT(Number(item.sell_price), locale)} ${t('tomanAbbr')}`
         }
         emptyHeader={tPicker('noResults')}
       />
 
-      <QuantityModal
-        isOpen={modalOpen}
-        item={modalItem}
-        onClose={closeModal}
+      <AssetQuantityDrawer
+        isOpen={drawerOpen}
+        onOpenChange={(open) => {
+          setDrawerOpen(open)
+          if (!open) setSelectedItem(null)
+        }}
+        initialQuantity=""
+        sellPrice={sellPrice}
+        isIRT={isIRT}
+        symbol={symbol}
+        title={drawerTitle}
+        saveLabel={tPicker('save')}
         onSave={handleSave}
         isPending={addMutation.isPending}
+        autoFocusQuantity
       />
     </>
   )

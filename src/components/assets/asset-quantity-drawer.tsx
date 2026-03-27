@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import {
   Button,
@@ -14,8 +14,6 @@ import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 import { formatIRT } from '@/lib/prices'
-
-const SYNC_DEBOUNCE_MS = 320
 
 export interface AssetQuantityDrawerProps {
   isOpen: boolean
@@ -32,8 +30,6 @@ export interface AssetQuantityDrawerProps {
   /** Add flow focuses the first field; edit often avoids stealing focus on open. */
   autoFocusQuantity?: boolean
 }
-
-type LastTouched = 'quantity' | 'value' | null
 
 export function AssetQuantityDrawer({
   isOpen,
@@ -55,83 +51,8 @@ export function AssetQuantityDrawer({
   const [quantityNum, setQuantityNum] = useState<number | undefined>(undefined)
   const [valueIRTNum, setValueIRTNum] = useState<number | undefined>(undefined)
 
-  const lastTouchedRef = useRef<LastTouched>(null)
-  const qtyToValueTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const valueToQtyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const clearQtyToValueTimer = useCallback(() => {
-    if (qtyToValueTimerRef.current) {
-      clearTimeout(qtyToValueTimerRef.current)
-      qtyToValueTimerRef.current = null
-    }
-  }, [])
-
-  const clearValueToQtyTimer = useCallback(() => {
-    if (valueToQtyTimerRef.current) {
-      clearTimeout(valueToQtyTimerRef.current)
-      valueToQtyTimerRef.current = null
-    }
-  }, [])
-
-  const clearAllTimers = useCallback(() => {
-    clearQtyToValueTimer()
-    clearValueToQtyTimer()
-  }, [clearQtyToValueTimer, clearValueToQtyTimer])
-
-  const syncValueFromQuantity = useCallback(
-    (qty: number | undefined) => {
-      if (qty === undefined || sellPrice <= 0 || isIRT) {
-        setValueIRTNum(undefined)
-        return
-      }
-      setValueIRTNum(Math.round(qty * sellPrice))
-    },
-    [isIRT, sellPrice],
-  )
-
-  const syncQuantityFromValue = useCallback(
-    (irt: number | undefined) => {
-      if (irt === undefined || sellPrice <= 0 || isIRT) {
-        setQuantityNum(undefined)
-        return
-      }
-      const raw = irt / sellPrice
-      setQuantityNum(Math.round(raw * 1e8) / 1e8)
-    },
-    [isIRT, sellPrice],
-  )
-
-  /** Quantity to persist when Save runs mid-debounce (state may lag by one frame). */
-  const resolveQuantityForSave = useCallback((): number | undefined => {
-    clearAllTimers()
-    if (isIRT || sellPrice <= 0) return quantityNum
-    if (lastTouchedRef.current === 'value' && valueIRTNum !== undefined) {
-      const raw = valueIRTNum / sellPrice
-      const q = Math.round(raw * 1e8) / 1e8
-      setQuantityNum(q)
-      setValueIRTNum(Math.round(q * sellPrice))
-      return q
-    }
-    if (lastTouchedRef.current === 'quantity' && quantityNum !== undefined) {
-      setValueIRTNum(Math.round(quantityNum * sellPrice))
-    }
-    return quantityNum
-  }, [
-    clearAllTimers,
-    isIRT,
-    quantityNum,
-    sellPrice,
-    valueIRTNum,
-  ])
-
   useEffect(() => {
-    if (!isOpen) {
-      clearAllTimers()
-      lastTouchedRef.current = null
-      return
-    }
-    lastTouchedRef.current = null
-    clearAllTimers()
+    if (!isOpen) return
     if (initialQuantity === '') {
       setQuantityNum(undefined)
       setValueIRTNum(undefined)
@@ -144,53 +65,36 @@ export function AssetQuantityDrawer({
       return
     }
     setQuantityNum(qty)
-    if (sellPrice > 0 && !isIRT) {
-      setValueIRTNum(Math.round(qty * sellPrice))
-    } else {
-      setValueIRTNum(undefined)
-    }
-  }, [isOpen, initialQuantity, sellPrice, isIRT, clearAllTimers])
-
-  useEffect(() => () => clearAllTimers(), [clearAllTimers])
+    setValueIRTNum(
+      sellPrice > 0 && !isIRT ? Math.round(qty * sellPrice) : undefined,
+    )
+  }, [isOpen, initialQuantity, sellPrice, isIRT])
 
   const handleQuantityChange = (num: number | undefined) => {
-    lastTouchedRef.current = 'quantity'
     setQuantityNum(num)
-    clearQtyToValueTimer()
-    clearValueToQtyTimer()
-    if (isIRT || sellPrice <= 0) {
+    if (isIRT || sellPrice <= 0 || num === undefined) {
       setValueIRTNum(undefined)
-      return
+    } else {
+      setValueIRTNum(Math.round(num * sellPrice))
     }
-    qtyToValueTimerRef.current = setTimeout(() => {
-      qtyToValueTimerRef.current = null
-      syncValueFromQuantity(num)
-    }, SYNC_DEBOUNCE_MS)
   }
 
   const handleValueChange = (num: number | undefined) => {
-    lastTouchedRef.current = 'value'
     setValueIRTNum(num)
-    clearQtyToValueTimer()
-    clearValueToQtyTimer()
-    if (isIRT || sellPrice <= 0) {
+    if (isIRT || sellPrice <= 0 || num === undefined) {
       setQuantityNum(undefined)
-      return
+    } else {
+      setQuantityNum(Math.round((num / sellPrice) * 1e8) / 1e8)
     }
-    valueToQtyTimerRef.current = setTimeout(() => {
-      valueToQtyTimerRef.current = null
-      syncQuantityFromValue(num)
-    }, SYNC_DEBOUNCE_MS)
   }
 
   const handleSave = () => {
     if (isPending) return
-    const qty = resolveQuantityForSave()
-    if (qty === undefined || qty <= 0) {
+    if (quantityNum === undefined || quantityNum <= 0) {
       toast.error(tAssets('toastInvalidQuantity'))
       return
     }
-    onSave(String(qty))
+    onSave(String(quantityNum))
   }
 
   const showDualFields = !isIRT && sellPrice > 0
@@ -211,14 +115,12 @@ export function AssetQuantityDrawer({
     'flex max-w-[40%] shrink-0 items-center border-border/50 border-s px-3 ' +
     'font-medium text-muted-foreground text-sm tabular-nums'
 
-  const handleClose = () => onOpenChange(false)
-
   return (
     <Drawer>
       <Drawer.Backdrop
         isOpen={isOpen}
         onOpenChange={(v) => {
-          if (!v) handleClose()
+          if (!v) onOpenChange(false)
         }}
       >
         <Drawer.Content placement="bottom">

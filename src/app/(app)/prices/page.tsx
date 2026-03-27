@@ -7,7 +7,7 @@ import { IconSearch } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
-import { QuantityModal } from '@/components/assets/quantity-modal'
+import { AssetQuantityDrawer } from '@/components/assets/asset-quantity-drawer'
 import { PageShell } from '@/components/layout/page-shell'
 import { PriceCategoryNav } from '@/components/prices/price-category-nav'
 import { PriceSection } from '@/components/prices/price-section'
@@ -28,6 +28,7 @@ import type { PriceItem } from '@/lib/prices'
 import {
   filterPriceItems,
   getBaseSymbol,
+  getLocalizedItemName,
   groupByCategory,
   parsePriceSnapshot,
   sortedGroupEntries,
@@ -39,6 +40,7 @@ import { api } from '@/trpc/react'
 export default function PricesPage() {
   const t = useTranslations('prices')
   const tAssets = useTranslations('assets')
+  const tPicker = useTranslations('picker')
   const tCommon = useTranslations('common')
   const tNav = useTranslations('nav')
   const locale = useLocale()
@@ -199,12 +201,24 @@ export default function PricesPage() {
         )}
       </PageShell>
 
-      <QuantityModal
+      <AssetQuantityDrawer
         isOpen={modalOpen}
-        item={modalItem}
-        onClose={closeModal}
+        onOpenChange={(open) => {
+          if (!open) closeModal()
+        }}
+        initialQuantity=""
+        sellPrice={Number(modalItem?.sell_price ?? 0)}
+        isIRT={modalItem?.symbol === 'IRT'}
+        symbol={modalItem ? getBaseSymbol(modalItem) : ''}
+        title={
+          modalItem
+            ? `${getLocalizedItemName(modalItem, locale)} — ${tPicker('enterQuantity')}`
+            : tPicker('enterQuantity')
+        }
+        saveLabel={tPicker('save')}
         onSave={handleSave}
         isPending={addMutation.isPending}
+        autoFocusQuantity
       />
     </>
   )
