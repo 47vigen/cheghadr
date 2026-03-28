@@ -57,6 +57,7 @@ describe('createPortfolioSnapshot', () => {
         data: [
           {
             base_currency: { symbol: 'USD' },
+            quote_currency: { symbol: 'IRT' },
             sell_price: '500000',
           },
         ],
@@ -79,6 +80,7 @@ describe('createPortfolioSnapshot', () => {
         data: [
           {
             base_currency: { symbol: 'USD' },
+            quote_currency: { symbol: 'IRT' },
             sell_price: '500000',
           },
         ],

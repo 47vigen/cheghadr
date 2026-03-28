@@ -32,6 +32,7 @@ function makeSnapshot(sellPrice: string) {
             fa: 'دلار',
             en: 'USD',
           },
+          quote_currency: { symbol: 'IRT' },
           name: { fa: 'دلار', en: 'US Dollar' },
           sell_price: sellPrice,
           change: '0',
@@ -320,6 +321,7 @@ describe('evaluatePriceAlerts', () => {
               fa: 'دلار',
               en: 'USD',
             },
+            quote_currency: { symbol: 'IRT' },
             name: { fa: 'دلار', en: 'US Dollar' },
             sell_price: '0', // zero price
             change: '0',
