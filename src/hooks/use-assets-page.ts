@@ -20,8 +20,12 @@ export function useAssetsPage() {
 
   // --- UI state ---
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null)
-  const [portfolioDialogMode, setPortfolioDialogMode] = useState<'create' | 'rename' | null>(null)
+  const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(
+    null,
+  )
+  const [portfolioDrawerMode, setPortfolioDrawerMode] = useState<
+    'create' | 'rename' | null
+  >(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [portfolioToDelete, setPortfolioToDelete] = useState<{
     id: string
@@ -145,9 +149,9 @@ export function useAssetsPage() {
 
   const utils = api.useUtils()
   // Re-fetch portfolio list after creating/renaming so the selector updates
-  const handlePortfolioDialogClose = (open: boolean) => {
+  const handlePortfolioDrawerClose = (open: boolean) => {
     if (!open) {
-      setPortfolioDialogMode(null)
+      setPortfolioDrawerMode(null)
       void utils.portfolio.list.invalidate()
     }
   }
@@ -159,8 +163,8 @@ export function useAssetsPage() {
     selectedPortfolioId,
     deltaWindow,
     setDeltaWindow,
-    portfolioDialogMode,
-    setPortfolioDialogMode,
+    portfolioDrawerMode,
+    setPortfolioDrawerMode,
     showDeleteModal,
     portfolioToDelete,
     // Queries
@@ -185,6 +189,6 @@ export function useAssetsPage() {
     handleRequestDeletePortfolio,
     handleCloseDeleteModal,
     handleRefreshStale,
-    handlePortfolioDialogClose,
+    handlePortfolioDrawerClose,
   }
 }

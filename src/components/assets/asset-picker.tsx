@@ -38,7 +38,9 @@ export function AssetPicker({
   const locale = useLocale()
 
   const [search, setSearch] = useState('')
-  const [activeCategory, setActiveCategory] = useState<string | null>('CURRENCY')
+  const [activeCategory, setActiveCategory] = useState<string | null>(
+    'CURRENCY',
+  )
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<PriceItem | null>(null)
 

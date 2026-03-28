@@ -1,7 +1,12 @@
 'use client'
 
 import { Button } from '@heroui/react'
-import { IconDownload, IconPencil, IconSettings2, IconTrash } from '@tabler/icons-react'
+import {
+  IconDownload,
+  IconPencil,
+  IconSettings2,
+  IconTrash,
+} from '@tabler/icons-react'
 import { useTranslations } from 'next-intl'
 
 import {
@@ -101,23 +106,24 @@ export function AssetsHeroSection({
             {portfolio.selectedId && (
               <div className="mb-2 flex gap-1">
                 <Button
+                  isIconOnly
                   size="sm"
                   variant="ghost"
-                  className="h-6 gap-1 px-2 text-xs"
+                  className="h-7 w-7"
                   onPress={portfolio.onRename}
                   aria-label={tPortfolios('renameTitle')}
                 >
-                  <IconPencil size={12} aria-hidden />
-                  {tPortfolios('renameTitle')}
+                  <IconPencil size={14} aria-hidden />
                 </Button>
                 <Button
+                  isIconOnly
                   size="sm"
                   variant="ghost"
-                  className="h-6 gap-1 px-2 text-destructive text-xs"
+                  className="h-7 w-7 text-destructive"
                   onPress={portfolio.onDelete}
                   aria-label={tPortfolios('deleteTitle')}
                 >
-                  <IconTrash size={12} aria-hidden />
+                  <IconTrash size={14} aria-hidden />
                 </Button>
               </div>
             )}

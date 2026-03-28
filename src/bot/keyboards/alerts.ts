@@ -19,4 +19,3 @@ export function alertDeleteConfirmKeyboard(
     .text(t(locale, 'bot.alerts.deleteYes'), CB.alertDeleteYes(alertId))
     .text(t(locale, 'bot.alerts.deleteNo'), CB.ALERTS_LIST)
 }
-

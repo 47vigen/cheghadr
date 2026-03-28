@@ -2,9 +2,9 @@
 
 import { useLocale } from 'next-intl'
 
-import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
-
 import type { DeltaWindow } from '@/components/portfolio/portfolio-delta'
+
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
 
 import {
   REFETCH_ALERTS_MS,

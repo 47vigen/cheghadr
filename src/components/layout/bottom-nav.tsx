@@ -42,8 +42,7 @@ export function BottomNav() {
       }}
     >
       {tabs.map(({ id, path, labelKey, Icon }) => {
-        const isSelected =
-          pathname === path || pathname.startsWith(`${path}/`)
+        const isSelected = pathname === path || pathname.startsWith(`${path}/`)
         return (
           <Button
             key={id}

@@ -34,11 +34,7 @@ export function Cell({
     <Component
       type={handler ? 'button' : undefined}
       onClick={handler}
-      className={clsx(
-        'cell-row',
-        handler && 'cell-row-interactive',
-        className,
-      )}
+      className={clsx('cell-row', handler && 'cell-row-interactive', className)}
     >
       {before && (
         <div className="flex shrink-0 items-center self-center">{before}</div>

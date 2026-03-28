@@ -136,8 +136,23 @@ export function AssetQuantityDrawer({
             className="max-h-[min(92dvh,var(--visual-viewport-height,100dvh)*0.92)] border-border/60 border-t bg-background px-0 pt-3 pb-0 shadow-[0_-8px_32px_oklch(0_0_0/0.12)] sm:max-h-[min(90dvh,var(--visual-viewport-height,100dvh)*0.9)] dark:shadow-[0_-12px_40px_oklch(0_0_0/0.35)]"
           >
             <Drawer.Handle className="mx-auto mb-0.5" />
-            <Drawer.Header className="px-4 pt-0 pb-1">
-              <Drawer.Heading className="text-balance font-semibold text-base leading-snug">
+            <Drawer.Header className="flex items-center gap-2 border-border/40 border-b px-4 pt-0 pb-3">
+              {onDelete && deleteLabel ? (
+                <Button
+                  isIconOnly
+                  variant="ghost"
+                  size="sm"
+                  className="shrink-0 rounded-lg text-destructive"
+                  onPress={() => {
+                    onOpenChange(false)
+                    onDelete()
+                  }}
+                  aria-label={deleteLabel}
+                >
+                  <IconTrash size={16} aria-hidden />
+                </Button>
+              ) : null}
+              <Drawer.Heading className="flex-1 text-balance font-semibold text-base leading-snug">
                 {title}
               </Drawer.Heading>
             </Drawer.Header>
@@ -155,7 +170,9 @@ export function AssetQuantityDrawer({
                 }}
                 autoFocus={autoFocusQuantity}
               >
-                <Label className="font-medium">{tAddAsset('assetAmount')}</Label>
+                <Label className="font-medium">
+                  {tAddAsset('assetAmount')}
+                </Label>
                 {priceHint ? (
                   <Description className="mt-0.5 text-foreground/80 text-sm tabular-nums">
                     {priceHint}
@@ -200,24 +217,6 @@ export function AssetQuantityDrawer({
                     </NumberField.Group>
                   </div>
                 </NumberField>
-              ) : null}
-
-              {onDelete && deleteLabel ? (
-                <div className="border-border/40 border-t pt-2">
-                  <Button
-                    variant="ghost"
-                    fullWidth
-                    size="sm"
-                    onPress={() => {
-                      onOpenChange(false)
-                      onDelete()
-                    }}
-                    className="text-destructive"
-                  >
-                    <IconTrash size={14} aria-hidden />
-                    {deleteLabel}
-                  </Button>
-                </div>
               ) : null}
             </Drawer.Body>
 
