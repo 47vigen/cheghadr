@@ -19,6 +19,7 @@ import { api } from '@/trpc/react'
 export default function AddAssetPage() {
   const router = useRouter()
   const t = useTranslations('addAsset')
+  const tCommon = useTranslations('common')
   const searchParams = useSearchParams()
   const portfolioId = searchParams.get('portfolioId') ?? ''
   useTelegramBackButton(true)
@@ -79,7 +80,7 @@ export default function AddAssetPage() {
       <ErrorState
         header={t('title')}
         description={portfoliosQuery.error?.message || t('subtitle')}
-        retryLabel={t('back')}
+        retryLabel={tCommon('back')}
         onRetry={() => void portfoliosQuery.refetch()}
       />
     )
@@ -90,7 +91,7 @@ export default function AddAssetPage() {
       <ErrorState
         header={t('title')}
         description={ensureDefaultErr?.message || t('subtitle')}
-        retryLabel={t('back')}
+        retryLabel={tCommon('back')}
         onRetry={() => {
           resetEnsureDefault()
           ensureDefault()
@@ -104,7 +105,7 @@ export default function AddAssetPage() {
       <ErrorState
         header={t('title')}
         description={error?.message || t('subtitle')}
-        retryLabel={t('back')}
+        retryLabel={tCommon('back')}
         onRetry={() => void refetch()}
       />
     )
@@ -119,7 +120,7 @@ export default function AddAssetPage() {
       <PageHeader
         title={t('title')}
         onBack={() => router.push('/')}
-        backLabel={t('back')}
+        backLabel={tCommon('back')}
       />
       <div className="px-3 pt-2 pb-1">
         <p className="text-muted-foreground text-xs">{t('subtitle')}</p>

@@ -1,6 +1,5 @@
 'use client'
 
-import { IconBellPlus } from '@tabler/icons-react'
 import { useTranslations } from 'next-intl'
 
 import { AlertListItem } from '@/components/alerts/alert-list-item'
@@ -9,7 +8,6 @@ import { PageHeader } from '@/components/layout/page-header'
 import { PageShell } from '@/components/layout/page-shell'
 import { AlertsSkeleton } from '@/components/skeletons/alerts-skeleton'
 import { ErrorState } from '@/components/ui/async-states'
-import { Placeholder } from '@/components/ui/placeholder'
 import { Section } from '@/components/ui/section'
 
 import { useTelegramBackButton } from '@/hooks/use-telegram-back-button'
@@ -18,6 +16,7 @@ import { api } from '@/trpc/react'
 
 export default function AlertsPage() {
   const t = useTranslations('alerts')
+  const tCommon = useTranslations('common')
   useTelegramBackButton(true)
 
   const {
@@ -49,49 +48,26 @@ export default function AlertsPage() {
 
   return (
     <PageShell>
-      <PageHeader title={t('title')} backLabel={t('back')} />
+      <PageHeader title={t('title')} backLabel={tCommon('back')} />
 
-      <div>
-        <Section header={t('create')}>
-          {alerts && alerts.length === 0 ? (
-            <>
-              <Placeholder
-                variant="empty"
-                iconSize="md"
-                className="gap-1.5 py-4"
-                header={t('noAlerts')}
-                description={t('noAlertsDescription')}
-              >
-                <IconBellPlus />
-              </Placeholder>
-              <div className="mt-2">
-                <CreateAlertForm />
-              </div>
-            </>
-          ) : (
-            <CreateAlertForm />
-          )}
-        </Section>
-      </div>
+      <Section header={t('create')}>
+        <CreateAlertForm />
+      </Section>
 
       {activeAlerts.length > 0 && (
-        <div>
-          <Section header={t('activeSection')}>
-            {activeAlerts.map((alert) => (
-              <AlertListItem key={alert.id} alert={alert} />
-            ))}
-          </Section>
-        </div>
+        <Section header={t('activeSection')}>
+          {activeAlerts.map((alert) => (
+            <AlertListItem key={alert.id} alert={alert} />
+          ))}
+        </Section>
       )}
 
       {triggeredAlerts.length > 0 && (
-        <div>
-          <Section header={t('triggeredSection')}>
-            {triggeredAlerts.map((alert) => (
-              <AlertListItem key={alert.id} alert={alert} />
-            ))}
-          </Section>
-        </div>
+        <Section header={t('triggeredSection')}>
+          {triggeredAlerts.map((alert) => (
+            <AlertListItem key={alert.id} alert={alert} />
+          ))}
+        </Section>
       )}
     </PageShell>
   )

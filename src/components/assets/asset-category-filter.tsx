@@ -7,19 +7,19 @@ import { useLocale, useTranslations } from 'next-intl'
 import { getCategoryColor } from '@/lib/category-colors'
 import { formatIRT, getIntlLocale } from '@/lib/prices'
 
-interface CategoryFilterHeaderProps {
+interface AssetCategoryFilterProps {
   category: string
   valueIRT: number
   percentage: number
   onClear: () => void
 }
 
-export function CategoryFilterHeader({
+export function AssetCategoryFilter({
   category,
   valueIRT,
   percentage,
   onClear,
-}: CategoryFilterHeaderProps) {
+}: AssetCategoryFilterProps) {
   const t = useTranslations('categories')
   const tBreakdown = useTranslations('breakdown')
   const locale = useLocale()

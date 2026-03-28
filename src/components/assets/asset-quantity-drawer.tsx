@@ -11,6 +11,7 @@ import {
   Spinner,
   toast,
 } from '@heroui/react'
+import { IconTrash } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { getDir } from '@/lib/i18n-utils'
@@ -30,6 +31,9 @@ export interface AssetQuantityDrawerProps {
   isPending: boolean
   /** Add flow focuses the first field; edit often avoids stealing focus on open. */
   autoFocusQuantity?: boolean
+  /** When provided, a delete button is shown at the bottom of the drawer body. */
+  deleteLabel?: string
+  onDelete?: () => void
 }
 
 export function AssetQuantityDrawer({
@@ -44,8 +48,10 @@ export function AssetQuantityDrawer({
   onSave,
   isPending,
   autoFocusQuantity = true,
+  deleteLabel,
+  onDelete,
 }: AssetQuantityDrawerProps) {
-  const tPicker = useTranslations('picker')
+  const tAddAsset = useTranslations('addAsset')
   const tAssets = useTranslations('assets')
   const locale = useLocale()
 
@@ -100,7 +106,7 @@ export function AssetQuantityDrawer({
 
   const showDualFields = !isIRT && sellPrice > 0
   const priceHint = showDualFields
-    ? tPicker('priceHint', { price: formatIRT(sellPrice, locale) })
+    ? tAddAsset('priceHint', { price: formatIRT(sellPrice, locale) })
     : null
 
   const fieldGroupClass =
@@ -149,7 +155,7 @@ export function AssetQuantityDrawer({
                 }}
                 autoFocus={autoFocusQuantity}
               >
-                <Label className="font-medium">{tPicker('assetAmount')}</Label>
+                <Label className="font-medium">{tAddAsset('assetAmount')}</Label>
                 {priceHint ? (
                   <Description className="mt-0.5 text-foreground/80 text-sm tabular-nums">
                     {priceHint}
@@ -180,7 +186,7 @@ export function AssetQuantityDrawer({
                   }}
                 >
                   <Label className="font-medium">
-                    {tPicker('valueInToman')}
+                    {tAddAsset('valueInToman')}
                   </Label>
                   <div className="mt-2 min-w-0" dir="ltr">
                     <NumberField.Group className={fieldGroupClass}>
@@ -194,6 +200,24 @@ export function AssetQuantityDrawer({
                     </NumberField.Group>
                   </div>
                 </NumberField>
+              ) : null}
+
+              {onDelete && deleteLabel ? (
+                <div className="border-border/40 border-t pt-2">
+                  <Button
+                    variant="ghost"
+                    fullWidth
+                    size="sm"
+                    onPress={() => {
+                      onOpenChange(false)
+                      onDelete()
+                    }}
+                    className="text-destructive"
+                  >
+                    <IconTrash size={14} aria-hidden />
+                    {deleteLabel}
+                  </Button>
+                </div>
               ) : null}
             </Drawer.Body>
 

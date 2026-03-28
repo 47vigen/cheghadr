@@ -22,6 +22,7 @@ export function PortfolioDeleteDialog({
   portfolio,
 }: PortfolioDeleteDialogProps) {
   const t = useTranslations('portfolios')
+  const tCommon = useTranslations('common')
   const utils = api.useUtils()
   const { notificationOccurred, impactOccurred } = useTelegramHaptics()
 
@@ -60,8 +61,8 @@ export function PortfolioDeleteDialog({
           </p>
         </div>
       }
-      cancelLabel={t('cancel')}
-      confirmLabel={t('delete')}
+      cancelLabel={tCommon('cancel')}
+      confirmLabel={tCommon('delete')}
       onConfirm={() => deleteMutation.mutate({ id: portfolio.id })}
       isPending={deleteMutation.isPending}
     />

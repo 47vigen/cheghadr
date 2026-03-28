@@ -17,6 +17,7 @@ export interface AssetEditDrawerProps {
   sellPrice: number
   isOpen: boolean
   onOpenChange: (open: boolean) => void
+  onDelete?: () => void
 }
 
 export function AssetEditDrawer({
@@ -27,8 +28,10 @@ export function AssetEditDrawer({
   sellPrice,
   isOpen,
   onOpenChange,
+  onDelete,
 }: AssetEditDrawerProps) {
   const t = useTranslations('assets')
+  const tCommon = useTranslations('common')
 
   const utils = api.useUtils()
   const { notificationOccurred } = useTelegramHaptics()
@@ -61,6 +64,8 @@ export function AssetEditDrawer({
       onSave={(qty) => updateMutation.mutate({ id: assetId, quantity: qty })}
       isPending={updateMutation.isPending}
       autoFocusQuantity={false}
+      deleteLabel={tCommon('delete')}
+      onDelete={onDelete}
     />
   )
 }

@@ -8,7 +8,7 @@ import { EmptyState } from '@/components/ui/async-states'
 
 import { useRouter } from '@/i18n/navigation'
 
-export function AssetsEmptyState() {
+export function AssetEmptyState() {
   const router = useRouter()
   const t = useTranslations('assets')
 
