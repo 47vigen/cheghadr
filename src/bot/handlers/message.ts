@@ -16,7 +16,7 @@ export async function handleMessage(ctx: BotContext): Promise<void> {
   // Exit any lingering conversation (e.g. stuck at waitForCallbackQuery) when
   // the user explicitly navigates away with /start or /cancel.
   if (cmd === '/start' || cmd === '/cancel') {
-    await ctx.conversation.exit()
+    await ctx.conversation.exitAll()
   }
   const { text, keyboard } = await buildMainMenu(user.id, locale, {
     showWelcome,
