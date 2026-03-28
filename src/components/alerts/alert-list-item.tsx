@@ -12,8 +12,8 @@ import { Cell } from '@/components/ui/cell'
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 
 import { formatIRT, getIntlLocale } from '@/lib/prices'
-import type { AlertEntry } from '@/types/api'
 import { api } from '@/trpc/react'
+import type { AlertEntry } from '@/types/api'
 
 interface AlertListItemProps {
   alert: AlertEntry

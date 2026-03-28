@@ -33,10 +33,7 @@ export function DeleteDialog({
   return (
     <AlertDialog.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>
       <AlertDialog.Container placement="auto" size="sm">
-        <AlertDialog.Dialog
-          className="sm:max-w-[360px]"
-          dir={getDir(locale)}
-        >
+        <AlertDialog.Dialog className="sm:max-w-[360px]" dir={getDir(locale)}>
           <AlertDialog.Header>
             <AlertDialog.Icon status="danger" />
             <AlertDialog.Heading>{title}</AlertDialog.Heading>

@@ -11,7 +11,9 @@ interface UseAddAssetMutationOptions {
   onSuccess?: () => void
 }
 
-export function useAddAssetMutation({ onSuccess }: UseAddAssetMutationOptions = {}) {
+export function useAddAssetMutation({
+  onSuccess,
+}: UseAddAssetMutationOptions = {}) {
   const t = useTranslations('assets')
   const utils = api.useUtils()
   const { notificationOccurred } = useTelegramHaptics()

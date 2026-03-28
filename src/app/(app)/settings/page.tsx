@@ -9,9 +9,11 @@ import { PageHeader } from '@/components/layout/page-header'
 import { PageShell } from '@/components/layout/page-shell'
 import { SettingsSkeleton } from '@/components/skeletons/settings-skeleton'
 import { Section } from '@/components/ui/section'
+
 import { useTelegramBackButton } from '@/hooks/use-telegram-back-button'
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 import { useLocaleContext } from '@/providers/locale-provider'
+
 import { api } from '@/trpc/react'
 
 export default function SettingsPage() {

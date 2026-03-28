@@ -15,7 +15,11 @@ export const userRouter = router({
   getSettings: protectedProcedure.query(({ ctx }) => {
     return ctx.db.user.findUniqueOrThrow({
       where: { id: ctx.user.id },
-      select: { dailyDigestEnabled: true, isOnboarded: true, preferredLocale: true },
+      select: {
+        dailyDigestEnabled: true,
+        isOnboarded: true,
+        preferredLocale: true,
+      },
     })
   }),
 

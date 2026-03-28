@@ -8,10 +8,7 @@ import { CB } from '../callback-data'
 import type { BotContext } from '../context'
 import { t } from '../i18n'
 import { buildAlertList } from '../screens/alerts'
-import {
-  showMain,
-  showSuccessAndList,
-} from '../shared/wizard'
+import { showMain, showSuccessAndList } from '../shared/wizard'
 import { loadBotUserAndLocale } from './utils'
 import { waitForPositiveNumberOrExit } from './wait-for-number'
 
