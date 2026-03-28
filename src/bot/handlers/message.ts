@@ -13,6 +13,11 @@ export async function handleMessage(ctx: BotContext): Promise<void> {
   }
   const cmd = ctx.message?.text?.trim().split(/\s+/)[0]?.toLowerCase()
   const showWelcome = cmd === '/start'
+  // Exit any lingering conversation (e.g. stuck at waitForCallbackQuery) when
+  // the user explicitly navigates away with /start or /cancel.
+  if (cmd === '/start' || cmd === '/cancel') {
+    await ctx.conversation.exitAll()
+  }
   const { text, keyboard } = await buildMainMenu(user.id, locale, {
     showWelcome,
   })
