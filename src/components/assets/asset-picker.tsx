@@ -9,8 +9,8 @@ import { AssetQuantityDrawer } from '@/components/assets/asset-quantity-drawer'
 import { AssetSearchPanel } from '@/components/assets/asset-search-panel'
 import { PriceCategoryNav } from '@/components/prices/price-category-nav'
 
+import { useAddAssetMutation } from '@/hooks/use-add-asset-mutation'
 import { useAssetSearchGroups } from '@/hooks/use-asset-search-groups'
-import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 
 import { getDir } from '@/lib/i18n-utils'
 import type { PriceItem } from '@/lib/prices'
@@ -21,7 +21,6 @@ import {
   makeIrtPriceItem,
   parsePriceSnapshot,
 } from '@/lib/prices'
-import { api } from '@/trpc/react'
 
 interface AssetPickerProps {
   priceData: unknown
@@ -35,7 +34,7 @@ export function AssetPicker({
   onSaved,
 }: AssetPickerProps) {
   const t = useTranslations('assets')
-  const tPicker = useTranslations('picker')
+  const tAddAsset = useTranslations('addAsset')
   const locale = useLocale()
 
   const [search, setSearch] = useState('')
@@ -43,21 +42,11 @@ export function AssetPicker({
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<PriceItem | null>(null)
 
-  const utils = api.useUtils()
-  const { notificationOccurred } = useTelegramHaptics()
-
-  const addMutation = api.assets.add.useMutation({
+  const addMutation = useAddAssetMutation({
     onSuccess: () => {
-      notificationOccurred('success')
-      void utils.assets.list.invalidate()
-      toast.success(t('toastAdded'))
       setDrawerOpen(false)
       setSelectedItem(null)
       onSaved()
-    },
-    onError: (err) => {
-      notificationOccurred('error')
-      toast.danger(err.message || t('toastAddError'))
     },
   })
 
@@ -102,8 +91,8 @@ export function AssetPicker({
     ? getLocalizedItemName(selectedItem, locale)
     : ''
   const drawerTitle = selectedItem
-    ? `${assetName} — ${tPicker('enterQuantity')}`
-    : tPicker('enterQuantity')
+    ? `${assetName} — ${tAddAsset('enterQuantity')}`
+    : tAddAsset('enterQuantity')
 
   return (
     <>
@@ -114,7 +103,7 @@ export function AssetPicker({
             <SearchField.Group>
               <SearchField.SearchIcon />
               <SearchField.Input
-                placeholder={tPicker('search')}
+                placeholder={tAddAsset('search')}
                 dir={getDir(locale)}
                 className="py-3"
               />
@@ -139,13 +128,13 @@ export function AssetPicker({
         search={search}
         onSearchChange={handleSearchChange}
         locale={locale}
-        searchPlaceholder={tPicker('search')}
+        searchPlaceholder={tAddAsset('search')}
         groups={visibleGroups}
         onSelect={handleSelect}
         getSubtitle={(item) =>
           `${formatIRT(Number(item.sell_price), locale)} ${t('tomanAbbr')}`
         }
-        emptyHeader={tPicker('noResults')}
+        emptyHeader={tAddAsset('noResults')}
       />
 
       <AssetQuantityDrawer
@@ -159,7 +148,7 @@ export function AssetPicker({
         isIRT={isIRT}
         symbol={symbol}
         title={drawerTitle}
-        saveLabel={tPicker('save')}
+        saveLabel={tAddAsset('save')}
         onSave={handleSave}
         isPending={addMutation.isPending}
         autoFocusQuantity

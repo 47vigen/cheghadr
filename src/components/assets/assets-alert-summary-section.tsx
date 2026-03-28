@@ -36,7 +36,7 @@ export function AssetsAlertSummarySection({
 
   return (
     <div>
-      <Section header={tAlerts('sectionTitle')}>
+      <Section header={tAlerts('title')}>
         <AlertSummaryCard
           activeCount={activeCount}
           triggeredCount={triggeredCount}

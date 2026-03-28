@@ -8,7 +8,6 @@ import { getIntlLocale } from '@/lib/prices'
 
 interface StalenessBannerProps {
   snapshotAt: Date | string | null
-  namespace?: 'assets' | 'prices'
   onRefresh?: () => void
 }
 
@@ -39,25 +38,18 @@ function formatRelativeTime(
 
 export function StalenessBanner({
   snapshotAt,
-  namespace = 'prices',
   onRefresh,
 }: StalenessBannerProps) {
   const locale = useLocale()
-
-  const tPrices = useTranslations('prices')
-  const tAssets = useTranslations('assets')
   const tCommon = useTranslations('common')
 
   const resolvedDate = snapshotAt ? new Date(snapshotAt) : null
 
-  const label =
-    namespace === 'prices'
-      ? resolvedDate
-        ? tPrices('staleWarning', {
-            time: formatRelativeTime(resolvedDate, locale, tCommon),
-          })
-        : tPrices('checkLater')
-      : tAssets('staleWarning')
+  const label = resolvedDate
+    ? tCommon('lastUpdated', {
+        time: formatRelativeTime(resolvedDate, locale, tCommon),
+      })
+    : tCommon('staleWarning')
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-1 bg-warning/10 px-2 py-1">

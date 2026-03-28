@@ -16,6 +16,7 @@ import { api } from '@/trpc/react'
 
 export default function SettingsPage() {
   const t = useTranslations('settings')
+  const tCommon = useTranslations('common')
   useTelegramBackButton(true)
   const { notificationOccurred } = useTelegramHaptics()
   const localeCtx = useLocaleContext()
@@ -47,7 +48,7 @@ export default function SettingsPage() {
 
   return (
     <PageShell>
-      <PageHeader title={t('title')} backLabel={t('back')} />
+      <PageHeader title={t('title')} backLabel={tCommon('back')} />
 
       <div>
         <Section header={t('languageSection')}>

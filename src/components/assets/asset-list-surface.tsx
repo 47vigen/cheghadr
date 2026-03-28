@@ -38,7 +38,7 @@ export function AssetListSurface({
   emptyHeader,
 }: AssetListSurfaceProps) {
   const locale = useLocale()
-  const tPicker = useTranslations('picker')
+  const tAddAsset = useTranslations('addAsset')
 
   return (
     <>
@@ -73,7 +73,7 @@ export function AssetListSurface({
 
       {groups.length === 0 ? (
         <Section>
-          <Placeholder header={emptyHeader || tPicker('noResults')} />
+          <Placeholder header={emptyHeader || tAddAsset('noResults')} />
         </Section>
       ) : null}
     </>

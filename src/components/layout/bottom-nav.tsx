@@ -2,6 +2,7 @@
 
 import type { ComponentType } from 'react'
 
+import { Button } from '@heroui/react'
 import { IconCalculator, IconChartLine, IconCoins } from '@tabler/icons-react'
 import { useTranslations } from 'next-intl'
 
@@ -44,16 +45,16 @@ export function BottomNav() {
         const isSelected =
           pathname === path || pathname.startsWith(`${path}/`)
         return (
-          <button
+          <Button
             key={id}
-            type="button"
+            variant="ghost"
             aria-label={t(labelKey)}
             aria-current={isSelected ? 'page' : undefined}
-            onClick={() => {
+            onPress={() => {
               selectionChanged()
               router.push(path)
             }}
-            className={`flex flex-col items-center gap-0.5 px-2 py-1 transition-colors ${
+            className={`flex h-auto flex-col items-center gap-0.5 px-2 py-1 transition-colors ${
               isSelected
                 ? 'text-accent'
                 : 'text-muted-foreground hover:text-foreground'
@@ -63,7 +64,7 @@ export function BottomNav() {
             <span className="label-compact" aria-hidden>
               {t(labelKey)}
             </span>
-          </button>
+          </Button>
         )
       })}
     </nav>

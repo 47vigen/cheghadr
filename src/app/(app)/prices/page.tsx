@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 
-import { SearchField, toast } from '@heroui/react'
+import { SearchField } from '@heroui/react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { AssetQuantityDrawer } from '@/components/assets/asset-quantity-drawer'
@@ -18,9 +18,9 @@ import {
 } from '@/components/ui/async-states'
 import { Section } from '@/components/ui/section'
 
+import { useAddAssetMutation } from '@/hooks/use-add-asset-mutation'
 import { usePriceCategoryScrollSpy } from '@/hooks/use-price-category-scroll-spy'
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
-import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 
 import { getDir } from '@/lib/i18n-utils'
 import type { PriceItem } from '@/lib/prices'
@@ -38,52 +38,38 @@ import { api } from '@/trpc/react'
 
 export default function PricesPage() {
   const t = useTranslations('prices')
-  const tAssets = useTranslations('assets')
-  const tPicker = useTranslations('picker')
+  const tAddAsset = useTranslations('addAsset')
   const tCommon = useTranslations('common')
   const tNav = useTranslations('nav')
   const locale = useLocale()
   const [search, setSearch] = useState('')
-  const [modalOpen, setModalOpen] = useState(false)
-  const [modalItem, setModalItem] = useState<PriceItem | null>(null)
-
-  const { notificationOccurred } = useTelegramHaptics()
-  const utils = api.useUtils()
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [drawerItem, setDrawerItem] = useState<PriceItem | null>(null)
 
   const portfoliosQuery = api.portfolio.list.useQuery()
   const portfolioId = portfoliosQuery.data?.[0]?.id ?? ''
 
-  const addMutation = api.assets.add.useMutation({
+  const addMutation = useAddAssetMutation({
     onSuccess: () => {
-      notificationOccurred('success')
-      void utils.assets.list.invalidate()
-      toast.success(tAssets('toastAdded'))
-      setModalOpen(false)
-      setModalItem(null)
-    },
-    onError: (err) => {
-      notificationOccurred('error')
-      toast.danger(err.message || tAssets('toastAddError'))
+      setDrawerOpen(false)
+      setDrawerItem(null)
     },
   })
 
-  const openModal = (item: PriceItem) => {
-    setModalItem(item)
-    setModalOpen(true)
+  const openDrawer = (item: PriceItem) => {
+    setDrawerItem(item)
+    setDrawerOpen(true)
   }
 
-  const closeModal = () => {
-    setModalOpen(false)
-    setModalItem(null)
+  const closeDrawer = () => {
+    setDrawerOpen(false)
+    setDrawerItem(null)
   }
 
   const handleSave = (qty: string) => {
-    if (!modalItem || addMutation.isPending) return
-    const sym = getBaseSymbol(modalItem)
-    if (!sym || !portfolioId) {
-      toast.danger(tAssets('toastAddError'))
-      return
-    }
+    if (!drawerItem || addMutation.isPending) return
+    const sym = getBaseSymbol(drawerItem)
+    if (!sym || !portfolioId) return
     addMutation.mutate({ symbol: sym, quantity: qty, portfolioId })
   }
 
@@ -154,7 +140,6 @@ export default function PricesPage() {
               <div className="mt-2">
                 <StalenessBanner
                   snapshotAt={data.snapshotAt}
-                  namespace="prices"
                   onRefresh={() => void refetch()}
                 />
               </div>
@@ -191,7 +176,7 @@ export default function PricesPage() {
               <PriceSection
                 category={category}
                 items={items}
-                onPress={openModal}
+                onPress={openDrawer}
               />
             </div>
           ))
@@ -199,20 +184,20 @@ export default function PricesPage() {
       </PageShell>
 
       <AssetQuantityDrawer
-        isOpen={modalOpen}
+        isOpen={drawerOpen}
         onOpenChange={(open) => {
-          if (!open) closeModal()
+          if (!open) closeDrawer()
         }}
         initialQuantity=""
-        sellPrice={Number(modalItem?.sell_price ?? 0)}
-        isIRT={modalItem?.symbol === 'IRT'}
-        symbol={modalItem ? getBaseSymbol(modalItem) : ''}
+        sellPrice={Number(drawerItem?.sell_price ?? 0)}
+        isIRT={drawerItem?.symbol === 'IRT'}
+        symbol={drawerItem ? getBaseSymbol(drawerItem) : ''}
         title={
-          modalItem
-            ? `${getLocalizedItemName(modalItem, locale)} — ${tPicker('enterQuantity')}`
-            : tPicker('enterQuantity')
+          drawerItem
+            ? `${getLocalizedItemName(drawerItem, locale)} — ${tAddAsset('enterQuantity')}`
+            : tAddAsset('enterQuantity')
         }
-        saveLabel={tPicker('save')}
+        saveLabel={tAddAsset('save')}
         onSave={handleSave}
         isPending={addMutation.isPending}
         autoFocusQuantity

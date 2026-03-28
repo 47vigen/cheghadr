@@ -3,7 +3,6 @@
 import { useState } from 'react'
 
 import { Button, Switch, toast } from '@heroui/react'
-import type { Alert } from '@prisma/client'
 import { IconBell, IconTrash } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 
@@ -13,10 +12,11 @@ import { Cell } from '@/components/ui/cell'
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 
 import { formatIRT, getIntlLocale } from '@/lib/prices'
+import type { AlertEntry } from '@/types/api'
 import { api } from '@/trpc/react'
 
 interface AlertListItemProps {
-  alert: Alert
+  alert: AlertEntry
 }
 
 export function AlertListItem({ alert }: AlertListItemProps) {
@@ -61,6 +61,10 @@ export function AlertListItem({ alert }: AlertListItemProps) {
       })
     : undefined
 
+  // Triggered (inactive) alerts show an explicit re-enable button instead of
+  // a toggle switch, making the affordance clear.
+  const isTriggered = !alert.isActive && alert.triggeredAt !== null
+
   return (
     <>
       <Cell
@@ -73,17 +77,28 @@ export function AlertListItem({ alert }: AlertListItemProps) {
         subtitle={subtitle}
         after={
           <div className="flex items-center gap-1.5">
-            <Switch
-              isSelected={alert.isActive}
-              isDisabled={toggleMutation.isPending}
-              onChange={() => toggleMutation.mutate({ id: alert.id })}
-              size="sm"
-              aria-label={title}
-            >
-              <Switch.Control>
-                <Switch.Thumb />
-              </Switch.Control>
-            </Switch>
+            {isTriggered ? (
+              <Button
+                size="sm"
+                variant="ghost"
+                onPress={() => toggleMutation.mutate({ id: alert.id })}
+                isDisabled={toggleMutation.isPending}
+              >
+                {t('reEnable')}
+              </Button>
+            ) : (
+              <Switch
+                isSelected={alert.isActive}
+                isDisabled={toggleMutation.isPending}
+                onChange={() => toggleMutation.mutate({ id: alert.id })}
+                size="sm"
+                aria-label={title}
+              >
+                <Switch.Control>
+                  <Switch.Thumb />
+                </Switch.Control>
+              </Switch>
+            )}
             <Button
               isIconOnly
               variant="ghost"

@@ -7,8 +7,8 @@ import { useLocale, useTranslations } from 'next-intl'
 import { AssetDeleteDialog } from '@/components/assets/asset-delete-dialog'
 import { AssetEditDrawer } from '@/components/assets/asset-edit-drawer'
 import { AssetListItem } from '@/components/assets/asset-list-item'
-import { CategoryFilterHeader } from '@/components/assets/asset-category-filter'
-import { AssetsEmptyState } from '@/components/assets/asset-empty-state'
+import { AssetCategoryFilter } from '@/components/assets/asset-category-filter'
+import { AssetEmptyState } from '@/components/assets/asset-empty-state'
 import { Section } from '@/components/ui/section'
 
 import { pickDisplayName } from '@/lib/prices'
@@ -43,7 +43,7 @@ export function AssetsListSection({
   if (assets.length === 0) {
     return (
       <div>
-        <AssetsEmptyState />
+        <AssetEmptyState />
       </div>
     )
   }
@@ -52,7 +52,7 @@ export function AssetsListSection({
     <div>
       <Section header={t('assetsList')}>
         {selectedCategory && selectedCategoryData && (
-          <CategoryFilterHeader
+          <AssetCategoryFilter
             category={selectedCategory}
             valueIRT={selectedCategoryData.valueIRT}
             percentage={selectedCategoryData.percentage}
@@ -69,7 +69,6 @@ export function AssetsListSection({
                 : undefined
             }
             onEdit={() => setEditTarget(asset)}
-            onDelete={() => setDeleteTarget(asset)}
           />
         ))}
       </Section>
@@ -91,6 +90,10 @@ export function AssetsListSection({
         isOpen={editTarget !== null}
         onOpenChange={(open) => {
           if (!open) setEditTarget(null)
+        }}
+        onDelete={() => {
+          if (editTarget) setDeleteTarget(editTarget)
+          setEditTarget(null)
         }}
       />
       <AssetDeleteDialog

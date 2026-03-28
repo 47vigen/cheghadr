@@ -23,6 +23,7 @@ export function AssetDeleteDialog({
   onOpenChange,
 }: AssetDeleteDialogProps) {
   const t = useTranslations('assets')
+  const tCommon = useTranslations('common')
   const utils = api.useUtils()
   const { notificationOccurred, impactOccurred } = useTelegramHaptics()
 
@@ -49,8 +50,8 @@ export function AssetDeleteDialog({
           {t('deleteConfirm', { name: assetName })}
         </p>
       }
-      cancelLabel={t('cancel')}
-      confirmLabel={t('delete')}
+      cancelLabel={tCommon('cancel')}
+      confirmLabel={tCommon('delete')}
       onConfirm={() => deleteMutation.mutate({ id: assetId })}
       isPending={deleteMutation.isPending}
     />

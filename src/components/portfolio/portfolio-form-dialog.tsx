@@ -17,20 +17,21 @@ import { getDir } from '@/lib/i18n-utils'
 import { api } from '@/trpc/react'
 import type { PortfolioListItem } from '@/types/api'
 
-interface PortfolioFormModalProps {
+interface PortfolioFormDialogProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   mode: 'create' | 'rename'
   portfolio?: PortfolioListItem
 }
 
-export function PortfolioFormModal({
+export function PortfolioFormDialog({
   isOpen,
   onOpenChange,
   mode,
   portfolio,
-}: PortfolioFormModalProps) {
+}: PortfolioFormDialogProps) {
   const t = useTranslations('portfolios')
+  const tCommon = useTranslations('common')
   const locale = useLocale()
 
   const [name, setName] = useState('')
@@ -137,7 +138,7 @@ export function PortfolioFormModal({
                 onPress={() => onOpenChange(false)}
                 isDisabled={isPending}
               >
-                {t('cancel')}
+                {tCommon('cancel')}
               </Button>
               <Button
                 variant="primary"

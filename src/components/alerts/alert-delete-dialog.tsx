@@ -21,6 +21,7 @@ export function AlertDeleteDialog({
   onOpenChange,
 }: AlertDeleteDialogProps) {
   const t = useTranslations('alerts')
+  const tCommon = useTranslations('common')
   const { notificationOccurred, impactOccurred } = useTelegramHaptics()
   const utils = api.useUtils()
 
@@ -47,8 +48,8 @@ export function AlertDeleteDialog({
           {t('deleteConfirm')}
         </p>
       }
-      cancelLabel={t('cancel')}
-      confirmLabel={t('delete')}
+      cancelLabel={tCommon('cancel')}
+      confirmLabel={tCommon('delete')}
       onConfirm={() => deleteMutation.mutate({ id: alertId })}
       isPending={deleteMutation.isPending}
     />

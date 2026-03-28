@@ -1,5 +1,8 @@
 'use client'
 
+import type { Key } from '@heroui/react'
+
+import { ListBox, Select, Separator } from '@heroui/react'
 import { useTranslations } from 'next-intl'
 
 import type { PortfolioListItem } from '@/types/api'
@@ -19,43 +22,56 @@ export function PortfolioSelector({
 }: PortfolioSelectorProps) {
   const t = useTranslations('portfolios')
 
-  const currentLabel =
-    selectedId === null
-      ? `📊 ${t('consolidated')}`
-      : (() => {
-          const p = portfolios.find((x) => x.id === selectedId)
-          return p ? `${p.emoji ?? '💼'} ${p.name}` : `📊 ${t('consolidated')}`
-        })()
+  const handleChange = (key: Key | null) => {
+    if (key === '__create__') {
+      onCreate()
+      return
+    }
+    onSelect(key === '' || key === null ? null : String(key))
+  }
 
   return (
-    <div className="relative mb-3">
-      <select
-        className="w-full appearance-none rounded-lg border border-border bg-card px-3 py-2 pe-8 font-medium text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+    <div className="mb-3">
+      <Select
         value={selectedId ?? ''}
-        onChange={(e) => {
-          const val = e.target.value
-          if (val === '__create__') {
-            onCreate()
-          } else {
-            onSelect(val === '' ? null : val)
-          }
-        }}
-        aria-label={currentLabel}
+        onChange={handleChange}
+        fullWidth
+        aria-label={t('consolidated')}
       >
-        <option value="">📊 {t('consolidated')}</option>
-        {portfolios.map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.emoji ?? '💼'} {p.name} ({p.assetCount})
-          </option>
-        ))}
-        <option value="__create__">➕ {t('newPortfolio')}</option>
-      </select>
-      <span
-        className="pointer-events-none absolute end-2 top-1/2 -translate-y-1/2 text-muted-foreground text-xs"
-        aria-hidden
-      >
-        ▾
-      </span>
+        <Select.Trigger>
+          <Select.Value />
+          <Select.Indicator />
+        </Select.Trigger>
+        <Select.Popover>
+          <ListBox>
+            <ListBox.Item id="" textValue={`📊 ${t('consolidated')}`}>
+              📊 {t('consolidated')}
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+            {portfolios.map((p) => (
+              <ListBox.Item
+                key={p.id}
+                id={p.id}
+                textValue={`${p.emoji ?? '💼'} ${p.name}`}
+              >
+                <span className="flex w-full items-center justify-between gap-2">
+                  <span>
+                    {p.emoji ?? '💼'} {p.name}
+                  </span>
+                  <span className="text-muted-foreground text-xs tabular-nums">
+                    {p.assetCount}
+                  </span>
+                </span>
+                <ListBox.ItemIndicator />
+              </ListBox.Item>
+            ))}
+            <Separator />
+            <ListBox.Item id="__create__" textValue={t('newPortfolio')}>
+              ➕ {t('newPortfolio')}
+            </ListBox.Item>
+          </ListBox>
+        </Select.Popover>
+      </Select>
     </div>
   )
 }

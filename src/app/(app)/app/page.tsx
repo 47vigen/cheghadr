@@ -11,7 +11,7 @@ import { AssetsHeroSection } from '@/components/assets/assets-hero-section'
 import { AssetsListSection } from '@/components/assets/assets-list-section'
 import { PageShell } from '@/components/layout/page-shell'
 import { PortfolioDeleteDialog } from '@/components/portfolio/portfolio-delete-dialog'
-import { PortfolioFormModal } from '@/components/portfolio/portfolio-form-modal'
+import { PortfolioFormDialog } from '@/components/portfolio/portfolio-form-dialog'
 import { AssetsSkeleton } from '@/components/skeletons/assets-skeleton'
 import { ErrorState, RefreshIndicator } from '@/components/ui/async-states'
 
@@ -25,10 +25,8 @@ export default function AssetsPage() {
     selectedPortfolioId,
     deltaWindow,
     setDeltaWindow,
-    showCreateModal,
-    setShowCreateModal,
-    showRenameModal,
-    setShowRenameModal,
+    portfolioDialogMode,
+    setPortfolioDialogMode,
     showDeleteModal,
     portfolioToDelete,
     assetsQuery,
@@ -40,7 +38,6 @@ export default function AssetsPage() {
     portfoliosQuery,
     isRefreshing,
     chartTimeZone,
-    hasMultiplePortfolios,
     defaultPortfolioId,
     biggestMoverPeriodLabel,
     filteredAssets,
@@ -51,6 +48,7 @@ export default function AssetsPage() {
     handleRequestDeletePortfolio,
     handleCloseDeleteModal,
     handleRefreshStale,
+    handlePortfolioDialogClose,
   } = useAssetsPage()
 
   if (assetsQuery.isLoading) {
@@ -80,25 +78,30 @@ export default function AssetsPage() {
 
       <PageShell>
         <AssetsHeroSection
-          portfolios={portfoliosQuery.data}
-          hasMultiplePortfolios={hasMultiplePortfolios}
-          selectedPortfolioId={selectedPortfolioId}
-          onPortfolioSelect={handlePortfolioSelect}
-          onCreatePortfolio={() => setShowCreateModal(true)}
-          onRenamePortfolio={() => setShowRenameModal(true)}
-          onRequestDeletePortfolio={handleRequestDeletePortfolio}
-          totalIRT={data.totalIRT}
-          usdSellPrice={data.usdSellPrice}
-          eurSellPrice={data.eurSellPrice}
-          stale={data.stale}
-          snapshotAt={data.snapshotAt}
-          onRefreshStale={handleRefreshStale}
-          chartTimeZone={chartTimeZone}
+          portfolio={{
+            portfolios: portfoliosQuery.data,
+            selectedId: selectedPortfolioId,
+            onSelect: handlePortfolioSelect,
+            onCreate: () => setPortfolioDialogMode('create'),
+            onRename: () => setPortfolioDialogMode('rename'),
+            onDelete: handleRequestDeletePortfolio,
+          }}
+          prices={{
+            totalIRT: data.totalIRT,
+            usdSellPrice: data.usdSellPrice,
+            eurSellPrice: data.eurSellPrice,
+            stale: data.stale,
+            snapshotAt: data.snapshotAt,
+            onRefresh: handleRefreshStale,
+          }}
+          delta={{
+            window: deltaWindow,
+            onChange: setDeltaWindow,
+            timezone: chartTimeZone,
+          }}
           onSettings={handleSettings}
           onExport={handleExport}
           exportFetching={exportQuery.isFetching}
-          deltaWindow={deltaWindow}
-          onDeltaWindowChange={setDeltaWindow}
         />
 
         <AssetsChartSection historyData={historyQuery.data} />
@@ -136,25 +139,17 @@ export default function AssetsPage() {
         />
       </PageShell>
 
-      {data.assets.length > 0 && (
-        <AssetsFab
-          selectedPortfolioId={selectedPortfolioId}
-          defaultPortfolioId={defaultPortfolioId}
-        />
-      )}
-
-      <PortfolioFormModal
-        isOpen={showCreateModal}
-        onOpenChange={setShowCreateModal}
-        mode="create"
+      <AssetsFab
+        selectedPortfolioId={selectedPortfolioId}
+        defaultPortfolioId={defaultPortfolioId}
       />
 
-      <PortfolioFormModal
-        isOpen={showRenameModal}
-        onOpenChange={setShowRenameModal}
-        mode="rename"
+      <PortfolioFormDialog
+        isOpen={portfolioDialogMode !== null}
+        onOpenChange={handlePortfolioDialogClose}
+        mode={portfolioDialogMode ?? 'create'}
         portfolio={
-          selectedPortfolioId
+          portfolioDialogMode === 'rename' && selectedPortfolioId
             ? portfoliosQuery.data?.find((p) => p.id === selectedPortfolioId)
             : undefined
         }

@@ -65,7 +65,7 @@ export function AssetSelector({
   cellClassName,
   noBorder = false,
 }: AssetSelectorProps) {
-  const tPicker = useTranslations('picker')
+  const tAddAsset = useTranslations('addAsset')
   const locale = useLocale()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -135,7 +135,7 @@ export function AssetSelector({
               <Drawer.Handle className="mx-auto mb-0.5" />
               <Drawer.Header className="px-4 pt-0 pb-1">
                 <Drawer.Heading className="font-semibold text-base leading-snug">
-                  {tPicker('selectAsset')}
+                  {tAddAsset('selectAsset')}
                 </Drawer.Heading>
               </Drawer.Header>
               <Drawer.Body className="overflow-y-auto px-0 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
@@ -143,7 +143,7 @@ export function AssetSelector({
                   search={search}
                   onSearchChange={setSearch}
                   locale={locale}
-                  searchPlaceholder={tPicker('search')}
+                  searchPlaceholder={tAddAsset('search')}
                   groups={groups}
                   onSelect={(item) => {
                     onChange(getBaseSymbol(item))
@@ -154,18 +154,18 @@ export function AssetSelector({
                       <span className="text-accent">✓</span>
                     ) : undefined
                   }
-                  emptyHeader={tPicker('noResults')}
+                  emptyHeader={tAddAsset('noResults')}
                   wrapSearchInSection
                   beforeList={
                     !search.trim() ? (
                       <Section
-                        header={tPicker('iranianToman')}
+                        header={tAddAsset('iranianToman')}
                         headerRowClassName="px-4"
                       >
                         <Cell
                           before={
                             <AssetAvatar
-                              alt={tPicker('toman')}
+                              alt={tAddAsset('toman')}
                               symbol={
                                 locale === 'fa'
                                   ? IRT_ENTRY.fa.charAt(0)
@@ -183,7 +183,7 @@ export function AssetSelector({
                             closeDrawer()
                           }}
                         >
-                          {tPicker('toman')}
+                          {tAddAsset('toman')}
                         </Cell>
                       </Section>
                     ) : null

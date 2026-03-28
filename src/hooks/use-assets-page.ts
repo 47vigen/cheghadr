@@ -3,34 +3,25 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import { toast } from '@heroui/react'
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 
 import type { DeltaWindow } from '@/components/portfolio/portfolio-delta'
 
-import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
+import { useAssetsQueries } from '@/hooks/use-assets-queries'
 
 import { useRouter } from '@/i18n/navigation'
 import { downloadCSV } from '@/lib/csv-download'
-import {
-  REFETCH_ALERTS_MS,
-  REFETCH_ASSETS_MS,
-  REFETCH_PORTFOLIO_MS,
-} from '@/trpc/constants'
 import { api } from '@/trpc/react'
 
 export function useAssetsPage() {
-  const locale = useLocale()
   const tDelta = useTranslations('delta')
   const tExport = useTranslations('export')
   const router = useRouter()
 
   // --- UI state ---
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(
-    null,
-  )
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [showRenameModal, setShowRenameModal] = useState(false)
+  const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null)
+  const [portfolioDialogMode, setPortfolioDialogMode] = useState<'create' | 'rename' | null>(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [portfolioToDelete, setPortfolioToDelete] = useState<{
     id: string
@@ -39,7 +30,7 @@ export function useAssetsPage() {
   } | null>(null)
   const [deltaWindow, setDeltaWindow] = useState<DeltaWindow>('1D')
 
-  // --- Derived constants ---
+  // --- Timezone ---
   const chartTimeZone = useMemo(() => {
     try {
       return Intl.DateTimeFormat().resolvedOptions().timeZone ?? 'UTC'
@@ -49,85 +40,24 @@ export function useAssetsPage() {
   }, [])
 
   // --- Queries ---
-  const settingsQuery = api.user.getSettings.useQuery()
+  const {
+    portfoliosQuery,
+    assetsQuery,
+    historyQuery,
+    biggestMoverQuery,
+    breakdownQuery,
+    alertsQuery,
+    exportQuery,
+    settingsQuery,
+    isRefreshing,
+  } = useAssetsQueries({ selectedPortfolioId, deltaWindow, chartTimeZone })
 
+  // --- Onboarding redirect ---
   useEffect(() => {
     if (settingsQuery.data && !settingsQuery.data.isOnboarded) {
       router.replace('/onboard')
     }
   }, [settingsQuery.data, router])
-
-  const portfoliosQuery = api.portfolio.list.useQuery()
-
-  const assetsQuery = api.assets.list.useQuery(
-    selectedPortfolioId ? { portfolioId: selectedPortfolioId } : undefined,
-    {
-      refetchInterval: REFETCH_ASSETS_MS,
-      refetchOnWindowFocus: true,
-    },
-  )
-
-  const historyQuery = api.portfolio.history.useQuery(
-    selectedPortfolioId
-      ? {
-          window: deltaWindow,
-          timezone: chartTimeZone,
-          portfolioId: selectedPortfolioId,
-        }
-      : { window: deltaWindow, timezone: chartTimeZone },
-    {
-      refetchInterval: REFETCH_PORTFOLIO_MS,
-      refetchOnWindowFocus: true,
-    },
-  )
-
-  const biggestMoverQuery = api.portfolio.biggestMover.useQuery(
-    selectedPortfolioId
-      ? {
-          window: deltaWindow,
-          timezone: chartTimeZone,
-          portfolioId: selectedPortfolioId,
-          locale: locale === 'fa' ? 'fa' : 'en',
-        }
-      : {
-          window: deltaWindow,
-          timezone: chartTimeZone,
-          locale: locale === 'fa' ? 'fa' : 'en',
-        },
-    {
-      refetchInterval: REFETCH_PORTFOLIO_MS,
-      refetchOnWindowFocus: true,
-    },
-  )
-
-  const breakdownQuery = api.portfolio.breakdown.useQuery(
-    selectedPortfolioId ? { portfolioId: selectedPortfolioId } : undefined,
-    {
-      refetchInterval: REFETCH_PORTFOLIO_MS,
-      refetchOnWindowFocus: true,
-    },
-  )
-
-  const alertsQuery = api.alerts.list.useQuery(undefined, {
-    refetchInterval: REFETCH_ALERTS_MS,
-    refetchOnWindowFocus: true,
-  })
-
-  const exportQuery = api.portfolio.export.useQuery(
-    selectedPortfolioId ? { portfolioId: selectedPortfolioId } : undefined,
-    { enabled: false },
-  )
-
-  // --- Pull-to-refresh ---
-  const { isRefreshing } = usePullToRefresh(async () => {
-    await Promise.all([
-      assetsQuery.refetch(),
-      historyQuery.refetch(),
-      biggestMoverQuery.refetch(),
-      alertsQuery.refetch(),
-      breakdownQuery.refetch(),
-    ])
-  })
 
   // --- Keep filters in sync with data ---
   useEffect(() => {
@@ -170,7 +100,6 @@ export function useAssetsPage() {
     )
   }, [selectedCategory, breakdownQuery.data])
 
-  const hasMultiplePortfolios = (portfoliosQuery.data?.length ?? 0) > 1
   const defaultPortfolioId = portfoliosQuery.data?.[0]?.id
 
   // --- Handlers ---
@@ -214,6 +143,15 @@ export function useAssetsPage() {
       breakdownQuery.refetch(),
     ])
 
+  const utils = api.useUtils()
+  // Re-fetch portfolio list after creating/renaming so the selector updates
+  const handlePortfolioDialogClose = (open: boolean) => {
+    if (!open) {
+      setPortfolioDialogMode(null)
+      void utils.portfolio.list.invalidate()
+    }
+  }
+
   return {
     // State
     selectedCategory,
@@ -221,10 +159,8 @@ export function useAssetsPage() {
     selectedPortfolioId,
     deltaWindow,
     setDeltaWindow,
-    showCreateModal,
-    setShowCreateModal,
-    showRenameModal,
-    setShowRenameModal,
+    portfolioDialogMode,
+    setPortfolioDialogMode,
     showDeleteModal,
     portfolioToDelete,
     // Queries
@@ -238,7 +174,6 @@ export function useAssetsPage() {
     isRefreshing,
     // Derived
     chartTimeZone,
-    hasMultiplePortfolios,
     defaultPortfolioId,
     biggestMoverPeriodLabel,
     filteredAssets,
@@ -250,5 +185,6 @@ export function useAssetsPage() {
     handleRequestDeletePortfolio,
     handleCloseDeleteModal,
     handleRefreshStale,
+    handlePortfolioDialogClose,
   }
 }
