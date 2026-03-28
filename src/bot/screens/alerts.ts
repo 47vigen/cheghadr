@@ -65,7 +65,10 @@ export async function buildAlertList(
     lines.push(`\n${status} ${label}`)
 
     // Per-alert toggle/delete buttons
-    kb.text(status, CB.alertToggle(alert.id))
+    const toggleLabel = alert.isActive
+      ? t(locale, 'bot.alerts.actionPause')
+      : t(locale, 'bot.alerts.actionEnable')
+    kb.text(toggleLabel, CB.alertToggle(alert.id))
       .text(t(locale, 'bot.alerts.deleteBtn'), CB.alertDeleteConfirm(alert.id))
       .row()
   }

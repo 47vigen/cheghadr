@@ -15,7 +15,6 @@ const fa = {
         '👇 <b>عدد را در یک پیام</b> بفرستید.\n<i>با دکمهٔ لغو، یا ارسال /cancel یا /start به منو برگردید.</i>',
     },
     nav: {
-      portfolio: '💼 سبد دارایی',
       prices: '📊 قیمت‌ها',
       alerts: '🔔 هشدارها',
       settings: '⚙️ تنظیمات',
@@ -25,7 +24,6 @@ const fa = {
       assets: '🏦 دارایی‌ها',
     },
     portfolio: {
-      title: '💼 <b>سبد دارایی</b>',
       noData:
         '📭 اطلاعاتی برای نمایش وجود ندارد.\nدارایی‌های خود را از طریق اپ اضافه کنید.',
       homeTotal: 'ارزش کل: <b>{value}</b> تومان',
@@ -40,9 +38,6 @@ const fa = {
       windowALL: 'کل دوره',
       breakdownTitle: '📂 <b>ترکیب سبد</b>',
       breakdownTotal: '💰 جمع کل: <b>{value}</b>',
-      assetsTitle: '🏦 <b>دارایی‌ها</b>',
-      noAssetData: '📊 قیمت دارایی‌ها در دسترس نیست.',
-      assetRow: '{name} — {qty} عدد — {value} تومان',
     },
     prices: {
       selectCategory: '📊 <b>قیمت‌ها</b>\nیک دسته‌بندی انتخاب کنید:',
@@ -63,12 +58,12 @@ const fa = {
       labelPortfolio: '💼 سبد  {dir} {threshold} تومان',
       statusActive: '✅',
       statusPaused: '⏸️',
+      actionPause: '⏸️ مکث',
+      actionEnable: '▶️ فعال‌سازی',
       deleteBtn: '🗑',
       deleteConfirmTitle: '⚠️ آیا این هشدار حذف شود؟',
       deleteYes: '✅ بله، حذف کن',
       deleteNo: '❌ خیر',
-      deleted: '✅ هشدار حذف شد.',
-      toggled: '✅ وضعیت هشدار تغییر کرد.',
       wizard: {
         selectCategory: '🔔 <b>هشدار قیمت جدید</b>\nدسته‌بندی را انتخاب کنید:',
         selectAsset: '👉 دارایی را انتخاب کنید:',
@@ -91,11 +86,10 @@ const fa = {
       noAssets:
         '📭 هنوز دارایی‌ای ندارید.\nاز طریق دکمه زیر یک دارایی اضافه کنید.',
       addAsset: '➕ افزودن دارایی',
-      assetRow: '{name} ({symbol})\n{qty} ✖️ {price} = {value} تومان',
+      deleteBtn: '🗑',
       deleteConfirmTitle: '⚠️ آیا این دارایی حذف شود؟',
       deleteYes: '✅ بله، حذف کن',
       deleteNo: '❌ خیر',
-      deleted: '✅ دارایی حذف شد.',
       wizard: {
         selectCategory: '➕ <b>افزودن دارایی</b>\nدسته‌بندی را انتخاب کنید:',
         selectAsset: '👉 دارایی را انتخاب کنید:',
@@ -106,7 +100,8 @@ const fa = {
           '⚠️ هنوز دادهٔ قیمتی در دسترس نیست. پس از همگام‌سازی قیمت‌ها دوباره امتحان کنید یا از اپ استفاده کنید.',
         noPortfolio: '⚠️ هیچ سبدی یافت نشد. ابتدا از طریق اپ یک سبد بسازید.',
         selectPortfolio: '📁 سبد مقصد را انتخاب کنید:',
-        created: '✅ دارایی با موفقیت اضافه شد.',
+        created: '✅ <b>{name}</b> با موفقیت اضافه شد (تعداد: {qty}).',
+        updated: '✅ تعداد <b>{name}</b> به {qty} به‌روزرسانی شد.',
         cancelled: '🚫 افزودن دارایی لغو شد.',
         cancel: '❌ لغو',
       },
@@ -117,11 +112,9 @@ const fa = {
       localeFa: '🇮🇷 فارسی',
       localeEn: '🇺🇸 English',
       checkmark: ' ✅',
-      languageChanged: '✅ زبان تغییر کرد.',
       digest: 'خلاصه روزانه:',
       digestEnabled: '✅ فعال',
       digestDisabled: '⏸️ غیرفعال',
-      digestToggled: '✅ وضعیت خلاصه روزانه تغییر کرد.',
     },
   },
   category: {

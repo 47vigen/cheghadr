@@ -53,7 +53,7 @@ export function assetPageKeyboard(
   return kb
 }
 
-/** Navigate back to the main menu (used after cancel/success in wizards). */
+/** Navigate back to the main menu (used after cancel in wizards). */
 export async function showMain(
   userId: string,
   ctx: Pick<Context, 'reply'>,
@@ -65,30 +65,26 @@ export async function showMain(
 }
 
 /**
- * After a wizard completes successfully: show a transient success message,
- * then replace it with the relevant list screen after a short delay.
+ * After a wizard completes successfully: edit the anchor to show the success
+ * text, then immediately reply with the relevant list screen.
+ * No setTimeout — safe for Vercel serverless.
  */
-export function scheduleSuccessFollowUp(
+export async function showSuccessAndList(
   ctx: BotContext,
   userId: string,
   locale: BotLocale,
+  successHtml: string,
   buildList: (
     userId: string,
     locale: BotLocale,
   ) => Promise<{ text: string; keyboard: InlineKeyboard }>,
-  successMsgId: number,
   logTag: string,
-): void {
-  const chatId = ctx.chat?.id
-  setTimeout(async () => {
-    try {
-      const { text, keyboard } = await buildList(userId, locale)
-      await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
-      if (chatId) {
-        await ctx.api.deleteMessage(chatId, successMsgId).catch(() => null)
-      }
-    } catch (e) {
-      console.error(`[bot/${logTag}] success follow-up failed`, e)
-    }
-  }, 1000)
+): Promise<void> {
+  try {
+    await ctx.reply(successHtml, { parse_mode: 'HTML' })
+    const { text, keyboard } = await buildList(userId, locale)
+    await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard })
+  } catch (e) {
+    console.error(`[bot/${logTag}] showSuccessAndList failed`, e)
+  }
 }

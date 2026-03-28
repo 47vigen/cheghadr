@@ -5,8 +5,9 @@ import type { BotContext } from '../context'
 import { type BotLocale, t } from '../i18n'
 import { getLocale } from '../middleware/locale'
 import { buildAlertDeleteConfirm, buildAlertList } from '../screens/alerts'
+import { buildAssetList } from '../screens/assets'
 import { buildMainMenu } from '../screens/main'
-import { buildAssetList, buildBreakdown } from '../screens/portfolio'
+import { buildBreakdown } from '../screens/portfolio'
 import { buildCategoryMenu, buildPricePage } from '../screens/prices'
 import { buildSettings } from '../screens/settings'
 
@@ -105,13 +106,7 @@ export async function handleCallbacks(ctx: BotContext): Promise<void> {
 
   // ── Portfolio ────────────────────────────────────────────────────────────
   if (screen === 'p') {
-    if (action === 'v') {
-      const { text, keyboard } = await buildMainMenu(user.id, locale)
-      await ctx.editMessageText(text, {
-        parse_mode: 'HTML',
-        reply_markup: keyboard,
-      })
-    } else if (action === 'b') {
+    if (action === 'b') {
       const { text, keyboard } = await buildBreakdown(user.id, locale)
       await ctx.editMessageText(text, {
         parse_mode: 'HTML',

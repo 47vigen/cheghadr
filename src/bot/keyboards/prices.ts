@@ -45,5 +45,6 @@ export function pricePageKeyboard(
   }
 
   kb.text(t(locale, 'bot.prices.backToCategories'), CB.PRICES_CATEGORIES)
+    .text(t(locale, 'bot.wizard.home'), CB.HOME)
   return kb
 }
