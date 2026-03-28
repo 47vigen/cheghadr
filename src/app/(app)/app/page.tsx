@@ -11,7 +11,7 @@ import { AssetsHeroSection } from '@/components/assets/assets-hero-section'
 import { AssetsListSection } from '@/components/assets/assets-list-section'
 import { PageShell } from '@/components/layout/page-shell'
 import { PortfolioDeleteDialog } from '@/components/portfolio/portfolio-delete-dialog'
-import { PortfolioFormDialog } from '@/components/portfolio/portfolio-form-dialog'
+import { PortfolioFormDrawer } from '@/components/portfolio/portfolio-form-drawer'
 import { AssetsSkeleton } from '@/components/skeletons/assets-skeleton'
 import { ErrorState, RefreshIndicator } from '@/components/ui/async-states'
 
@@ -25,8 +25,8 @@ export default function AssetsPage() {
     selectedPortfolioId,
     deltaWindow,
     setDeltaWindow,
-    portfolioDialogMode,
-    setPortfolioDialogMode,
+    portfolioDrawerMode,
+    setPortfolioDrawerMode,
     showDeleteModal,
     portfolioToDelete,
     assetsQuery,
@@ -48,7 +48,7 @@ export default function AssetsPage() {
     handleRequestDeletePortfolio,
     handleCloseDeleteModal,
     handleRefreshStale,
-    handlePortfolioDialogClose,
+    handlePortfolioDrawerClose,
   } = useAssetsPage()
 
   if (assetsQuery.isLoading) {
@@ -82,8 +82,8 @@ export default function AssetsPage() {
             portfolios: portfoliosQuery.data,
             selectedId: selectedPortfolioId,
             onSelect: handlePortfolioSelect,
-            onCreate: () => setPortfolioDialogMode('create'),
-            onRename: () => setPortfolioDialogMode('rename'),
+            onCreate: () => setPortfolioDrawerMode('create'),
+            onRename: () => setPortfolioDrawerMode('rename'),
             onDelete: handleRequestDeletePortfolio,
           }}
           prices={{
@@ -144,12 +144,12 @@ export default function AssetsPage() {
         defaultPortfolioId={defaultPortfolioId}
       />
 
-      <PortfolioFormDialog
-        isOpen={portfolioDialogMode !== null}
-        onOpenChange={handlePortfolioDialogClose}
-        mode={portfolioDialogMode ?? 'create'}
+      <PortfolioFormDrawer
+        isOpen={portfolioDrawerMode !== null}
+        onOpenChange={handlePortfolioDrawerClose}
+        mode={portfolioDrawerMode ?? 'create'}
         portfolio={
-          portfolioDialogMode === 'rename' && selectedPortfolioId
+          portfolioDrawerMode === 'rename' && selectedPortfolioId
             ? portfoliosQuery.data?.find((p) => p.id === selectedPortfolioId)
             : undefined
         }
