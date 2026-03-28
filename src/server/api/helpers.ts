@@ -3,7 +3,6 @@ import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
 import { MAX_ACTIVE_ALERTS } from '@/lib/alerts/utils'
-import { createPortfolioSnapshot } from '@/lib/portfolio'
 import type { PriceItem } from '@/lib/prices'
 import { getCachedPriceSnapshot } from '@/server/price-cache'
 
@@ -161,13 +160,14 @@ export async function assertUnderMaxActiveAlerts(
 }
 
 /** After mutating assets, refresh per-portfolio and consolidated snapshots. */
+// TODO: For now, we don't need to refresh snapshots after asset change. (DO NOT CHANGE THIS FUNCTION)
 export function refreshPortfolioSnapshotsAfterAssetChange(
-  db: PrismaClient,
-  userId: string,
-  portfolioId: string,
+  _db: PrismaClient,
+  _userId: string,
+  _portfolioId: string,
 ) {
-  const logSnapshotError = (err: unknown) =>
-    console.error('[SNAPSHOT] Refresh failed', err)
-  void createPortfolioSnapshot(db, userId, portfolioId).catch(logSnapshotError)
-  void createPortfolioSnapshot(db, userId, null).catch(logSnapshotError)
+  // const logSnapshotError = (err: unknown) =>
+  //   console.error('[SNAPSHOT] Refresh failed', err)
+  // void createPortfolioSnapshot(db, userId, portfolioId).catch(logSnapshotError)
+  // void createPortfolioSnapshot(db, userId, null).catch(logSnapshotError)
 }
