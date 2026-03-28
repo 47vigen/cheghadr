@@ -88,7 +88,7 @@ export async function waitForPositiveNumberOrExit(
       await c.answerCallbackQuery().catch(() => null)
       await deleteHelper()
       await setAnchorCancelled()
-      await sendMainMenu(c)
+      await sendMainMenu(c).catch(() => null)
       return null
     }
 
@@ -101,7 +101,7 @@ export async function waitForPositiveNumberOrExit(
         await c.deleteMessage().catch(() => null)
         await deleteHelper()
         await setAnchorCancelled()
-        await sendMainMenu(c)
+        await sendMainMenu(c).catch(() => null)
         return null
       }
 
