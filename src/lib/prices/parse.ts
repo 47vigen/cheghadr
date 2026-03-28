@@ -8,7 +8,8 @@ export type PriceItem = EcotrustPriceItem
 export function parsePriceSnapshot(data: unknown): PriceItem[] {
   if (!data || typeof data !== 'object') return []
   const response = data as PricesResponse
-  return response?.data ?? []
+  const items = response?.data ?? []
+  return items.filter((item) => item?.quote_currency?.symbol === 'IRT')
 }
 
 /**
