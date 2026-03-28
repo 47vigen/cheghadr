@@ -20,10 +20,3 @@ export function alertDeleteConfirmKeyboard(
     .text(t(locale, 'bot.alerts.deleteNo'), CB.ALERTS_LIST)
 }
 
-export function directionKeyboard(locale: BotLocale): InlineKeyboard {
-  return new InlineKeyboard()
-    .text(t(locale, 'bot.alerts.wizard.above'), CB.wizardDirectionAbove)
-    .text(t(locale, 'bot.alerts.wizard.below'), CB.wizardDirectionBelow)
-    .row()
-    .text(t(locale, 'bot.alerts.wizard.cancel'), CB.WIZARD_CANCEL)
-}

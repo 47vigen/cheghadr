@@ -16,7 +16,6 @@ const en = {
         '👇 <b>Send your number</b> in a message.\n<i>You can tap Cancel, or send /cancel or /start to return to the menu.</i>',
     },
     nav: {
-      portfolio: '💼 Portfolio',
       prices: '📊 Prices',
       alerts: '🔔 Alerts',
       settings: '⚙️ Settings',
@@ -26,7 +25,6 @@ const en = {
       assets: '🏦 Assets',
     },
     portfolio: {
-      title: '💼 <b>Portfolio</b>',
       noData:
         '📭 No data to display.\nAdd assets through the app to get started.',
       homeTotal: 'Total value: <b>{value}</b> Toman',
@@ -41,9 +39,6 @@ const en = {
       windowALL: 'All time',
       breakdownTitle: '📂 <b>Portfolio Breakdown</b>',
       breakdownTotal: '💰 Total: <b>{value}</b>',
-      assetsTitle: '🏦 <b>My Assets</b>',
-      noAssetData: '📊 Asset prices are currently unavailable.',
-      assetRow: '{name} — {qty} units — {value} Toman',
     },
     prices: {
       selectCategory: '📊 <b>Prices</b>\nSelect a category:',
@@ -64,12 +59,12 @@ const en = {
       labelPortfolio: '💼 Portfolio  {dir} {threshold} Toman',
       statusActive: '✅',
       statusPaused: '⏸️',
+      actionPause: '⏸️ Pause',
+      actionEnable: '▶️ Enable',
       deleteBtn: '🗑',
       deleteConfirmTitle: '⚠️ Delete this alert?',
       deleteYes: '✅ Yes, delete',
       deleteNo: '❌ No',
-      deleted: '✅ Alert deleted.',
-      toggled: '✅ Alert status updated.',
       wizard: {
         selectCategory: '🔔 <b>New Price Alert</b>\nSelect a category:',
         selectAsset: '👉 Select an asset:',
@@ -91,11 +86,10 @@ const en = {
       listTitle: '🏦 <b>My Assets</b>',
       noAssets: '📭 You have no assets yet.\nAdd one using the button below.',
       addAsset: '➕ Add Asset',
-      assetRow: '{name} ({symbol})\n{qty} ✖️ {price} = {value} Toman',
+      deleteBtn: '🗑',
       deleteConfirmTitle: '⚠️ Delete this asset?',
       deleteYes: '✅ Yes, delete',
       deleteNo: '❌ No',
-      deleted: '✅ Asset deleted.',
       wizard: {
         selectCategory: '➕ <b>Add Asset</b>\nSelect a category:',
         selectAsset: '👉 Select an asset:',
@@ -106,7 +100,8 @@ const en = {
         noPortfolio:
           '⚠️ No portfolio found. Please create one via the app first.',
         selectPortfolio: '📁 Select a destination portfolio:',
-        created: '✅ Asset added successfully.',
+        created: '✅ <b>{name}</b> added successfully (qty: {qty}).',
+        updated: '✅ <b>{name}</b> quantity updated to {qty}.',
         cancelled: '🚫 Asset addition cancelled.',
         cancel: '❌ Cancel',
       },
@@ -117,11 +112,9 @@ const en = {
       localeFa: '🇮🇷 Persian',
       localeEn: '🇺🇸 English',
       checkmark: ' ✅',
-      languageChanged: '✅ Language updated.',
       digest: 'Daily digest:',
       digestEnabled: '✅ Enabled',
       digestDisabled: '⏸️ Disabled',
-      digestToggled: '✅ Daily digest preference updated.',
     },
   },
   category: {

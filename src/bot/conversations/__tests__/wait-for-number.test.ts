@@ -4,7 +4,7 @@ import {
   isWizardExitCommandText,
   normalizeWizardNumericInput,
   parseWizardPositiveNumber,
-} from '../wait-positive-number-input'
+} from '../wait-for-number'
 
 describe('normalizeWizardNumericInput', () => {
   it('strips ASCII and Persian grouping commas', () => {

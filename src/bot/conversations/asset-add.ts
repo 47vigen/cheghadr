@@ -1,4 +1,5 @@
 import type { Conversation } from '@grammyjs/conversations'
+import { InlineKeyboard } from 'grammy'
 
 import {
   getLocalizedItemName,
@@ -13,17 +14,18 @@ import { db } from '@/server/db'
 
 import { CB } from '../callback-data'
 import type { BotContext } from '../context'
+import { escapeTelegramHtml } from '../html-escape'
 import { t } from '../i18n'
-import { buildAssetList } from '../screens/portfolio'
+import { buildAssetList } from '../screens/assets'
 import { getLatestPrices } from '../shared/prices'
 import {
   assetPageKeyboard,
   categorySelectionKeyboard,
-  scheduleSuccessFollowUp,
   showMain,
+  showSuccessAndList,
 } from '../shared/wizard'
-import { loadBotUserAndLocale } from './context'
-import { waitForPositiveNumberOrExit } from './wait-positive-number-input'
+import { loadBotUserAndLocale } from './utils'
+import { waitForPositiveNumberOrExit } from './wait-for-number'
 
 const PAGE_SIZE = 10
 
@@ -35,6 +37,58 @@ export async function assetAddWizard(
   if (!loaded) return
   const { user, locale } = loaded
 
+  // ── Step 0: Portfolio selection (skip if only one portfolio) ─────────────
+  const portfolios = await conversation.external(() =>
+    db.portfolio.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: 'asc' },
+      select: { id: true, name: true, emoji: true },
+    }),
+  )
+
+  let selectedPortfolioId: string
+
+  if (portfolios.length === 0) {
+    // Auto-create default
+    const defaultPortfolio = await conversation.external(() =>
+      ensureDefaultPortfolio(db, user.id),
+    )
+    selectedPortfolioId = defaultPortfolio.id
+  } else if (portfolios.length === 1 && portfolios[0]) {
+    // Skip picker
+    selectedPortfolioId = portfolios[0].id
+  } else {
+    // Show portfolio picker
+    const pfKb = new InlineKeyboard()
+    for (const pf of portfolios) {
+      const label = pf.emoji ? `${pf.emoji} ${pf.name}` : pf.name
+      pfKb.text(label, CB.wizardPortfolio(pf.id)).row()
+    }
+    pfKb.text(t(locale, 'bot.assets.wizard.cancel'), CB.WIZARD_CANCEL)
+
+    await ctx.editMessageText(t(locale, 'bot.assets.wizard.selectPortfolio'), {
+      parse_mode: 'HTML',
+      reply_markup: pfKb,
+    })
+
+    const pfCtx = await conversation.waitForCallbackQuery([
+      /^wz:pf:/,
+      CB.WIZARD_CANCEL,
+    ])
+    await pfCtx.answerCallbackQuery()
+
+    if (pfCtx.callbackQuery.data === CB.WIZARD_CANCEL) {
+      await pfCtx.editMessageText(t(locale, 'bot.assets.wizard.cancelled'), {
+        parse_mode: 'HTML',
+      })
+      await showMain(user.id, pfCtx, locale)
+      return
+    }
+
+    selectedPortfolioId = pfCtx.callbackQuery.data.split(':')[2] ?? ''
+    if (!selectedPortfolioId) return
+  }
+
   // ── Step 1: Category ────────────────────────────────────────────────────
   const prices = await conversation.external(() => getLatestPrices())
   const grouped = groupByCategory(prices)
@@ -44,7 +98,7 @@ export async function assetAddWizard(
     await ctx.editMessageText(t(locale, 'bot.assets.wizard.noPriceData'), {
       parse_mode: 'HTML',
     })
-    setTimeout(() => showMain(user.id, ctx, locale), 2000)
+    await showMain(user.id, ctx, locale)
     return
   }
 
@@ -67,7 +121,7 @@ export async function assetAddWizard(
     await catCtx.editMessageText(t(locale, 'bot.assets.wizard.cancelled'), {
       parse_mode: 'HTML',
     })
-    setTimeout(() => showMain(user.id, catCtx, locale), 1500)
+    await showMain(user.id, catCtx, locale)
     return
   }
 
@@ -115,7 +169,7 @@ export async function assetAddWizard(
       await assetCtx.editMessageText(t(locale, 'bot.assets.wizard.cancelled'), {
         parse_mode: 'HTML',
       })
-      setTimeout(() => showMain(user.id, assetCtx, locale), 1500)
+      await showMain(user.id, assetCtx, locale)
       return
     }
 
@@ -155,8 +209,19 @@ export async function assetAddWizard(
   if (quantity === null) return
 
   // ── Step 4: Save (upsert) ─────────────────────────────────────────────────
-  const portfolio = await conversation.external(() =>
-    ensureDefaultPortfolio(db, user.id),
+  const isUpdate = await conversation.external(() =>
+    db.userAsset
+      .findUnique({
+        where: {
+          userId_symbol_portfolioId: {
+            userId: user.id,
+            symbol,
+            portfolioId: selectedPortfolioId,
+          },
+        },
+        select: { id: true },
+      })
+      .then((r: { id: string } | null) => r !== null),
   )
 
   await conversation.external(async () => {
@@ -165,29 +230,39 @@ export async function assetAddWizard(
         userId_symbol_portfolioId: {
           userId: user.id,
           symbol,
-          portfolioId: portfolio.id,
+          portfolioId: selectedPortfolioId,
         },
       },
       update: { quantity },
       create: {
         userId: user.id,
         symbol,
-        portfolioId: portfolio.id,
+        portfolioId: selectedPortfolioId,
         quantity,
       },
     })
-    refreshPortfolioSnapshotsAfterAssetChange(db, user.id, portfolio.id)
+    refreshPortfolioSnapshotsAfterAssetChange(db, user.id, selectedPortfolioId)
   })
 
-  const successMsg = await ctx.reply(t(locale, 'bot.assets.wizard.created'), {
-    parse_mode: 'HTML',
-  })
-  scheduleSuccessFollowUp(
+  // Find localized asset name for success message
+  const priceItem = prices.find(
+    (p) => p.base_currency?.symbol?.toUpperCase() === symbol.toUpperCase(),
+  )
+  const assetName = priceItem
+    ? escapeTelegramHtml(getLocalizedItemName(priceItem, locale))
+    : escapeTelegramHtml(symbol)
+
+  const successKey = isUpdate
+    ? 'bot.assets.wizard.updated'
+    : 'bot.assets.wizard.created'
+  const successHtml = t(locale, successKey, { name: assetName, qty: quantity })
+
+  await showSuccessAndList(
     ctx,
     user.id,
     locale,
+    successHtml,
     buildAssetList,
-    successMsg.message_id,
     'assetAddWizard',
   )
 }

@@ -1,3 +1,5 @@
+import { InlineKeyboard } from 'grammy'
+
 import { computeLivePortfolioBreakdown } from '@/lib/portfolio-breakdown'
 import {
   getPortfolioSnapshotDelta,
@@ -6,7 +8,6 @@ import {
 import {
   computeAssetValueIRT,
   findBySymbol,
-  formatChange,
   formatCompactCurrency,
   formatIRT,
   getIntlLocale,
@@ -17,11 +18,10 @@ import {
 import { db } from '@/server/db'
 import { getCachedPriceSnapshot } from '@/server/price-cache'
 
+import { CB } from '../callback-data'
 import { escapeTelegramHtml } from '../html-escape'
 import type { BotLocale } from '../i18n'
 import { t, tCategory } from '../i18n'
-import { assetListFooterKeyboard } from '../keyboards/assets'
-import { portfolioSubKeyboard } from '../keyboards/portfolio'
 import type { ScreenResult } from './types'
 
 const DELTA_WINDOWS: PortfolioDeltaWindow[] = ['1D', '1W', '1M', 'ALL']
@@ -157,7 +157,9 @@ export async function buildBreakdown(
   userId: string,
   locale: BotLocale,
 ): Promise<ScreenResult> {
-  const keyboard = portfolioSubKeyboard(locale)
+  const keyboard = new InlineKeyboard()
+    .text(t(locale, 'bot.nav.assets'), CB.PORTFOLIO_ASSETS)
+    .text(t(locale, 'bot.nav.back'), CB.HOME)
 
   const [userAssets, cached] = await Promise.all([
     db.userAsset.findMany({
@@ -215,46 +217,3 @@ export async function buildBreakdown(
   return { text, keyboard }
 }
 
-export async function buildAssetList(
-  userId: string,
-  locale: BotLocale,
-): Promise<ScreenResult> {
-  const keyboard = assetListFooterKeyboard(locale)
-
-  const assets = await db.userAsset.findMany({
-    where: { userId },
-    orderBy: { createdAt: 'asc' },
-  })
-
-  if (assets.length === 0) {
-    return {
-      text: `${t(locale, 'bot.assets.listTitle')}\n\n${t(locale, 'bot.assets.noAssets')}`,
-      keyboard,
-    }
-  }
-
-  const cached = await getCachedPriceSnapshot(db)
-  const prices = cached?.prices ?? []
-
-  const lines: string[] = []
-  for (const asset of assets) {
-    const item = findBySymbol(prices, asset.symbol)
-    const rawName = item ? getLocalizedItemName(item, locale) : asset.symbol
-    const name = escapeTelegramHtml(rawName)
-    const symbol = escapeTelegramHtml(asset.symbol)
-    const qty = Number(asset.quantity)
-    const sellPrice = getSellPriceBySymbol(asset.symbol, prices)
-    const value = computeAssetValueIRT(qty, sellPrice)
-
-    const changeInfo = item ? formatChange(item.change, locale) : null
-    const changeStr = changeInfo ? ` (${changeInfo.text})` : ''
-
-    lines.push(
-      `• <b>${name}</b> (${symbol})\n  ${qty.toFixed(4)} × ${formatIRT(sellPrice, locale)} = <b>${formatIRT(value, locale)}</b>${changeStr}`,
-    )
-  }
-
-  const text = `${t(locale, 'bot.assets.listTitle')}\n\n${lines.join('\n\n')}`
-
-  return { text, keyboard }
-}

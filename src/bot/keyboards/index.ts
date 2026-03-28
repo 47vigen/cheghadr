@@ -1,6 +1,5 @@
 export * from './alerts'
 export * from './assets'
 export * from './main'
-export * from './portfolio'
 export * from './prices'
 export * from './settings'

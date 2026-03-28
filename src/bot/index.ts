@@ -40,7 +40,7 @@ export function createBot(): Bot<BotContext> {
   // Cast is safe: at runtime OC=BotContext guarantees session/botUser are present
   bot.use(
     createConversation<BotContext, BotContext>(async (conversation, ctx) => {
-      const { priceAlertWizard } = await import('./conversations/alert-create')
+      const { priceAlertWizard } = await import('./conversations/price-alert')
       return priceAlertWizard(
         conversation as unknown as Conversation<BotContext>,
         ctx,
@@ -51,7 +51,7 @@ export function createBot(): Bot<BotContext> {
   bot.use(
     createConversation<BotContext, BotContext>(async (conversation, ctx) => {
       const { portfolioAlertWizard } = await import(
-        './conversations/alert-create'
+        './conversations/portfolio-alert'
       )
       return portfolioAlertWizard(
         conversation as unknown as Conversation<BotContext>,

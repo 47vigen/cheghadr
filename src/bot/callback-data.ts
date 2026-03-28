@@ -7,7 +7,6 @@ export function cb(...parts: (string | number)[]): string {
 export const CB = {
   HOME: 'h',
 
-  PORTFOLIO_VIEW: 'p:v',
   PORTFOLIO_BREAKDOWN: 'p:b',
   PORTFOLIO_ASSETS: 'p:a',
 
