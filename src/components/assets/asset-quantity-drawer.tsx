@@ -136,25 +136,27 @@ export function AssetQuantityDrawer({
             className="max-h-[min(92dvh,var(--visual-viewport-height,100dvh)*0.92)] border-border/60 border-t bg-background px-0 pt-3 pb-0 shadow-[0_-8px_32px_oklch(0_0_0/0.12)] sm:max-h-[min(90dvh,var(--visual-viewport-height,100dvh)*0.9)] dark:shadow-[0_-12px_40px_oklch(0_0_0/0.35)]"
           >
             <Drawer.Handle className="mx-auto mb-0.5" />
-            <Drawer.Header className="flex items-center gap-2 border-border/40 border-b px-4 pt-0 pb-3">
-              {onDelete && deleteLabel ? (
-                <Button
-                  isIconOnly
-                  variant="ghost"
-                  size="sm"
-                  className="shrink-0 rounded-lg text-destructive"
-                  onPress={() => {
-                    onOpenChange(false)
-                    onDelete()
-                  }}
-                  aria-label={deleteLabel}
-                >
-                  <IconTrash size={16} aria-hidden />
-                </Button>
-              ) : null}
-              <Drawer.Heading className="flex-1 text-balance font-semibold text-base leading-snug">
-                {title}
-              </Drawer.Heading>
+            <Drawer.Header className="border-border/40 border-b px-4 pt-0 pb-3">
+              <div className="flex flex-row items-center gap-2">
+                {onDelete && deleteLabel ? (
+                  <Button
+                    isIconOnly
+                    variant="ghost"
+                    size="sm"
+                    className="shrink-0 rounded-lg text-destructive"
+                    onPress={() => {
+                      onOpenChange(false)
+                      onDelete()
+                    }}
+                    aria-label={deleteLabel}
+                  >
+                    <IconTrash size={16} aria-hidden />
+                  </Button>
+                ) : null}
+                <Drawer.Heading className="flex-1 text-balance font-semibold text-base leading-snug">
+                  {title}
+                </Drawer.Heading>
+              </div>
             </Drawer.Header>
 
             <Drawer.Body className="flex flex-col gap-4 px-4 py-2">
