@@ -158,52 +158,26 @@ export function AssetQuantityDrawer({
             </Drawer.Header>
 
             <Drawer.Body className="flex flex-col gap-4 px-4 py-2">
-              <NumberField
-                value={quantityNum}
-                onChange={handleQuantityChange}
-                fullWidth
-                variant="secondary"
-                minValue={0}
-                formatOptions={{
-                  maximumFractionDigits: 8,
-                  useGrouping: false,
-                }}
-                autoFocus={autoFocusQuantity}
-              >
-                <Label className="font-medium">
-                  {tAddAsset('assetAmount')}
-                </Label>
-                {priceHint ? (
-                  <Description className="mt-0.5 text-foreground/80 text-sm tabular-nums">
-                    {priceHint}
-                  </Description>
-                ) : null}
-                <div className="mt-2 min-w-0" dir="ltr">
-                  <NumberField.Group className={fieldGroupClass}>
-                    <NumberField.Input placeholder="0" className={inputClass} />
-                    {symbol ? (
-                      <span aria-hidden className={suffixClass}>
-                        {symbol}
-                      </span>
-                    ) : null}
-                  </NumberField.Group>
-                </div>
-              </NumberField>
-
-              {showDualFields ? (
+              {priceHint ? (
+                <Description className="mt-0.5 text-foreground/80 text-sm tabular-nums">
+                  {priceHint}
+                </Description>
+              ) : null}
+              <div className={showDualFields ? 'flex flex-row gap-3' : ''}>
                 <NumberField
-                  value={valueIRTNum}
-                  onChange={handleValueChange}
+                  value={quantityNum}
+                  onChange={handleQuantityChange}
                   fullWidth
                   variant="secondary"
                   minValue={0}
                   formatOptions={{
-                    maximumFractionDigits: 0,
-                    useGrouping: true,
+                    maximumFractionDigits: 8,
+                    useGrouping: false,
                   }}
+                  autoFocus={autoFocusQuantity}
                 >
                   <Label className="font-medium">
-                    {tAddAsset('valueInToman')}
+                    {tAddAsset('assetAmount')}
                   </Label>
                   <div className="mt-2 min-w-0" dir="ltr">
                     <NumberField.Group className={fieldGroupClass}>
@@ -211,13 +185,44 @@ export function AssetQuantityDrawer({
                         placeholder="0"
                         className={inputClass}
                       />
-                      <span aria-hidden className={suffixClass}>
-                        {tAssets('tomanAbbr')}
-                      </span>
+                      {symbol ? (
+                        <span aria-hidden className={suffixClass}>
+                          {symbol}
+                        </span>
+                      ) : null}
                     </NumberField.Group>
                   </div>
                 </NumberField>
-              ) : null}
+
+                {showDualFields ? (
+                  <NumberField
+                    value={valueIRTNum}
+                    onChange={handleValueChange}
+                    fullWidth
+                    variant="secondary"
+                    minValue={0}
+                    formatOptions={{
+                      maximumFractionDigits: 0,
+                      useGrouping: true,
+                    }}
+                  >
+                    <Label className="font-medium">
+                      {tAddAsset('valueInToman')}
+                    </Label>
+                    <div className="mt-2 min-w-0" dir="ltr">
+                      <NumberField.Group className={fieldGroupClass}>
+                        <NumberField.Input
+                          placeholder="0"
+                          className={inputClass}
+                        />
+                        <span aria-hidden className={suffixClass}>
+                          {tAssets('tomanAbbr')}
+                        </span>
+                      </NumberField.Group>
+                    </div>
+                  </NumberField>
+                ) : null}
+              </div>
             </Drawer.Body>
 
             <Drawer.Footer className="border-border/60 border-t bg-background/95 px-0 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm supports-[backdrop-filter]:bg-background/80">
