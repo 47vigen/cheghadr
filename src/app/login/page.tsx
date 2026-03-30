@@ -10,7 +10,7 @@ import { useTranslations } from 'next-intl'
 
 import { env } from '@/env'
 import { useRouter } from '@/i18n/navigation'
-import { getRawInitData } from '@/utils/telegram'
+import { getRawInitData, getStartParamRoute } from '@/utils/telegram'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -47,7 +47,8 @@ export default function LoginPage() {
     signIn('telegram-miniapp', { initData: rawInitData, redirect: false })
       .then((result) => {
         if (result?.ok) {
-          router.replace(callbackUrl)
+          const startRoute = getStartParamRoute()
+          router.replace((startRoute ?? callbackUrl) as Route)
         } else {
           setError(t('errorTelegram'))
           setMode('standalone')

@@ -1,5 +1,3 @@
-import { InlineKeyboard } from 'grammy'
-
 import {
   computeAssetValueIRT,
   findBySymbol,
@@ -11,10 +9,10 @@ import {
 import { db } from '@/server/db'
 import { getCachedPriceSnapshot } from '@/server/price-cache'
 
-import { CB } from '../callback-data'
 import { escapeTelegramHtml } from '../html-escape'
 import type { BotLocale } from '../i18n'
 import { t } from '../i18n'
+import { assetListFooterKeyboard } from '../keyboards/assets'
 import type { ScreenResult } from './types'
 
 export async function buildAssetList(
@@ -30,16 +28,10 @@ export async function buildAssetList(
     db.portfolio.count({ where: { userId } }),
   ])
 
-  const kb = new InlineKeyboard()
-
   if (assets.length === 0) {
-    kb.text(t(locale, 'bot.assets.addAsset'), CB.ASSET_ADD)
-      .row()
-      .text(t(locale, 'bot.nav.breakdown'), CB.PORTFOLIO_BREAKDOWN)
-      .text(t(locale, 'bot.nav.back'), CB.HOME)
     return {
       text: `${t(locale, 'bot.assets.listTitle')}\n\n${t(locale, 'bot.assets.noAssets')}`,
-      keyboard: kb,
+      keyboard: assetListFooterKeyboard(locale),
     }
   }
 
@@ -48,7 +40,6 @@ export async function buildAssetList(
 
   const showPortfolioLabels = portfolioCount > 1
 
-  // Group by portfolio when multi-portfolio
   const byPortfolio = new Map<string, typeof assets>()
   for (const asset of assets) {
     const key = showPortfolioLabels ? asset.portfolioId : '__single__'
@@ -81,19 +72,11 @@ export async function buildAssetList(
       lines.push(
         `• <b>${name}</b> (${symbol})\n  ${qty.toFixed(4)} × ${formatIRT(sellPrice, locale)} = <b>${formatIRT(value, locale)}</b>${changeStr}`,
       )
-
-      kb.text(
-        `${t(locale, 'bot.assets.deleteBtn')} ${symbol}`,
-        CB.assetDeleteConfirm(asset.id),
-      ).row()
     }
   }
 
-  // Footer navigation
-  kb.text(t(locale, 'bot.assets.addAsset'), CB.ASSET_ADD)
-    .row()
-    .text(t(locale, 'bot.nav.breakdown'), CB.PORTFOLIO_BREAKDOWN)
-    .text(t(locale, 'bot.nav.back'), CB.HOME)
-
-  return { text: lines.join('\n'), keyboard: kb }
+  return {
+    text: lines.join('\n'),
+    keyboard: assetListFooterKeyboard(locale),
+  }
 }

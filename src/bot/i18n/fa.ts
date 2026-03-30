@@ -3,16 +3,8 @@ const fa = {
     welcome:
       '👋 به ربات <b>چه‌قدر؟</b> خوش آمدید.\nاز دکمه‌های زیر استفاده کنید:',
     notRegistered: '⚠️ برای استفاده از ربات ابتدا از طریق اپلیکیشن وارد شوید.',
-    sessionExpired: '🔄 این مرحله دیگر فعال نیست. از منوی زیر ادامه دهید.',
     mainMenu: {
       title: '📱 <b>چه‌قدر؟</b>',
-    },
-    wizard: {
-      pagePrev: '⬅️',
-      pageNext: '➡️',
-      home: '🏠 منوی اصلی',
-      numberInputHint:
-        '👇 <b>عدد را در یک پیام</b> بفرستید.\n<i>با دکمهٔ لغو، یا ارسال /cancel یا /start به منو برگردید.</i>',
     },
     nav: {
       prices: '📊 قیمت‌ها',
@@ -49,62 +41,20 @@ const fa = {
     },
     alerts: {
       listTitle: '🔔 <b>هشدارهای من</b>',
-      noAlerts: '📭 هنوز هشداری ندارید.\nیک هشدار جدید بسازید.',
-      newPrice: '➕ هشدار قیمت',
-      newPortfolio: '➕ هشدار سبد',
+      noAlerts: '📭 هنوز هشداری ندارید.\nمدیریت هشدارها در اپ.',
+      manageInApp: '⚙️ مدیریت هشدارها در اپ',
       dirAbove: 'بالای',
       dirBelow: 'زیر',
       labelPrice: '📈 {name}  {dir} {threshold} تومان',
       labelPortfolio: '💼 سبد  {dir} {threshold} تومان',
       statusActive: '✅',
       statusPaused: '⏸️',
-      actionPause: '⏸️ مکث',
-      actionEnable: '▶️ فعال‌سازی',
-      deleteBtn: '🗑',
-      deleteConfirmTitle: '⚠️ آیا این هشدار حذف شود؟',
-      deleteYes: '✅ بله، حذف کن',
-      deleteNo: '❌ خیر',
-      wizard: {
-        selectCategory: '🔔 <b>هشدار قیمت جدید</b>\nدسته‌بندی را انتخاب کنید:',
-        selectAsset: '👉 دارایی را انتخاب کنید:',
-        selectDirection: '⚖️ نوع هشدار:',
-        above: '⬆️ بالای آستانه',
-        below: '⬇️ زیر آستانه',
-        enterThreshold:
-          '💬 مقدار آستانه را به <b>تومان</b> وارد کنید:\n<i>مثلاً: 85000000</i>',
-        invalidNumber: '❌ لطفاً یک عدد مثبت وارد کنید.',
-        created: '✅ هشدار با موفقیت ساخته شد.',
-        cancelled: '🚫 هشدار لغو شد.',
-        maxReached:
-          '⚠️ به حداکثر {max} هشدار فعال رسیده‌اید. ابتدا یک هشدار حذف کنید.',
-        portfolioTitle: '🔔 <b>هشدار سبد جدید</b>\nنوع هشدار:',
-        cancel: '❌ لغو',
-      },
     },
     assets: {
       listTitle: '🏦 <b>دارایی‌های من</b>',
       noAssets:
-        '📭 هنوز دارایی‌ای ندارید.\nاز طریق دکمه زیر یک دارایی اضافه کنید.',
-      addAsset: '➕ افزودن دارایی',
-      deleteBtn: '🗑',
-      deleteConfirmTitle: '⚠️ آیا این دارایی حذف شود؟',
-      deleteYes: '✅ بله، حذف کن',
-      deleteNo: '❌ خیر',
-      wizard: {
-        selectCategory: '➕ <b>افزودن دارایی</b>\nدسته‌بندی را انتخاب کنید:',
-        selectAsset: '👉 دارایی را انتخاب کنید:',
-        enterQuantity:
-          '💬 مقدار (تعداد/وزن) را وارد کنید:\n<i>مثلاً: 0.5 یا 1000</i>',
-        invalidQuantity: '❌ لطفاً یک عدد مثبت وارد کنید.',
-        noPriceData:
-          '⚠️ هنوز دادهٔ قیمتی در دسترس نیست. پس از همگام‌سازی قیمت‌ها دوباره امتحان کنید یا از اپ استفاده کنید.',
-        noPortfolio: '⚠️ هیچ سبدی یافت نشد. ابتدا از طریق اپ یک سبد بسازید.',
-        selectPortfolio: '📁 سبد مقصد را انتخاب کنید:',
-        created: '✅ <b>{name}</b> با موفقیت اضافه شد (تعداد: {qty}).',
-        updated: '✅ تعداد <b>{name}</b> به {qty} به‌روزرسانی شد.',
-        cancelled: '🚫 افزودن دارایی لغو شد.',
-        cancel: '❌ لغو',
-      },
+        '📭 هنوز دارایی‌ای ندارید.\nدارایی‌های خود را از طریق اپ اضافه کنید.',
+      addInApp: '➕ افزودن دارایی در اپ',
     },
     settings: {
       title: '⚙️ <b>تنظیمات</b>',

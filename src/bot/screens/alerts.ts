@@ -1,16 +1,10 @@
-import { InlineKeyboard } from 'grammy'
-
 import { findBySymbol, formatIRT, getLocalizedItemName } from '@/lib/prices'
 import { db } from '@/server/db'
 
-import { CB } from '../callback-data'
 import { escapeTelegramHtml } from '../html-escape'
 import type { BotLocale } from '../i18n'
 import { t } from '../i18n'
-import {
-  alertDeleteConfirmKeyboard,
-  alertListFooterKeyboard,
-} from '../keyboards/alerts'
+import { alertListFooterKeyboard } from '../keyboards/alerts'
 import { getLatestPrices } from '../shared/prices'
 import type { ScreenResult } from './types'
 
@@ -36,13 +30,11 @@ export async function buildAlertList(
     }
   }
 
-  // Get price names for PRICE alerts
   const prices = await getLatestPrices()
 
   const dirAbove = t(locale, 'bot.alerts.dirAbove')
   const dirBelow = t(locale, 'bot.alerts.dirBelow')
 
-  const kb = new InlineKeyboard()
   const lines: string[] = [t(locale, 'bot.alerts.listTitle')]
 
   for (const alert of alerts) {
@@ -63,40 +55,10 @@ export async function buildAlertList(
     }
 
     lines.push(`\n${status} ${label}`)
-
-    // Per-alert toggle/delete buttons
-    const toggleLabel = alert.isActive
-      ? t(locale, 'bot.alerts.actionPause')
-      : t(locale, 'bot.alerts.actionEnable')
-    kb.text(toggleLabel, CB.alertToggle(alert.id))
-      .text(t(locale, 'bot.alerts.deleteBtn'), CB.alertDeleteConfirm(alert.id))
-      .row()
-  }
-
-  // Footer buttons
-  const footer = alertListFooterKeyboard(locale)
-  for (const row of footer.inline_keyboard) {
-    kb.row(...row)
-  }
-
-  const text = lines.join('\n')
-  return { text, keyboard: kb }
-}
-
-export async function buildAlertDeleteConfirm(
-  userId: string,
-  alertId: string,
-  locale: BotLocale,
-): Promise<ScreenResult> {
-  const alert = await db.alert.findUnique({ where: { id: alertId } })
-
-  if (!alert || alert.userId !== userId) {
-    // Fallback to list
-    return buildAlertList(userId, locale)
   }
 
   return {
-    text: t(locale, 'bot.alerts.deleteConfirmTitle'),
-    keyboard: alertDeleteConfirmKeyboard(locale, alertId),
+    text: lines.join('\n'),
+    keyboard: alertListFooterKeyboard(locale),
   }
 }

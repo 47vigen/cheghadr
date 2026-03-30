@@ -1,53 +1,14 @@
-import { MAX_ACTIVE_ALERTS } from '@/lib/alerts/utils'
 import { db } from '@/server/db'
 
 import type { BotContext } from '../context'
 import { type BotLocale, t } from '../i18n'
 import { getLocale } from '../middleware/locale'
-import { buildAlertDeleteConfirm, buildAlertList } from '../screens/alerts'
+import { buildAlertList } from '../screens/alerts'
 import { buildAssetList } from '../screens/assets'
 import { buildMainMenu } from '../screens/main'
 import { buildBreakdown } from '../screens/portfolio'
 import { buildCategoryMenu, buildPricePage } from '../screens/prices'
 import { buildSettings } from '../screens/settings'
-
-/**
- * When re-activating a paused alert would exceed the cap, show a Telegram
- * popup alert and return `{ blocked: true }`. Otherwise return the fetched
- * alert so the caller can reuse it (avoids a second DB query).
- */
-async function guardAlertToggle(
-  ctx: BotContext,
-  userId: string,
-  locale: BotLocale,
-  alertId: string,
-): Promise<
-  | { blocked: true }
-  | {
-      blocked: false
-      alert: NonNullable<Awaited<ReturnType<typeof db.alert.findUnique>>>
-    }
-> {
-  const alert = await db.alert.findUnique({ where: { id: alertId } })
-  if (!alert || alert.userId !== userId) {
-    return { blocked: true }
-  }
-  if (!alert.isActive) {
-    const activeCount = await db.alert.count({
-      where: { userId, isActive: true },
-    })
-    if (activeCount >= MAX_ACTIVE_ALERTS) {
-      await ctx.answerCallbackQuery({
-        text: t(locale, 'bot.alerts.wizard.maxReached', {
-          max: MAX_ACTIVE_ALERTS,
-        }),
-        show_alert: true,
-      })
-      return { blocked: true }
-    }
-  }
-  return { blocked: false, alert }
-}
 
 /** Main callback_query dispatcher. */
 export async function handleCallbacks(ctx: BotContext): Promise<void> {
@@ -66,33 +27,7 @@ export async function handleCallbacks(ctx: BotContext): Promise<void> {
     return
   }
 
-  // Pre-fetch alert for toggle action (avoids double DB query)
-  let toggleAlert: Awaited<ReturnType<typeof db.alert.findUnique>> | undefined
-  if (screen === 'al' && action === 't' && parts[2]) {
-    const result = await guardAlertToggle(ctx, user.id, locale, parts[2])
-    if (result.blocked) return
-    toggleAlert = result.alert
-  }
-
   await ctx.answerCallbackQuery()
-
-  if (screen === 'wz') {
-    const expiredLine = t(locale, 'bot.sessionExpired')
-    const { text, keyboard } = await buildMainMenu(user.id, locale)
-    const combined = `${expiredLine}\n\n${text}`
-    try {
-      await ctx.editMessageText(combined, {
-        parse_mode: 'HTML',
-        reply_markup: keyboard,
-      })
-    } catch {
-      await ctx.reply(combined, {
-        parse_mode: 'HTML',
-        reply_markup: keyboard,
-      })
-    }
-    return
-  }
 
   // ── Home ────────────────────────────────────────────────────────────────
   if (screen === 'h') {
@@ -144,98 +79,12 @@ export async function handleCallbacks(ctx: BotContext): Promise<void> {
   }
 
   // ── Alerts ───────────────────────────────────────────────────────────────
-  if (screen === 'al') {
-    if (action === 'l') {
-      const { text, keyboard } = await buildAlertList(user.id, locale)
-      await ctx.editMessageText(text, {
-        parse_mode: 'HTML',
-        reply_markup: keyboard,
-      })
-    } else if (action === 't') {
-      // Toggle alert active/inactive (guard + fetch already done before answerCallbackQuery)
-      if (toggleAlert) {
-        await db.alert.update({
-          where: { id: toggleAlert.id },
-          data: {
-            isActive: !toggleAlert.isActive,
-            ...(toggleAlert.isActive ? {} : { triggeredAt: null }),
-          },
-        })
-        const { text, keyboard } = await buildAlertList(user.id, locale)
-        await ctx.editMessageText(text, {
-          parse_mode: 'HTML',
-          reply_markup: keyboard,
-        })
-      }
-    } else if (action === 'dc') {
-      const alertId = parts[2]
-      if (alertId) {
-        const { text, keyboard } = await buildAlertDeleteConfirm(
-          user.id,
-          alertId,
-          locale,
-        )
-        await ctx.editMessageText(text, {
-          parse_mode: 'HTML',
-          reply_markup: keyboard,
-        })
-      }
-    } else if (action === 'dy') {
-      const alertId = parts[2]
-      if (alertId) {
-        const alert = await db.alert.findUnique({ where: { id: alertId } })
-        if (alert && alert.userId === user.id) {
-          await db.alert.delete({ where: { id: alertId } })
-        }
-        const { text, keyboard } = await buildAlertList(user.id, locale)
-        await ctx.editMessageText(text, {
-          parse_mode: 'HTML',
-          reply_markup: keyboard,
-        })
-      }
-    } else if (action === 'np') {
-      await ctx.conversation.enter('priceAlert')
-    } else if (action === 'nq') {
-      await ctx.conversation.enter('portfolioAlert')
-    }
-    return
-  }
-
-  // ── Assets ───────────────────────────────────────────────────────────────
-  if (screen === 'as') {
-    if (action === 'a') {
-      await ctx.conversation.enter('assetAdd')
-    } else if (action === 'dc') {
-      const assetId = parts[2]
-      if (assetId) {
-        const asset = await db.userAsset.findUnique({ where: { id: assetId } })
-        if (asset && asset.userId === user.id) {
-          const { assetDeleteConfirmKeyboard } = await import(
-            '../keyboards/assets'
-          )
-          await ctx.editMessageText(
-            t(locale, 'bot.assets.deleteConfirmTitle'),
-            {
-              parse_mode: 'HTML',
-              reply_markup: assetDeleteConfirmKeyboard(locale, assetId),
-            },
-          )
-        }
-      }
-    } else if (action === 'dy') {
-      const assetId = parts[2]
-      if (assetId) {
-        const asset = await db.userAsset.findUnique({ where: { id: assetId } })
-        if (asset && asset.userId === user.id) {
-          await db.userAsset.delete({ where: { id: assetId } })
-        }
-        const { text, keyboard } = await buildAssetList(user.id, locale)
-        await ctx.editMessageText(text, {
-          parse_mode: 'HTML',
-          reply_markup: keyboard,
-        })
-      }
-    }
+  if (screen === 'al' && action === 'l') {
+    const { text, keyboard } = await buildAlertList(user.id, locale)
+    await ctx.editMessageText(text, {
+      parse_mode: 'HTML',
+      reply_markup: keyboard,
+    })
     return
   }
 
@@ -248,12 +97,11 @@ export async function handleCallbacks(ctx: BotContext): Promise<void> {
         reply_markup: keyboard,
       })
     } else if (action === 'lf' || action === 'le') {
-      const newLocale = action === 'lf' ? 'fa' : 'en'
+      const newLocale: BotLocale = action === 'lf' ? 'fa' : 'en'
       await db.user.update({
         where: { id: user.id },
         data: { preferredLocale: newLocale },
       })
-      // Update ctx.botUser so the next render uses the new locale
       ctx.botUser = { ...user, preferredLocale: newLocale }
       const { text, keyboard } = buildSettings(
         newLocale,
