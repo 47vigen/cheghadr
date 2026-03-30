@@ -1,7 +1,4 @@
-import type { ConversationFlavor } from '@grammyjs/conversations'
-import type { Context, SessionFlavor } from 'grammy'
-
-import type { SessionData } from './session/types'
+import type { Context } from 'grammy'
 
 export interface BotUser {
   id: string
@@ -10,7 +7,4 @@ export interface BotUser {
   dailyDigestEnabled: boolean
 }
 
-type BotContextBase = Context &
-  SessionFlavor<SessionData> & { botUser?: BotUser }
-
-export type BotContext = BotContextBase & ConversationFlavor<BotContextBase>
+export type BotContext = Context & { botUser?: BotUser }

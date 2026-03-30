@@ -38,7 +38,6 @@
   },
   "dependencies": {
     "@date-fns/tz": "^1.4.1",
-    "@grammyjs/conversations": "^2.1.1",
     "@heroui/react": "3.0.1",
     "@heroui/styles": "3.0.1",
     "@neondatabase/serverless": "^1.0.2",

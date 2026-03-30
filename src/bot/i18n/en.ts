@@ -4,16 +4,8 @@ const en = {
       '👋 Welcome to <b>Cheghadr?</b>\nUse the buttons below to navigate:',
     notRegistered:
       '⚠️ Please sign in through the app first before using the bot.',
-    sessionExpired: '🔄 This step is no longer active. Use the menu below.',
     mainMenu: {
       title: '📱 <b>Cheghadr?</b>',
-    },
-    wizard: {
-      pagePrev: '⬅️',
-      pageNext: '➡️',
-      home: '🏠 Main menu',
-      numberInputHint:
-        '👇 <b>Send your number</b> in a message.\n<i>You can tap Cancel, or send /cancel or /start to return to the menu.</i>',
     },
     nav: {
       prices: '📊 Prices',
@@ -50,61 +42,19 @@ const en = {
     },
     alerts: {
       listTitle: '🔔 <b>My Alerts</b>',
-      noAlerts: '📭 You have no alerts yet.\nCreate a new one below.',
-      newPrice: '➕ Price Alert',
-      newPortfolio: '➕ Portfolio Alert',
+      noAlerts: '📭 You have no alerts yet.\nManage alerts in the app.',
+      manageInApp: '⚙️ Manage Alerts in App',
       dirAbove: 'above',
       dirBelow: 'below',
       labelPrice: '📈 {name}  {dir} {threshold} Toman',
       labelPortfolio: '💼 Portfolio  {dir} {threshold} Toman',
       statusActive: '✅',
       statusPaused: '⏸️',
-      actionPause: '⏸️ Pause',
-      actionEnable: '▶️ Enable',
-      deleteBtn: '🗑',
-      deleteConfirmTitle: '⚠️ Delete this alert?',
-      deleteYes: '✅ Yes, delete',
-      deleteNo: '❌ No',
-      wizard: {
-        selectCategory: '🔔 <b>New Price Alert</b>\nSelect a category:',
-        selectAsset: '👉 Select an asset:',
-        selectDirection: '⚖️ Alert type:',
-        above: '⬆️ Above threshold',
-        below: '⬇️ Below threshold',
-        enterThreshold:
-          '💬 Enter the threshold amount in <b>Toman</b>:\n<i>e.g. 85000000</i>',
-        invalidNumber: '❌ Please enter a positive number.',
-        created: '✅ Alert created successfully.',
-        cancelled: '🚫 Alert creation cancelled.',
-        maxReached:
-          '⚠️ You have reached the maximum of {max} active alerts. Delete one first.',
-        portfolioTitle: '🔔 <b>New Portfolio Alert</b>\nAlert type:',
-        cancel: '❌ Cancel',
-      },
     },
     assets: {
       listTitle: '🏦 <b>My Assets</b>',
-      noAssets: '📭 You have no assets yet.\nAdd one using the button below.',
-      addAsset: '➕ Add Asset',
-      deleteBtn: '🗑',
-      deleteConfirmTitle: '⚠️ Delete this asset?',
-      deleteYes: '✅ Yes, delete',
-      deleteNo: '❌ No',
-      wizard: {
-        selectCategory: '➕ <b>Add Asset</b>\nSelect a category:',
-        selectAsset: '👉 Select an asset:',
-        enterQuantity: '💬 Enter the quantity:\n<i>e.g. 0.5 or 1000</i>',
-        invalidQuantity: '❌ Please enter a positive number.',
-        noPriceData:
-          '⚠️ No price data is available yet. Try again after prices sync, or use the app.',
-        noPortfolio:
-          '⚠️ No portfolio found. Please create one via the app first.',
-        selectPortfolio: '📁 Select a destination portfolio:',
-        created: '✅ <b>{name}</b> added successfully (qty: {qty}).',
-        updated: '✅ <b>{name}</b> quantity updated to {qty}.',
-        cancelled: '🚫 Asset addition cancelled.',
-        cancel: '❌ Cancel',
-      },
+      noAssets: '📭 You have no assets yet.\nAdd assets through the app.',
+      addInApp: '➕ Add Asset in App',
     },
     settings: {
       title: '⚙️ <b>Settings</b>',

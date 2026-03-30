@@ -11,9 +11,6 @@ importers:
       '@date-fns/tz':
         specifier: ^1.4.1
         version: 1.4.1
-      '@grammyjs/conversations':
-        specifier: ^2.1.1
-        version: 2.1.1(grammy@1.41.1)
       '@heroui/react':
         specifier: 3.0.1
         version: 3.0.1(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(tailwindcss@4.2.2)
@@ -684,12 +681,6 @@ packages:
 
   '@formatjs/intl-localematcher@0.8.2':
     resolution: {integrity: sha512-q05KMYGJLyqFNFtIb8NhWLF5X3aK/k0wYt7dnRFuy6aLQL+vUwQ1cg5cO4qawEiINybeCPXAWlprY2mSBjSXAQ==}
-
-  '@grammyjs/conversations@2.1.1':
-    resolution: {integrity: sha512-hoxqwSkaXDeU7mzXulpk3A4Cmd6UZO3HU4aPoITX5ekSHK7ZcUEmMl7RhKKkqw3z6zVbbAShQreJoVV5/dDSLA==}
-    engines: {node: ^12.20.0 || >=14.13.1}
-    peerDependencies:
-      grammy: ^1.20.1
 
   '@grammyjs/types@3.25.0':
     resolution: {integrity: sha512-iN9i5p+8ZOu9OMxWNcguojQfz4K/PDyMPOnL7PPCON+SoA/F8OKMH3uR7CVUkYfdNe0GCz8QOzAWrnqusQYFOg==}
@@ -5187,10 +5178,6 @@ snapshots:
   '@formatjs/intl-localematcher@0.8.2':
     dependencies:
       '@formatjs/fast-memoize': 3.1.1
-
-  '@grammyjs/conversations@2.1.1(grammy@1.41.1)':
-    dependencies:
-      grammy: 1.41.1
 
   '@grammyjs/types@3.25.0': {}
 

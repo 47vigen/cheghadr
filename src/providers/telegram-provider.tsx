@@ -1,18 +1,22 @@
 'use client'
 
+import type { Route } from 'next'
 import type { PropsWithChildren } from 'react'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 import WebApp from '@twa-dev/sdk'
 
 import { usePlatform } from '@/hooks/use-platform'
 import { useViewportHeight } from '@/hooks/use-viewport-height'
 
-import { getRawInitData } from '@/utils/telegram'
+import { useRouter } from '@/i18n/navigation'
+import { getRawInitData, getStartParamRoute } from '@/utils/telegram'
 import { applyTheme, resolveRuntimeTheme } from '@/utils/theme'
 
 export default function TelegramProvider(props: PropsWithChildren) {
   const platform = usePlatform()
+  const router = useRouter()
+  const startParamHandled = useRef(false)
 
   useViewportHeight()
 
@@ -24,7 +28,17 @@ export default function TelegramProvider(props: PropsWithChildren) {
     if (['ios', 'android'].includes(platform)) {
       // WebApp.requestFullscreen()
     }
-  }, [platform])
+
+    // Handle startapp deep-link routing for already-authenticated users.
+    // Unauthenticated users are handled in src/app/login/page.tsx after sign-in.
+    if (!startParamHandled.current) {
+      startParamHandled.current = true
+      const startRoute = getStartParamRoute()
+      if (startRoute) {
+        router.replace(startRoute as Route)
+      }
+    }
+  }, [platform, router])
 
   const inTelegram = !!getRawInitData()
 

@@ -1,14 +1,9 @@
-import type { Conversation } from '@grammyjs/conversations'
-import { conversations, createConversation } from '@grammyjs/conversations'
-import { Bot, session } from 'grammy'
+import { Bot } from 'grammy'
 
 import type { BotContext } from './context'
 import { handleCallbacks } from './handlers/callbacks'
 import { handleMessage } from './handlers/message'
 import { userMiddleware } from './middleware/user'
-import { prismaSessionAdapter } from './session/adapter'
-import { conversationContextStorageAdapter } from './session/conversation-storage'
-import type { SessionData } from './session/types'
 
 export function createBot(): Bot<BotContext> {
   const token = process.env.TELEGRAM_BOT_TOKEN
@@ -16,67 +11,13 @@ export function createBot(): Bot<BotContext> {
 
   const bot = new Bot<BotContext>(token)
 
-  // 1. Session (lazy — reads DB only when ctx.session is accessed)
-  bot.use(
-    session({
-      initial: (): SessionData => ({}),
-      storage: prismaSessionAdapter,
-      getSessionKey: (ctx) => ctx.chat?.id?.toString(),
-    }),
-  )
-
-  // 2. Conversations plugin (must come after session; persist state in ctx.session for webhooks)
-  bot.use(
-    conversations<BotContext, BotContext>({
-      storage: {
-        type: 'context',
-        version: 1,
-        adapter: conversationContextStorageAdapter,
-      },
-    }),
-  )
-
-  // Conversations use dynamic imports to avoid circular deps
-  // Cast is safe: at runtime OC=BotContext guarantees session/botUser are present
-  bot.use(
-    createConversation<BotContext, BotContext>(async (conversation, ctx) => {
-      const { priceAlertWizard } = await import('./conversations/price-alert')
-      return priceAlertWizard(
-        conversation as unknown as Conversation<BotContext>,
-        ctx,
-      )
-    }, 'priceAlert'),
-  )
-
-  bot.use(
-    createConversation<BotContext, BotContext>(async (conversation, ctx) => {
-      const { portfolioAlertWizard } = await import(
-        './conversations/portfolio-alert'
-      )
-      return portfolioAlertWizard(
-        conversation as unknown as Conversation<BotContext>,
-        ctx,
-      )
-    }, 'portfolioAlert'),
-  )
-
-  bot.use(
-    createConversation<BotContext, BotContext>(async (conversation, ctx) => {
-      const { assetAddWizard } = await import('./conversations/asset-add')
-      return assetAddWizard(
-        conversation as unknown as Conversation<BotContext>,
-        ctx,
-      )
-    }, 'assetAdd'),
-  )
-
-  // 3. User find-or-create
+  // 1. User find-or-create
   bot.use(userMiddleware)
 
-  // 4. Callback queries (button presses)
+  // 2. Callback queries (button presses)
   bot.on('callback_query:data', handleCallbacks)
 
-  // 5. Catch-all: any text message or /start → main menu
+  // 3. Catch-all: any text message or /start → main menu
   bot.on('message', handleMessage)
 
   return bot
