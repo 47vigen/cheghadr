@@ -6,6 +6,7 @@ interface QueuedNotification {
   telegramUserId: bigint
   text: string
   alertId: string
+  replyMarkup?: object
 }
 
 export class NotificationQueue {
@@ -29,6 +30,7 @@ export class NotificationQueue {
       const result = await sendBotMessageWithRetry(
         notification.telegramUserId,
         notification.text,
+        notification.replyMarkup,
       )
 
       if (result.success) {

@@ -3,8 +3,9 @@ import { describe, expect, it } from 'vitest'
 import {
   computeBiggestMover,
   computeBiggestMoverFromHistoricalBreakdown,
+  findBiggestMoverFromBreakdown,
 } from '@/lib/portfolio-utils'
-import type { BilingualDisplayNames } from '@/lib/prices'
+import type { BilingualDisplayNames, PriceItem } from '@/lib/prices'
 
 const makeAsset = (
   symbol: string,
@@ -152,5 +153,59 @@ describe('computeBiggestMoverFromHistoricalBreakdown', () => {
     )
     expect(result?.symbol).toBe('GOLD')
     expect(result?.deltaIRT).toBe(5_000_000)
+  })
+})
+
+const makePriceItem = (
+  symbol: string,
+  sellPrice: string,
+  change?: string,
+): PriceItem =>
+  ({
+    symbol,
+    sell_price: sellPrice,
+    buy_price: sellPrice,
+    change: change ?? null,
+    is_tradable: true,
+    is_up_to_date: true,
+    created_at: new Date().toISOString(),
+    price_source: {} as PriceItem['price_source'],
+    name: { en: `Asset ${symbol}`, fa: `دارایی ${symbol}` } as PriceItem['name'],
+    base_currency: {} as PriceItem['base_currency'],
+    quote_currency: {} as PriceItem['quote_currency'],
+  }) as unknown as PriceItem
+
+describe('findBiggestMoverFromBreakdown', () => {
+  it('returns null for empty breakdown', () => {
+    expect(findBiggestMoverFromBreakdown([], [], 'en')).toBeNull()
+  })
+
+  it('returns null when no asset has change data', () => {
+    const breakdown = [{ symbol: 'GOLD', quantity: 10, valueIRT: 5_000_000 }]
+    const prices = [makePriceItem('GOLD', '500000')]
+    expect(findBiggestMoverFromBreakdown(breakdown, prices, 'en')).toBeNull()
+  })
+
+  it('finds the biggest mover by absolute IRT delta', () => {
+    const breakdown = [
+      { symbol: 'GOLD', quantity: 10, valueIRT: 5_000_000 },
+      { symbol: 'BTC', quantity: 0.01, valueIRT: 20_000_000 },
+    ]
+    const prices = [
+      makePriceItem('GOLD', '500000', '2.0'),
+      makePriceItem('BTC', '2000000000', '5.0'),
+    ]
+    const result = findBiggestMoverFromBreakdown(breakdown, prices, 'en')
+    expect(result).not.toBeNull()
+    expect(result?.symbol).toBe('BTC')
+    expect(result?.isPositive).toBe(true)
+  })
+
+  it('handles negative mover correctly', () => {
+    const breakdown = [{ symbol: 'BTC', quantity: 0.01, valueIRT: 20_000_000 }]
+    const prices = [makePriceItem('BTC', '2000000000', '-3.0')]
+    const result = findBiggestMoverFromBreakdown(breakdown, prices, 'en')
+    expect(result?.isPositive).toBe(false)
+    expect(result?.symbol).toBe('BTC')
   })
 })

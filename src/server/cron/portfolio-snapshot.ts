@@ -2,13 +2,17 @@ import type { PrismaClient } from '@prisma/client'
 
 import {
   dailyDigestMessage,
+  getOpenAppReplyMarkup,
   portfolioAlertMessage,
   toAlertMessageLocale,
 } from '@/lib/alerts/messages'
 import { hasCrossedThreshold } from '@/lib/alerts/utils'
 import { NotificationQueue } from '@/lib/notifications'
 import { createPortfolioSnapshot } from '@/lib/portfolio'
-import { findTopHoldingByValue } from '@/lib/portfolio-utils'
+import {
+  findBiggestMoverFromBreakdown,
+  findTopHoldingByValue,
+} from '@/lib/portfolio-utils'
 import { getCachedPriceSnapshot } from '@/server/price-cache'
 import { parseBreakdownJson } from '@/types/schemas'
 
@@ -153,21 +157,30 @@ export async function runPortfolioCron(
 
     const currentIRT = Number(todaySnap.totalIRT)
     const previousIRT = Number(yesterdaySnap.totalIRT)
+    const deltaIRT = currentIRT - previousIRT
     const deltaPct =
       previousIRT !== 0
         ? (((currentIRT - previousIRT) / previousIRT) * 100).toFixed(2)
         : '0.00'
 
     const breakdown = parseBreakdownJson(todaySnap.breakdown)
-    const topMoverName = cached
+    const topHoldingName = cached
       ? findTopHoldingByValue(breakdown, cached.prices, digestLocale)
       : ''
+    const biggestMover = cached
+      ? findBiggestMoverFromBreakdown(breakdown, cached.prices, digestLocale)
+      : null
 
-    const text = dailyDigestMessage(deltaPct, topMoverName, digestLocale)
+    const text = dailyDigestMessage(deltaPct, topHoldingName, digestLocale, {
+      totalIRT: currentIRT,
+      deltaIRT,
+      biggestMover,
+    })
     queue.enqueue({
       telegramUserId: user.telegramUserId,
       text,
       alertId: `digest-${user.id}`,
+      replyMarkup: getOpenAppReplyMarkup(digestLocale),
     })
   }
 
