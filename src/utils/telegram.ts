@@ -48,7 +48,7 @@ export function getStartParamRoute(): string | null {
   try {
     const startParam = WebApp.initDataUnsafe?.start_param
     if (startParam && START_PARAM_ROUTES[startParam]) {
-      return START_PARAM_ROUTES[startParam] ?? null
+      return START_PARAM_ROUTES[startParam]
     }
   } catch {
     // Not in Telegram context
