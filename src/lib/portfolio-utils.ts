@@ -144,9 +144,29 @@ export function shouldUseLivePriceChangeForBiggestMover(
 }
 
 /**
- * Returns the display name of the top holding by current IRT value, used in
- * the daily digest message. Returns empty string when breakdown is empty.
+ * Returns the biggest 24h mover (by absolute IRT delta) from the user's
+ * current portfolio breakdown, using live price `change` from price data.
+ * Returns null when no asset crosses the minimum delta threshold.
  */
+export function findBiggestMoverFromBreakdown(
+  breakdown: BreakdownItem[],
+  prices: PriceItem[],
+  locale: string,
+): BiggestMover | null {
+  const assets: AssetWithChange[] = breakdown.map((item) => {
+    const priceItem = findBySymbol(prices, item.symbol)
+    const sellPrice = getSellPriceBySymbol(item.symbol, prices)
+    const valueIRT = computeAssetValueIRT(item.quantity, sellPrice)
+    return {
+      symbol: item.symbol,
+      displayNames: getBilingualAssetLabels(priceItem, item.symbol),
+      valueIRT,
+      change: priceItem?.change ?? null,
+    }
+  })
+  return computeBiggestMover(assets, locale)
+}
+
 /**
  * Returns the display name of the top holding by current IRT value, used in
  * the daily digest message. Returns empty string when breakdown is empty.

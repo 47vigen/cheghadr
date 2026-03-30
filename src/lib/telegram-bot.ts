@@ -13,6 +13,7 @@ interface TelegramSendMessageResponse {
 async function sendBotMessage(
   telegramUserId: bigint,
   text: string,
+  replyMarkup?: object,
 ): Promise<SendResult> {
   const token = process.env.TELEGRAM_BOT_TOKEN
   if (!token) {
@@ -29,6 +30,7 @@ async function sendBotMessage(
           chat_id: telegramUserId.toString(),
           text,
           parse_mode: 'HTML',
+          ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
         }),
       },
     )
@@ -54,13 +56,14 @@ async function sendBotMessage(
 export async function sendBotMessageWithRetry(
   telegramUserId: bigint,
   text: string,
+  replyMarkup?: object,
 ): Promise<SendResult> {
-  const first = await sendBotMessage(telegramUserId, text)
+  const first = await sendBotMessage(telegramUserId, text, replyMarkup)
   if (first.success) return first
 
   // One retry after 2-second delay
   await new Promise((resolve) => setTimeout(resolve, 2000))
-  const second = await sendBotMessage(telegramUserId, text)
+  const second = await sendBotMessage(telegramUserId, text, replyMarkup)
 
   if (!second.success) {
     console.error(
