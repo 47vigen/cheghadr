@@ -55,6 +55,12 @@
       "source": "prisma/skills",
       "sourceType": "github",
       "computedHash": "a3944954fcaabe06285ad866ca7ba19de0a8ab73ff988cbccd795a7694ecdcd6"
+    },
+    "raqam": {
+      "source": "47vigen/raqam",
+      "ref": "main",
+      "sourceType": "github",
+      "computedHash": "84a9da29be614f3dd495158c76084bb8836e4e8508479ede2f461b89f6c3b3bd"
     }
   }
 }
