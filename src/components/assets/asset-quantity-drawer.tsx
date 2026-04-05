@@ -165,7 +165,7 @@ export function AssetQuantityDrawer({
                   control={control}
                   formatOptions={{
                     maximumFractionDigits: 8,
-                    useGrouping: false,
+                    useGrouping: true,
                   }}
                   minValue={0}
                   allowNegative={false}
