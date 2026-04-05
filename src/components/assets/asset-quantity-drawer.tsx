@@ -1,18 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
-import {
-  Button,
-  Description,
-  Drawer,
-  Label,
-  NumberField,
-  Spinner,
-  toast,
-} from '@heroui/react'
+import { Button, Description, Drawer, Label, Spinner, toast } from '@heroui/react'
 import { IconTrash } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
+import { useForm, useWatch } from 'react-hook-form'
+
+import { NumberInputController } from '@/components/ui/number-input'
 
 import { getDir } from '@/lib/i18n-utils'
 import { formatIRT } from '@/lib/prices'
@@ -36,6 +31,11 @@ export interface AssetQuantityDrawerProps {
   onDelete?: () => void
 }
 
+type QuantityFormValues = {
+  quantity: number | null
+  valueIRT: number | null
+}
+
 export function AssetQuantityDrawer({
   isOpen,
   onOpenChange,
@@ -55,72 +55,63 @@ export function AssetQuantityDrawer({
   const tAssets = useTranslations('assets')
   const locale = useLocale()
 
-  const [quantityNum, setQuantityNum] = useState<number | undefined>(undefined)
-  const [valueIRTNum, setValueIRTNum] = useState<number | undefined>(undefined)
+  const { control, handleSubmit, reset, setValue } =
+    useForm<QuantityFormValues>({
+      defaultValues: { quantity: null, valueIRT: null },
+    })
 
+  // Reset fields when drawer opens / initialQuantity changes
   useEffect(() => {
     if (!isOpen) return
     if (initialQuantity === '') {
-      setQuantityNum(undefined)
-      setValueIRTNum(undefined)
+      reset({ quantity: null, valueIRT: null })
       return
     }
     const qty = Number(initialQuantity)
     if (Number.isNaN(qty)) {
-      setQuantityNum(undefined)
-      setValueIRTNum(undefined)
+      reset({ quantity: null, valueIRT: null })
       return
     }
-    setQuantityNum(qty)
-    setValueIRTNum(
-      sellPrice > 0 && !isIRT ? Math.round(qty * sellPrice) : undefined,
-    )
-  }, [isOpen, initialQuantity, sellPrice, isIRT])
+    reset({
+      quantity: qty,
+      valueIRT: sellPrice > 0 && !isIRT ? Math.round(qty * sellPrice) : null,
+    })
+  }, [isOpen, initialQuantity, sellPrice, isIRT, reset])
 
-  const handleQuantityChange = (num: number | undefined) => {
-    setQuantityNum(num)
-    if (isIRT || sellPrice <= 0 || num === undefined) {
-      setValueIRTNum(undefined)
+  // Watch quantity to sync valueIRT (quantity → IRT direction)
+  const quantityWatched = useWatch({ control, name: 'quantity' })
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally only reacts to quantityWatched
+  useEffect(() => {
+    if (isIRT || sellPrice <= 0 || quantityWatched === null || quantityWatched === undefined) return
+    setValue('valueIRT', Math.round(quantityWatched * sellPrice), {
+      shouldValidate: false,
+    })
+  }, [quantityWatched])
+
+  // IRT → quantity direction (called from onChange override)
+  const handleValueIRTChange = (num: number | null) => {
+    setValue('valueIRT', num, { shouldValidate: false })
+    if (isIRT || sellPrice <= 0 || num === null) {
+      setValue('quantity', null, { shouldValidate: false })
     } else {
-      setValueIRTNum(Math.round(num * sellPrice))
+      setValue('quantity', Math.round((num / sellPrice) * 1e8) / 1e8, {
+        shouldValidate: false,
+      })
     }
   }
 
-  const handleValueChange = (num: number | undefined) => {
-    setValueIRTNum(num)
-    if (isIRT || sellPrice <= 0 || num === undefined) {
-      setQuantityNum(undefined)
-    } else {
-      setQuantityNum(Math.round((num / sellPrice) * 1e8) / 1e8)
-    }
-  }
-
-  const handleSave = () => {
-    if (isPending) return
-    if (quantityNum === undefined || quantityNum <= 0) {
+  const onSubmit = (data: QuantityFormValues) => {
+    if (data.quantity === null || data.quantity <= 0) {
       toast.danger(tAssets('toastInvalidQuantity'))
       return
     }
-    onSave(String(quantityNum))
+    onSave(String(data.quantity))
   }
 
   const showDualFields = !isIRT && sellPrice > 0
   const priceHint = showDualFields
     ? tAddAsset('priceHint', { price: formatIRT(sellPrice, locale) })
     : null
-
-  const fieldGroupClass =
-    'number-field__group !inline-flex !h-auto min-h-11 w-full min-w-0 items-stretch ' +
-    'overflow-hidden rounded-xl border border-border/80 bg-surface/40 ' +
-    'shadow-none transition-colors ' +
-    'data-[focus-within]:border-primary/40 data-[focus-within]:bg-surface'
-
-  const inputClass =
-    'number-field__input min-h-11 min-w-0 flex-1 bg-transparent py-2.5 ps-3 pe-2 leading-normal'
-
-  const suffixClass =
-    'flex max-w-[40%] shrink-0 items-center border-border/50 border-s px-3 ' +
-    'font-medium text-muted-foreground text-sm tabular-nums'
 
   return (
     <Drawer>
@@ -160,19 +151,8 @@ export function AssetQuantityDrawer({
             </Drawer.Header>
 
             <Drawer.Body className="flex flex-col gap-4 px-4 py-2">
-              <NumberField
-                value={quantityNum}
-                onChange={handleQuantityChange}
-                fullWidth
-                variant="secondary"
-                minValue={0}
-                formatOptions={{
-                  maximumFractionDigits: 8,
-                  useGrouping: false,
-                }}
-                autoFocus={autoFocusQuantity}
-              >
-                <Label className="font-medium">
+              <div>
+                <Label className="font-medium text-sm">
                   {tAddAsset('assetAmount')}
                 </Label>
                 {priceHint ? (
@@ -180,45 +160,41 @@ export function AssetQuantityDrawer({
                     {priceHint}
                   </Description>
                 ) : null}
-                <div className="mt-2 min-w-0" dir="ltr">
-                  <NumberField.Group className={fieldGroupClass}>
-                    <NumberField.Input placeholder="0" className={inputClass} />
-                    {symbol ? (
-                      <span aria-hidden className={suffixClass}>
-                        {symbol}
-                      </span>
-                    ) : null}
-                  </NumberField.Group>
-                </div>
-              </NumberField>
+                <NumberInputController
+                  name="quantity"
+                  control={control}
+                  formatOptions={{
+                    maximumFractionDigits: 8,
+                    useGrouping: false,
+                  }}
+                  minValue={0}
+                  allowNegative={false}
+                  placeholder="0"
+                  suffix={symbol || undefined}
+                  autoFocus={autoFocusQuantity}
+                />
+              </div>
 
               {showDualFields ? (
-                <NumberField
-                  value={valueIRTNum}
-                  onChange={handleValueChange}
-                  fullWidth
-                  variant="secondary"
-                  minValue={0}
-                  formatOptions={{
-                    maximumFractionDigits: 0,
-                    useGrouping: true,
-                  }}
-                >
-                  <Label className="font-medium">
+                <div>
+                  <Label className="font-medium text-sm">
                     {tAddAsset('valueInToman')}
                   </Label>
-                  <div className="mt-2 min-w-0" dir="ltr">
-                    <NumberField.Group className={fieldGroupClass}>
-                      <NumberField.Input
-                        placeholder="0"
-                        className={inputClass}
-                      />
-                      <span aria-hidden className={suffixClass}>
-                        {tAssets('tomanAbbr')}
-                      </span>
-                    </NumberField.Group>
-                  </div>
-                </NumberField>
+                  <NumberInputController
+                    name="valueIRT"
+                    control={control}
+                    formatOptions={{
+                      maximumFractionDigits: 0,
+                      useGrouping: true,
+                    }}
+                    minValue={0}
+                    allowNegative={false}
+                    allowDecimal={false}
+                    placeholder="0"
+                    suffix={tAssets('tomanAbbr')}
+                    onChange={handleValueIRTChange}
+                  />
+                </div>
               ) : null}
             </Drawer.Body>
 
@@ -228,7 +204,7 @@ export function AssetQuantityDrawer({
                 fullWidth
                 size="lg"
                 className="mx-4 rounded-xl font-semibold"
-                onPress={handleSave}
+                onPress={() => void handleSubmit(onSubmit)()}
                 isDisabled={isPending}
               >
                 {isPending ? <Spinner size="sm" color="current" /> : saveLabel}

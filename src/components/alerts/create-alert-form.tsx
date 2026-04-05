@@ -1,29 +1,20 @@
 'use client'
 
-import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 
-import {
-  Button,
-  Label,
-  NumberField,
-  Spinner,
-  Tabs,
-  Text,
-  toast,
-} from '@heroui/react'
-import { clsx } from 'clsx'
+import { Label, Tabs, Text, toast } from '@heroui/react'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useLocale, useTranslations } from 'next-intl'
+import { z } from 'zod/v4'
 
 import { AssetSelector } from '@/components/assets/asset-selector'
+import { NumberInputController } from '@/components/ui/number-input'
+import { SubmitButton } from '@/components/ui/submit-button'
 
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
 
 import { MAX_ACTIVE_ALERTS } from '@/lib/alerts/utils'
-import {
-  formatIRT,
-  getSellPriceBySymbol,
-  parsePriceSnapshot,
-} from '@/lib/prices'
+import { formatIRT, getSellPriceBySymbol, parsePriceSnapshot } from '@/lib/prices'
 import { api } from '@/trpc/react'
 
 type AlertType = 'PRICE' | 'PORTFOLIO'
@@ -31,15 +22,38 @@ type AlertDir = 'ABOVE' | 'BELOW'
 
 const PORTFOLIO_SYMBOL = '__PORTFOLIO__'
 
+const alertSchema = z.object({
+  symbol: z.string().min(1),
+  direction: z.enum(['ABOVE', 'BELOW']),
+  threshold: z.number({ error: 'Required' }).positive('Must be greater than 0'),
+})
+
+type AlertFormValues = z.infer<typeof alertSchema>
+
 export function CreateAlertForm() {
   const t = useTranslations('alerts')
   const tAssets = useTranslations('assets')
   const locale = useLocale()
   const { notificationOccurred } = useTelegramHaptics()
 
-  const [selectedSymbol, setSelectedSymbol] = useState('')
-  const [direction, setDirection] = useState<AlertDir>('ABOVE')
-  const [threshold, setThreshold] = useState<number | undefined>(undefined)
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    reset,
+    formState: { isSubmitting },
+  } = useForm<AlertFormValues>({
+    resolver: zodResolver(alertSchema),
+    defaultValues: {
+      symbol: '',
+      direction: 'ABOVE',
+      threshold: null as unknown as number,
+    },
+  })
+
+  const symbol = watch('symbol')
+  const direction = watch('direction')
 
   const utils = api.useUtils()
 
@@ -47,15 +61,15 @@ export function CreateAlertForm() {
   const prices = parsePriceSnapshot(pricesData?.data)
 
   const { data: alertsList } = api.alerts.list.useQuery()
-  const activeCount = alertsList?.filter((a) => a.isActive).length ?? 0
+  const activeCount =
+    alertsList?.filter((a: { isActive: boolean }) => a.isActive).length ?? 0
   const atLimit = activeCount >= MAX_ACTIVE_ALERTS
 
   const createMutation = api.alerts.create.useMutation({
     onSuccess: () => {
       notificationOccurred('success')
       void utils.alerts.list.invalidate()
-      setSelectedSymbol('')
-      setThreshold(undefined)
+      reset()
       toast.success(t('toastCreated'))
     },
     onError: (err) => {
@@ -64,28 +78,18 @@ export function CreateAlertForm() {
     },
   })
 
-  const isPortfolio = selectedSymbol === PORTFOLIO_SYMBOL
+  const isPortfolio = symbol === PORTFOLIO_SYMBOL
   const alertType: AlertType = isPortfolio ? 'PORTFOLIO' : 'PRICE'
 
   const currentPrice =
-    !isPortfolio && selectedSymbol
-      ? getSellPriceBySymbol(selectedSymbol, prices)
-      : null
+    !isPortfolio && symbol ? getSellPriceBySymbol(symbol, prices) : null
 
-  const canSubmit =
-    !atLimit &&
-    selectedSymbol !== '' &&
-    threshold !== undefined &&
-    threshold > 0 &&
-    !createMutation.isPending
-
-  const handleSubmit = () => {
-    if (!canSubmit || threshold === undefined) return
+  const onSubmit = (data: AlertFormValues) => {
     createMutation.mutate({
       type: alertType,
-      symbol: isPortfolio ? undefined : selectedSymbol,
-      direction,
-      thresholdIRT: String(threshold),
+      symbol: isPortfolio ? undefined : data.symbol,
+      direction: data.direction,
+      thresholdIRT: String(data.threshold),
     })
   }
 
@@ -102,9 +106,9 @@ export function CreateAlertForm() {
         selectedKey={isPortfolio ? 'portfolio' : 'asset'}
         onSelectionChange={(key) => {
           if (key === 'portfolio') {
-            setSelectedSymbol(PORTFOLIO_SYMBOL)
+            setValue('symbol', PORTFOLIO_SYMBOL, { shouldValidate: false })
           } else {
-            setSelectedSymbol('')
+            setValue('symbol', '', { shouldValidate: false })
           }
         }}
       >
@@ -126,10 +130,10 @@ export function CreateAlertForm() {
       {!isPortfolio && prices.length > 0 && (
         <AssetSelector
           label={t('selectAsset')}
-          value={selectedSymbol}
+          value={symbol}
           onChange={(sym) => {
             if (sym === 'IRT') return
-            setSelectedSymbol(sym)
+            setValue('symbol', sym, { shouldValidate: true })
           }}
           items={prices}
         />
@@ -146,7 +150,9 @@ export function CreateAlertForm() {
       {/* Above / Below tab selector */}
       <Tabs
         selectedKey={direction}
-        onSelectionChange={(key) => setDirection(key as AlertDir)}
+        onSelectionChange={(key) =>
+          setValue('direction', key as AlertDir, { shouldValidate: false })
+        }
       >
         <Tabs.ListContainer>
           <Tabs.List aria-label={t('threshold')} className="w-full">
@@ -162,47 +168,27 @@ export function CreateAlertForm() {
         </Tabs.ListContainer>
       </Tabs>
 
-      <NumberField
-        value={threshold}
-        onChange={setThreshold}
-        fullWidth
-        minValue={0}
-        formatOptions={{ maximumFractionDigits: 0, useGrouping: true }}
-      >
-        <Label>{t('threshold')}</Label>
-        <div className="mt-2 min-w-0" dir="ltr">
-          <NumberField.Group className="number-field__group !inline-flex !h-auto min-h-11 w-full min-w-0 items-stretch overflow-hidden rounded-xl border border-border/80 bg-surface/40 shadow-none transition-colors data-[focus-within]:border-primary/40 data-[focus-within]:bg-surface">
-            <NumberField.Input
-              placeholder={t('thresholdPlaceholder')}
-              className="number-field__input min-h-11 min-w-0 flex-1 bg-transparent py-2.5 ps-3 pe-2 leading-normal"
-            />
-            <span
-              aria-hidden
-              className="flex max-w-[40%] shrink-0 items-center border-border/50 border-s px-3 font-medium text-muted-foreground text-sm tabular-nums"
-            >
-              {tAssets('tomanAbbr')}
-            </span>
-          </NumberField.Group>
-        </div>
-      </NumberField>
+      <div>
+        <Label className="font-medium text-sm">{t('threshold')}</Label>
+        <NumberInputController
+          name="threshold"
+          control={control}
+          formatOptions={{ maximumFractionDigits: 0, useGrouping: true }}
+          minValue={0}
+          allowDecimal={false}
+          allowNegative={false}
+          placeholder={t('thresholdPlaceholder')}
+          suffix={tAssets('tomanAbbr')}
+        />
+      </div>
 
-      <Button
-        variant="primary"
-        fullWidth
-        size="lg"
-        onPress={handleSubmit}
-        isDisabled={!canSubmit}
-        isPending={createMutation.isPending}
-        className={clsx(
-          canSubmit &&
-            !createMutation.isPending &&
-            'bg-success text-success-foreground hover:opacity-95',
-        )}
-      >
-        {({ isPending }) =>
-          isPending ? <Spinner size="sm" color="current" /> : t('createButton')
-        }
-      </Button>
+      <SubmitButton
+        label={t('createButton')}
+        isLoading={createMutation.isPending || isSubmitting}
+        isDisabled={atLimit}
+        onPress={() => void handleSubmit(onSubmit)()}
+        className="bg-success text-success-foreground hover:opacity-95"
+      />
     </div>
   )
 }
