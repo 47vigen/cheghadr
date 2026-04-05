@@ -1,17 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
-import {
-  Button,
-  Drawer,
-  Input,
-  Label,
-  Spinner,
-  TextField,
-  toast,
-} from '@heroui/react'
+import { Button, Drawer, Input, Label, Spinner, TextField, toast } from '@heroui/react'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useLocale, useTranslations } from 'next-intl'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod/v4'
 
 import { getDir } from '@/lib/i18n-utils'
 import { api } from '@/trpc/react'
@@ -24,6 +19,13 @@ interface PortfolioFormDrawerProps {
   portfolio?: PortfolioListItem
 }
 
+const portfolioSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(50),
+  emoji: z.string().max(4).optional(),
+})
+
+type PortfolioFormValues = z.infer<typeof portfolioSchema>
+
 export function PortfolioFormDrawer({
   isOpen,
   onOpenChange,
@@ -34,15 +36,24 @@ export function PortfolioFormDrawer({
   const tCommon = useTranslations('common')
   const locale = useLocale()
 
-  const [name, setName] = useState('')
-  const [emoji, setEmoji] = useState('')
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { isSubmitting, errors },
+  } = useForm<PortfolioFormValues>({
+    resolver: zodResolver(portfolioSchema),
+    defaultValues: { name: '', emoji: '' },
+  })
 
   useEffect(() => {
     if (isOpen) {
-      setName(portfolio?.name ?? '')
-      setEmoji(portfolio?.emoji ?? '')
+      reset({
+        name: portfolio?.name ?? '',
+        emoji: portfolio?.emoji ?? '',
+      })
     }
-  }, [isOpen, portfolio])
+  }, [isOpen, portfolio, reset])
 
   const utils = api.useUtils()
 
@@ -68,21 +79,20 @@ export function PortfolioFormDrawer({
     },
   })
 
-  const isPending = createMutation.isPending || renameMutation.isPending
+  const isPending =
+    createMutation.isPending || renameMutation.isPending || isSubmitting
 
-  const handleSave = () => {
-    if (!name.trim() || isPending) return
-
+  const onSubmit = (data: PortfolioFormValues) => {
     if (mode === 'create') {
       createMutation.mutate({
-        name: name.trim(),
-        emoji: emoji.trim() || undefined,
+        name: data.name,
+        emoji: data.emoji?.trim() || undefined,
       })
     } else if (portfolio) {
       renameMutation.mutate({
         id: portfolio.id,
-        name: name.trim(),
-        emoji: emoji.trim() || null,
+        name: data.name,
+        emoji: data.emoji?.trim() || null,
       })
     }
   }
@@ -108,32 +118,31 @@ export function PortfolioFormDrawer({
             </Drawer.Header>
 
             <Drawer.Body className="flex flex-col gap-4 px-4 py-4">
-              <TextField
-                value={name}
-                onChange={setName}
-                fullWidth
-                maxLength={50}
-              >
+              <TextField fullWidth isInvalid={!!errors.name}>
                 <Label>{t('name')}</Label>
                 <Input
+                  {...register('name')}
                   type="text"
                   placeholder={t('namePlaceholder')}
                   dir={getDir(locale)}
                   className="py-3"
+                  maxLength={50}
                 />
+                {errors.name ? (
+                  <p role="alert" className="mt-1 text-destructive text-xs">
+                    {errors.name.message}
+                  </p>
+                ) : null}
               </TextField>
-              <TextField
-                value={emoji}
-                onChange={setEmoji}
-                fullWidth
-                maxLength={4}
-              >
+              <TextField fullWidth>
                 <Label>{t('emoji')}</Label>
                 <Input
+                  {...register('emoji')}
                   type="text"
                   placeholder="💼"
                   dir="ltr"
                   className="py-3"
+                  maxLength={4}
                 />
               </TextField>
             </Drawer.Body>
@@ -153,8 +162,8 @@ export function PortfolioFormDrawer({
                   variant="secondary"
                   size="lg"
                   className="flex-1 rounded-xl font-semibold"
-                  onPress={handleSave}
-                  isDisabled={!name.trim() || isPending}
+                  onPress={() => void handleSubmit(onSubmit)()}
+                  isDisabled={isPending}
                 >
                   {isPending ? (
                     <Spinner size="sm" color="current" />

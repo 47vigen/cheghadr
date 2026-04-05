@@ -1,8 +1,8 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 
-import { Button, Label, NumberField } from '@heroui/react'
+import { Button, Label } from '@heroui/react'
 import { IconArrowsExchange } from '@tabler/icons-react'
 import { useTranslations } from 'next-intl'
 
@@ -15,6 +15,7 @@ import {
   ErrorState,
   RefreshIndicator,
 } from '@/components/ui/async-states'
+import { NumberInput } from '@/components/ui/number-input'
 
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
 import { useTelegramHaptics } from '@/hooks/use-telegram-haptics'
@@ -34,8 +35,7 @@ export default function CalculatorPage() {
 
   const [fromSymbol, setFromSymbol] = useState('USD')
   const [toSymbol, setToSymbol] = useState('IRT')
-  const [amount, setAmount] = useState<number | undefined>(undefined)
-  const amountRowRef = useRef<HTMLDivElement>(null)
+  const [amount, setAmount] = useState<number | null>(null)
 
   const { isRefreshing } = usePullToRefresh(async () => {
     await refetch()
@@ -45,7 +45,7 @@ export default function CalculatorPage() {
   const { selectionChanged } = useTelegramHaptics()
 
   const result =
-    amount !== undefined && amount > 0
+    amount !== null && amount > 0
       ? computeConversion(String(amount), fromSymbol, toSymbol, prices)
       : null
 
@@ -53,17 +53,6 @@ export default function CalculatorPage() {
     selectionChanged()
     setFromSymbol(toSymbol)
     setToSymbol(fromSymbol)
-  }
-
-  // When the soft keyboard opens, scroll the amount row to center so
-  // it clears both the keyboard and the fixed bottom nav bar.
-  const handleAmountFocus = () => {
-    setTimeout(() => {
-      amountRowRef.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      })
-    }, 320)
   }
 
   if (isLoading) {
@@ -139,29 +128,16 @@ export default function CalculatorPage() {
             <div className="mx-3 border-border/40 border-t" />
 
             {/* Amount input */}
-            <div ref={amountRowRef} className="px-3 pt-2.5 pb-3">
-              <NumberField
+            <div className="px-3 pt-2.5 pb-3">
+              <Label className="section-header mb-1.5 block">{t('amount')}</Label>
+              <NumberInput
                 value={amount}
                 onChange={setAmount}
-                fullWidth
-                minValue={0}
                 formatOptions={{ maximumFractionDigits: 8, useGrouping: false }}
-              >
-                <Label className="section-header mb-1.5 block">
-                  {t('amount')}
-                </Label>
-                <div className="mt-2 min-w-0" dir="ltr">
-                  <NumberField.Group
-                    className="number-field__group !inline-flex !h-auto min-h-11 w-full min-w-0 items-stretch overflow-hidden rounded-xl border border-border/80 bg-surface/40 shadow-none transition-colors data-[focus-within]:border-primary/40 data-[focus-within]:bg-surface"
-                    onFocus={handleAmountFocus}
-                  >
-                    <NumberField.Input
-                      placeholder={t('amountPlaceholder')}
-                      className="number-field__input min-h-11 min-w-0 flex-1 bg-transparent py-2.5 ps-3 pe-2 leading-normal"
-                    />
-                  </NumberField.Group>
-                </div>
-              </NumberField>
+                minValue={0}
+                allowNegative={false}
+                placeholder={t('amountPlaceholder')}
+              />
             </div>
           </div>
         </div>
