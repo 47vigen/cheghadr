@@ -74,6 +74,7 @@ export function AssetsListSection({
       </Section>
 
       <AssetEditDrawer
+        key={editTarget?.id ?? ''}
         assetId={editTarget?.id ?? ''}
         assetName={
           editTarget

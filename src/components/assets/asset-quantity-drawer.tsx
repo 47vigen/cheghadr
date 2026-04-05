@@ -2,15 +2,17 @@
 
 import { useEffect } from 'react'
 
-import { Button, Description, Drawer, Label, Spinner, toast } from '@heroui/react'
+import { Button, Description, Drawer, Label, toast } from '@heroui/react'
 import { IconTrash } from '@tabler/icons-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useForm, useWatch } from 'react-hook-form'
 
 import { NumberInputController } from '@/components/ui/number-input'
+import { SubmitButton } from '@/components/ui/submit-button'
 
 import { getDir } from '@/lib/i18n-utils'
 import { formatIRT } from '@/lib/prices'
+import { isTelegramWebApp } from '@/utils/telegram'
 
 export interface AssetQuantityDrawerProps {
   isOpen: boolean
@@ -55,9 +57,19 @@ export function AssetQuantityDrawer({
   const tAssets = useTranslations('assets')
   const locale = useLocale()
 
+  const initialQty = (() => {
+    if (initialQuantity === '') return null
+    const qty = Number(initialQuantity)
+    return Number.isNaN(qty) ? null : qty
+  })()
+  const initialValueIRT =
+    initialQty !== null && sellPrice > 0 && !isIRT
+      ? Math.round(initialQty * sellPrice)
+      : null
+
   const { control, handleSubmit, reset, setValue } =
     useForm<QuantityFormValues>({
-      defaultValues: { quantity: null, valueIRT: null },
+      defaultValues: { quantity: initialQty, valueIRT: initialValueIRT },
     })
 
   // Reset fields when drawer opens / initialQuantity changes
@@ -82,7 +94,13 @@ export function AssetQuantityDrawer({
   const quantityWatched = useWatch({ control, name: 'quantity' })
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally only reacts to quantityWatched
   useEffect(() => {
-    if (isIRT || sellPrice <= 0 || quantityWatched === null || quantityWatched === undefined) return
+    if (
+      isIRT ||
+      sellPrice <= 0 ||
+      quantityWatched === null ||
+      quantityWatched === undefined
+    )
+      return
     setValue('valueIRT', Math.round(quantityWatched * sellPrice), {
       shouldValidate: false,
     })
@@ -152,7 +170,7 @@ export function AssetQuantityDrawer({
 
             <Drawer.Body className="flex flex-col gap-4 px-4 py-2">
               <div>
-                <Label className="font-medium text-sm">
+                <Label className="block font-medium text-sm">
                   {tAddAsset('assetAmount')}
                 </Label>
                 {priceHint ? (
@@ -198,18 +216,27 @@ export function AssetQuantityDrawer({
               ) : null}
             </Drawer.Body>
 
-            <Drawer.Footer className="border-border/60 border-t bg-background/95 px-0 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm supports-[backdrop-filter]:bg-background/80">
-              <Button
-                variant="secondary"
-                fullWidth
-                size="lg"
-                className="mx-4 rounded-xl font-semibold"
-                onPress={() => void handleSubmit(onSubmit)()}
+            {isTelegramWebApp() ? (
+              <SubmitButton
+                label={saveLabel}
+                isLoading={isPending}
                 isDisabled={isPending}
-              >
-                {isPending ? <Spinner size="sm" color="current" /> : saveLabel}
-              </Button>
-            </Drawer.Footer>
+                onPress={() => void handleSubmit(onSubmit)()}
+              />
+            ) : (
+              <Drawer.Footer className="border-border/60 border-t bg-background/95 px-0 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm supports-[backdrop-filter]:bg-background/80">
+                <Button
+                  variant="secondary"
+                  fullWidth
+                  size="lg"
+                  className="mx-4 rounded-xl font-semibold"
+                  onPress={() => void handleSubmit(onSubmit)()}
+                  isDisabled={isPending}
+                >
+                  {saveLabel}
+                </Button>
+              </Drawer.Footer>
+            )}
           </Drawer.Dialog>
         </Drawer.Content>
       </Drawer.Backdrop>
